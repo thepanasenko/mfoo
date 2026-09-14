@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>MFOOT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= РЕГИСТРАЦИЯ ================= -->
+<section id="screen-register" class="screen">
+  <div class="register-wrap">
+    <div class="register-logo">
+      <span class="logo-m">M</span><span class="logo-foot">FOOT</span>
+    </div>
+    <div class="register-ball">⚽</div>
+    <p class="register-tag">Создайте свою футбольную команду</p>
+    <input id="team-name-input" class="input-team-name" type="text" maxlength="20" placeholder="Название команды">
+    <button id="btn-confirm-register" class="btn-primary btn-big">ПОДТВЕРДИТЬ</button>
+  </div>
+</section>
+
+<!-- ================= ПРИЛОЖЕНИЕ ================= -->
+<div id="app" class="app hidden">
+
+  <!-- верхняя панель -->
+  <header id="topbar" class="topbar">
+    <div class="stat-chip level" title="Уровень менеджера">
+      <img src="images/lvl.png" class="stat-level-img" alt="Уровень"><span id="topbar-level">1</span>
+    </div>
+    <div class="topbar-stats">
+      <div class="stat-chip coins" title="Монеты">
+        <img src="images/coin.png" class="img-icon-lg" alt="Монеты"><span id="stat-coins">0</span>
+      </div>
+      <div class="stat-chip budget" title="Бюджет">
+        <img src="images/cash.png" class="img-icon-lg" alt="Бюджет"><span id="stat-budget">0</span>
+      </div>
+      <div class="stat-chip power" title="Сила клуба">
+        <img src="images/sila.png" class="img-icon-lg" alt="Сила"><span id="stat-power">0</span>
+      </div>
+    </div>
+  </header>
+
+  <main id="views" class="views">
+
+    <!-- МЕНЕДЖЕР (главный экран) -->
+    <section id="view-manager" class="view">
+      <div class="hero-card">
+        <div class="hero-badge">📋 МОЙ МЕНЕДЖЕР</div>
+        <div class="hero-title">СИЛА КЛУБА</div>
+        <div id="hero-power" class="hero-power">0</div>
+        <div class="hero-sub">Побеждай в турнирах, усиливай состав</div>
+      </div>
+
+      <h2 class="view-title section-gap">Статистика и достижения</h2>
+      <div id="manager-body"></div>
+
+      <button id="btn-reset-game" class="btn-reset">🗑️ Сбросить игру</button>
+    </section>
+
+    <!-- КОМАНДА -->
+    <section id="view-team" class="view">
+      <h2 class="view-title">Моя команда</h2>
+      <div id="team-slots-card"></div>
+
+      <h3 class="squad-heading">СХЕМА ИГРЫ</h3>
+      <div id="formation-select" class="formation-select"></div>
+
+      <div class="pitch-wrap">
+        <div id="pitch" class="pitch"></div>
+      </div>
+
+      <div class="squad-block">
+        <h3 class="squad-heading">ЗАПАСНЫЕ</h3>
+        <div id="squad-bench" class="squad-list"></div>
+      </div>
+    </section>
+
+    <!-- ИГРАТЬ / ТУРНИРЫ -->
+    <section id="view-play" class="view">
+      <h2 class="view-title">Турниры</h2>
+      <div id="tournament-list" class="tournament-list"></div>
+    </section>
+
+    <!-- КУБОК -->
+    <section id="view-cup" class="view">
+      <div class="cup-header">
+        <button id="btn-cup-back" class="btn-back">← Назад</button>
+        <h2 id="cup-title" class="view-title">Кубок</h2>
+      </div>
+      <div id="cup-intro" class="cup-intro">
+        <div id="cup-intro-trophy" class="cup-trophy">🏆</div>
+        <div id="cup-eligibility" class="cup-eligibility"></div>
+        <button id="btn-cup-start" class="btn-primary btn-big">ИГРАТЬ</button>
+        <div id="cup-rewards" class="cup-rewards"></div>
+      </div>
+      <div id="cup-bracket-wrap" class="cup-bracket-wrap hidden">
+        <div id="cup-countdown" class="cup-countdown"></div>
+        <div class="cup-actions">
+          <button id="btn-play-now" class="cup-action-btn cup-action-primary" style="width:100%;">СЫГРАТЬ СЕЙЧАС</button>
+        </div>
+        <div id="bracket" class="bracket"></div>
+        <button id="btn-leave-cup" class="btn-reset">🚪 Покинуть кубок</button>
+      </div>
+    </section>
+
+    <!-- ТРАНСФЕР -->
+    <section id="view-transfer" class="view">
+      <h2 class="view-title">Трансфер</h2>
+      <div class="transfer-head">
+        <div class="transfer-head-text">
+          <div class="transfer-head-title">🔁 Рынок игроков</div>
+          <div class="transfer-head-sub">12 новых игроков каждый час</div>
+        </div>
+        <div id="transfer-timer" class="transfer-timer">--:--</div>
+      </div>
+      <div id="transfer-list" class="transfer-grid"></div>
+    </section>
+
+    <!-- БАНК -->
+    <section id="view-bank" class="view">
+      <h2 class="view-title">Банк</h2>
+
+      <div class="bank-card">
+        <div class="bank-card-head">
+          <img src="images/coin.png" class="bank-card-img" alt="Монеты">
+          <div>
+            <div class="bank-card-title">Пополнить монеты</div>
+            <div class="bank-card-sub">Бесплатно — просто нажмите на сумму</div>
+          </div>
+        </div>
+        <div class="coin-buy-grid">
+          <button class="coin-buy-btn" data-coins="1000">
+            <img src="images/coin.png" class="coin-buy-img" alt="Монеты">
+            <span class="coin-buy-amount">+1 000</span>
+            <span class="coin-buy-tag">БЕСПЛАТНО</span>
+          </button>
+          <button class="coin-buy-btn silver" data-coins="10000">
+            <img src="images/coin.png" class="coin-buy-img" alt="Монеты">
+            <span class="coin-buy-amount">+10 000</span>
+            <span class="coin-buy-tag">БЕСПЛАТНО</span>
+          </button>
+          <button class="coin-buy-btn gold" data-coins="100000">
+            <img src="images/coin.png" class="coin-buy-img" alt="Монеты">
+            <span class="coin-buy-amount">+100 000</span>
+            <span class="coin-buy-tag">БЕСПЛАТНО</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="bank-card">
+        <div class="bank-card-head">
+          <img src="images/cash.png" class="bank-card-img" alt="Бюджет">
+          <div>
+            <div class="bank-card-title">Пополнить бюджет</div>
+            <div class="bank-card-sub">Бесплатно — просто нажмите на сумму</div>
+          </div>
+        </div>
+        <div class="coin-buy-grid">
+          <button class="coin-buy-btn euro-buy-btn" data-euro="50000">
+            <img src="images/cash.png" class="coin-buy-img" alt="Бюджет">
+            <span class="coin-buy-amount">+50 000</span>
+            <span class="coin-buy-tag">БЕСПЛАТНО</span>
+          </button>
+          <button class="coin-buy-btn euro-buy-btn silver" data-euro="500000">
+            <img src="images/cash.png" class="coin-buy-img" alt="Бюджет">
+            <span class="coin-buy-amount">+500 000</span>
+            <span class="coin-buy-tag">БЕСПЛАТНО</span>
+          </button>
+          <button class="coin-buy-btn euro-buy-btn gold" data-euro="1000000">
+            <img src="images/cash.png" class="coin-buy-img" alt="Бюджет">
+            <span class="coin-buy-amount">+1 000 000</span>
+            <span class="coin-buy-tag">БЕСПЛАТНО</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="stub-card">
+        <div class="stub-icon">🏦</div>
+        <p>Кредиты, вклады и спонсорские контракты появятся здесь.</p>
+        <p class="stub-sub">Следите за обновлениями.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- нижняя навигация -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-nav="manager">
+      <img src="images/manager.png" class="nav-icon-img" alt="Менеджер">
+      <span>МЕНЕДЖЕР</span>
+    </button>
+    <button class="nav-btn" data-nav="play">
+      <img src="images/play.png" class="nav-icon-img" alt="Играть">
+      <span>ИГРАТЬ</span>
+    </button>
+    <button class="nav-btn" data-nav="team">
+      <img src="images/comands.png" class="nav-icon-img" alt="Команда">
+      <span>КОМАНДА</span>
+    </button>
+    <button class="nav-btn" data-nav="transfer">
+      <img src="images/transfer.png" class="nav-icon-img" alt="Трансфер">
+      <span>ТРАНСФЕР</span>
+    </button>
+    <button class="nav-btn" data-nav="bank">
+      <img src="images/bank.png" class="nav-icon-img" alt="Банк">
+      <span>БАНК</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- карточка игрока (модалка) -->
+<div id="player-modal" class="modal-overlay hidden">
+  <div class="modal-card player-modal-card">
+    <button id="player-modal-close" class="modal-close">✕</button>
+    <div id="player-modal-body"></div>
+  </div>
+</div>
+
+<!-- результат матча (модалка) -->
+<div id="match-modal" class="modal-overlay hidden">
+  <div class="modal-card match-modal-card">
+    <div id="match-modal-body"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
