@@ -189,8 +189,8 @@ input{ font-family: inherit; }
 .btn-primary.notched{ border-radius:0; }
 .btn-big{ width:100%; padding:16px; font-size:15px; }
 .btn-back{
-  background: var(--surface-2);
-  border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   color: var(--text-dim);
   padding:8px 14px;
   border-radius:10px;
@@ -392,9 +392,9 @@ input{ font-family: inherit; }
 
 /* manager / stats screen */
 .mgr-card{
-  background: linear-gradient(160deg, var(--surface-2), var(--surface));
-  border:1px solid var(--line);
-  border-radius:14px;
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
+    border-radius: 14px;
   padding:18px;
   margin-bottom:14px;
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
@@ -410,12 +410,13 @@ input{ font-family: inherit; }
 .mgr-stats-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
 @media (min-width:480px){ .mgr-stats-grid{ grid-template-columns:repeat(3,1fr); } }
 .mgr-stat{
-  background: var(--surface-3); border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   padding:12px 8px; text-align:center;
   border-radius:10px;
   transition: transform .18s var(--ease-bounce), border-color .15s ease;
 }
-.mgr-stat:hover{ transform: translateY(-2px); border-color: var(--line); }
+.mgr-stat:hover{ transform: translateY(-2px);  border-color: var(--line); }
 .mgr-stat-value{ font-family: var(--ff-display); font-size:24px; }
 .mgr-stat-label{ font-size:10px; color: var(--text-dim); letter-spacing:.5px; margin-top:2px; }
 .mgr-stat.wins .mgr-stat-value{ color: var(--green); }
@@ -424,7 +425,7 @@ input{ font-family: inherit; }
 .mgr-stat.total .mgr-stat-value{ color: var(--text); }
 .mgr-stat.xp .mgr-stat-value{ color:#7fd3ff; }
 .mgr-finance-row{ display:flex; gap:10px; margin-top:14px; }
-.mgr-finance-chip{ flex:1; background: var(--surface-3); border:1px solid var(--line); padding:10px; text-align:center; border-radius:10px; transition: transform .18s var(--ease-bounce); }
+.mgr-finance-chip{ flex:1; background: rgb(0 0 0 / 37%); border: 1px solid var(--line); padding:10px; text-align:center; border-radius:10px; transition: transform .18s var(--ease-bounce); }
 .mgr-finance-chip:hover{ transform: translateY(-2px); }
 .mgr-finance-chip .val{ font-family: var(--ff-display); font-size:18px; display:flex; align-items:center; justify-content:center; gap:5px; }
 .mgr-finance-chip .lbl{ font-size:10px; color: var(--text-dim); }
@@ -432,7 +433,8 @@ input{ font-family: inherit; }
 .mgr-trophy-list{ display:flex; flex-direction:column; gap:8px; }
 .mgr-trophy-item{
   display:flex; align-items:center; gap:10px;
-  background: var(--surface-2); border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   padding:10px 12px;
   border-radius:10px;
   transition: transform .18s var(--ease-bounce), border-color .15s ease;
@@ -550,8 +552,8 @@ input{ font-family: inherit; }
 @media (min-width:520px){ .squad-list{ grid-template-columns:1fr 1fr 1fr; } }
 
 .player-card{
-  background: var(--surface-2);
-  border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   border-radius:12px;
   padding:12px;
   display:flex; flex-direction:column; gap:6px;
@@ -639,7 +641,9 @@ input{ font-family: inherit; }
 /* cup */
 .cup-header{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .cup-header .view-title{ margin:0; }
-.cup-intro{ text-align:center; background: var(--surface-2); border:1px solid var(--line); padding:28px 18px; }
+.cup-intro{ text-align:center; background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
+    border-radius: 14px; padding:28px 18px; }
 .cup-trophy{ font-size:44px; margin-bottom:10px; }
 .cup-eligibility{ margin-bottom:16px; font-size:14px; color: var(--text-dim); line-height:1.5; }
 .cup-eligibility.bad{ color: var(--red); font-weight:700; }
@@ -656,13 +660,16 @@ input{ font-family: inherit; }
 }
 .bracket-matches{ display:flex; flex-direction:column; gap:8px; }
 .bracket-match{
-  background: var(--surface-2);
-  border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
+    border-radius: 14px;
   padding:10px 12px;
   display:flex; align-items:center; justify-content:space-between;
   font-size:13px;
 }
-.bracket-match.pending{ opacity:.5; }
+.bracket-match.pending{ background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
+    border-radius: 14px; }
 .bracket-match.playing{ border-color: var(--gold); animation: pulse-gold 1s infinite; }
 @keyframes pulse-gold{ 0%,100%{ box-shadow:0 0 0 0 rgba(242,183,5,.4);} 50%{ box-shadow:0 0 0 5px rgba(242,183,5,0);} }
 .bm-team{ flex:1; display:flex; align-items:center; gap:6px; }
@@ -761,8 +768,6 @@ input{ font-family: inherit; }
   border-radius:14px;
   padding:18px;
   margin-bottom:16px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 .bank-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .bank-card-icon{
@@ -787,8 +792,6 @@ input{ font-family: inherit; }
   padding:16px 10px 14px;
   display:flex; flex-direction:column; align-items:center; gap:6px;
   color: var(--text);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   transition: border-color .18s ease;
   overflow:hidden;
 }
@@ -831,8 +834,8 @@ input{ font-family: inherit; }
    TEAM — TRAINING SLOT UPGRADES
    ============================================================ */
 .slots-card{
-  background: linear-gradient(160deg, var(--surface-3), var(--surface-2));
-  border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   border-radius:14px;
   padding:16px;
   margin-bottom:18px;
@@ -1004,14 +1007,14 @@ input{ font-family: inherit; }
   align-items:stretch;
   justify-content:flex-start;
   gap:8px;
-  background: var(--surface-3);
-  border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   border-radius:10px;
   padding:10px 12px;
 }
 .cup-reward-row.final{
-  border-color: rgba(242,183,5,.5);
-  background: linear-gradient(160deg, rgba(242,183,5,.12), var(--surface-3));
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
 }
 .cup-reward-stage{
   font-size:12.5px;
@@ -1056,8 +1059,8 @@ input{ font-family: inherit; }
 }
 .formation-btn{
   flex:1 1 0;
-  background: var(--surface-2);
-  border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   color: var(--text-dim);
   padding:10px 6px;
   border-radius:10px;
@@ -1204,8 +1207,8 @@ input{ font-family: inherit; }
 @media (min-width:520px){ .transfer-grid{ grid-template-columns:1fr 1fr 1fr; } }
 
 .transfer-card{
-  background: var(--surface-2);
-  border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   border-radius:12px;
   padding:12px;
   display:flex; flex-direction:column; gap:6px;
