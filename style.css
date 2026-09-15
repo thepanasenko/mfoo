@@ -687,6 +687,43 @@ input{ font-family: inherit; }
   background: rgba(242, 183, 5, 0.15);
 }
 
+/* group stage table */
+.group-table-wrap{
+  background: var(--surface-2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:6px;
+}
+.group-table-title{
+  font-size:11px; letter-spacing:1px; color: var(--text-dim); font-weight:800;
+  margin-bottom:10px; text-transform:uppercase;
+}
+.group-table-head, .group-table-row{
+  display:grid;
+  grid-template-columns: 20px 1fr 24px 24px 24px 48px 28px;
+  align-items:center;
+  gap:6px;
+}
+.group-table-head{
+  font-size:10px; color: var(--text-mute); font-weight:800; padding:0 6px 6px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:4px;
+  text-align:center;
+}
+.group-table-head span:nth-child(2){ text-align:left; }
+.group-table-row{
+  font-size:12px; padding:6px; border-radius:6px;
+  text-align:center;
+}
+.group-table-row:nth-child(odd){ background: rgba(255,255,255,.02); }
+.group-table-row.leader{ background: rgba(46,213,115,.10); }
+.group-table-row.you{ font-weight:800; color:#eaf3ec; }
+.gt-pos{ color: var(--text-dim); font-weight:800; }
+.gt-name{ text-align:left; display:flex; align-items:center; gap:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.gt-pts{ color: var(--gold); font-weight:800; }
+.group-table-row.leader .gt-pos{ color: var(--green); }
+
 /* match result modal */
 .match-modal-card{ text-align:center; max-width:340px; }
 .mm-teams{ display:flex; align-items:center; justify-content:center; gap:14px; margin:10px 0 6px; font-weight:800; font-size:14px; }
@@ -726,7 +763,6 @@ input{ font-family: inherit; }
   border-radius:14px;
   padding:18px;
   margin-bottom:16px;
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 .bank-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
