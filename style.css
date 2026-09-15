@@ -223,7 +223,7 @@ input{ font-family: inherit; }
 .app{ display:flex; flex-direction:column; min-height:100vh; }
 
 /* ============================================================
-   TOPBAR — единый вид на всех устройствах
+   TOPBAR — единый вид на всех устройствах (БЕЗ АНИМАЦИЙ)
    ============================================================ */
 .topbar{
   display:flex;
@@ -235,7 +235,6 @@ input{ font-family: inherit; }
   border-bottom: none;
   position: static;
   z-index:auto;
-  transition: padding .28s var(--ease-smooth);
 }
 
 /* чипы статистики — группа справа */
@@ -246,7 +245,6 @@ input{ font-family: inherit; }
   min-width:0;
   flex-wrap: nowrap;
   margin-left:auto;
-  transition: gap .28s var(--ease-smooth);
 }
 
 .stat-chip{
@@ -262,12 +260,7 @@ input{ font-family: inherit; }
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   box-shadow: 0 3px 10px rgba(0,0,0,.35);
-  transition: transform .18s var(--ease-bounce),
-              border-color .18s ease,
-              padding .28s var(--ease-smooth),
-              font-size .28s var(--ease-smooth);
 }
-.stat-chip:hover{ transform: translateY(-2px); }
 
 .stat-chip.coins{ color: var(--gold); border-color: rgba(242,183,5,.1); }
 .stat-chip.budget{ color: var(--green); border-color: rgba(34,197,94,.1); }
@@ -283,9 +276,6 @@ input{ font-family: inherit; }
   gap: 7px;
   flex-shrink:0;
 }
-.stat-chip.level:hover{
-  border-color: rgba(242,183,5,.7);
-}
 .stat-level-img{
   width: 24px;
   height: 24px;
@@ -294,19 +284,16 @@ input{ font-family: inherit; }
   flex-shrink: 0;
   pointer-events: none;
   filter: drop-shadow(0 0 5px rgba(242,183,5,.45));
-  transition: width .28s var(--ease-smooth), height .28s var(--ease-smooth);
 }
 
 /* иконки в чипах */
 .stat-chip .img-icon-lg{
   width: 20px;
   height: 20px;
-  transition: width .28s var(--ease-smooth),
-              height .28s var(--ease-smooth);
 }
 
 /* ============================================================
-   TOPBAR — КОМПАКТНЫЙ РЕЖИМ (при скролле вниз)
+   TOPBAR — КОМПАКТНЫЙ РЕЖИМ (при скролле вниз) — БЕЗ АНИМАЦИЙ
    ============================================================ */
 .topbar.compact{
   padding: 8px 14px;
@@ -654,9 +641,7 @@ input{ font-family: inherit; }
    ============================================================ */
 .tournament-list{ display:flex; flex-direction:column; gap:12px; }
 .tournament-card {
-    background: #0b8f4d;
     background: rgb(0 0 0 / 37%);
-    backdrop-filter: blur(10px);
     border: 1px solid var(--line);
     border-radius: 12px;
     padding: 16px;
