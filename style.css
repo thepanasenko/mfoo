@@ -295,8 +295,6 @@ input{ font-family: inherit; }
   height: 20px;
 }
 
-
-
 .views{ flex:1; padding:16px 14px 120px; max-width:640px; width:100%; margin:0 auto; }
 .view{ display:none; }
 .view.active{ display:block; animation: fade-in .32s var(--ease-bounce); }
@@ -763,6 +761,7 @@ input{ font-family: inherit; }
   border-radius:14px;
   padding:18px;
   margin-bottom:16px;
+  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 .bank-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
@@ -827,6 +826,7 @@ input{ font-family: inherit; }
 
 /* отключаем «прыгающую» анимацию монеты */
 .coin-buy-pop{ animation: none; }
+
 /* ============================================================
    TEAM — TRAINING SLOT UPGRADES
    ============================================================ */
@@ -978,7 +978,9 @@ input{ font-family: inherit; }
 .cup-action-danger:hover{ filter: brightness(1.06); }
 .cup-action-danger:active{ transform: translateY(4px) scale(.98); box-shadow: 0 2px 0 #991b1b, 0 4px 8px rgba(0,0,0,.4); }
 
-/* cup stage rewards list */
+/* ============================================================
+   CUP STAGE REWARDS LIST — этап сверху, призовые всегда снизу
+   ============================================================ */
 .cup-rewards{
   margin-top:20px;
   text-align:left;
@@ -998,14 +1000,14 @@ input{ font-family: inherit; }
 }
 .cup-reward-row{
   display:flex;
-  align-items:center;
-  justify-content:space-between;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:flex-start;
   gap:8px;
   background: var(--surface-3);
   border:1px solid var(--line);
   border-radius:10px;
   padding:10px 12px;
-  flex-wrap:wrap;
 }
 .cup-reward-row.final{
   border-color: rgba(242,183,5,.5);
@@ -1015,14 +1017,17 @@ input{ font-family: inherit; }
   font-size:12.5px;
   font-weight:800;
   color: var(--text);
-  white-space:nowrap;
+  white-space:normal;
+  line-height:1.25;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--line);
 }
 .cup-reward-row.final .cup-reward-stage{ color: var(--gold); }
 .cup-reward-values{
   display:flex;
   gap:6px;
   flex-wrap:wrap;
-  justify-content:flex-end;
+  justify-content:flex-start;
 }
 .cup-reward-chip{
   font-size:11px;
@@ -1167,6 +1172,7 @@ input{ font-family: inherit; }
 .slot-picker-row:active{ transform: scale(.97); }
 .slot-picker-name{ flex:1; font-weight:700; font-size:13.5px; text-align:left; }
 .slot-picker-power{ font-family: var(--ff-display); font-size:15px; color: var(--green); }
+
 /* ============================================================
    TRANSFER MARKET
    ============================================================ */
