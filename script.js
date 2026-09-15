@@ -21,7 +21,9 @@ const IMG = {
 };
 /* per-tournament trophy images (falls back to emoji icon) */
 const TROPHY_IMG = {
-  jamaica: IMG.cupYam
+  jamaica: IMG.cupYam,
+  france:  'images/cup/cupfran.png',
+  usa:     'images/cup/cupusa.png'
 };
 function trophyIconHtml(tournament){
   const src = tournament && TROPHY_IMG[tournament.id];
@@ -198,103 +200,100 @@ const TOURNAMENTS = [
     xpPerWin: 50
   },
   {
-    id:'champions',
-    title:'КУБОК ЧЕМПИОНОВ',
-    icon:'👑',
+    id:'france',
+    title:'КУБОК ФРАНЦИИ',
+    icon:'🥐',
     min:601, max:1000,
     teamCount:16,
-    teamNames:['Real Madronia','AC Northport','Bayern Steelworks','Inter Halcyon','Atletico Vermont','Juventude FC','Borussia Ironfield','Paris Star','Milan Elite','Barcelona Nova','Lyon Olympique','Dortmund Black','Roma Imperiale','Ajax Capital','Sporting CP','Benfica Luz'],
+    teamNames:['Paris Étoile','Lyon Renard','Marseille Marée','Nice Soleil','Bordeaux Vigne','Toulouse Violette','Nantes Corsaire','Lille Nordique','Strasbourg Cigogne','Rennes Bretonne','Montpellier Garrigue','Reims Sacre','Le Havre Phare','Dijon Moutarde','Angers Loire','Grenoble Alpine'],
     stageRewardCoins: 400,
     stageRewardPower: 15,
     cupWinCoins: 2000,
     xpPerWin: 100
   },
   {
-    id:'legends',
-    title:'КУБОК ЛЕГЕНД',
-    icon:'🌟',
+    id:'usa',
+    title:'КУБОК США',
+    icon:'🦅',
     min:1001, max:1500,
     teamCount:16,
-    teamNames:['Olympus United','Valhalla FC','Camelot Rangers','Atlantis Sporting','Excalibur City','Avalon Athletic','Titan\'s Forge','Phoenix Ascend','Dragonspire FC','Ironcrown United','Thunderhall Rovers','Mythic Wanderers','Stormbreak City','Ravenwood FC','Frostpeak United','Goldenshield Athletic'],
+    teamNames:['New York Liberty FC','LA Golden Wave','Chicago Windstorm','Houston Lonestar','Miami Sunrise','Dallas Eagles','Seattle Rainguard','Denver Peak','Boston Patriots FC','Atlanta Phoenix','Austin Riverside','Phoenix Sunhawk','Detroit Ironworks','Portland Timberline','San Diego Coast','Nashville Rebels'],
     stageRewardCoins: 600,
     stageRewardPower: 20,
     cupWinCoins: 3000,
     xpPerWin: 150
   },
   {
-    id:'heroes',
-    title:'КУБОК ГЕРОЕВ',
-    icon:'⚡',
+    id:'belarus',
+    title:'КУБОК БЕЛАРУСИ',
+    icon:'🐃',
     min:1501, max:2000,
     teamCount:16,
-    teamNames:['Vanguard City','Iron Legion','Nova Guardians','Steel Phoenix FC','Falcon Strike','Crimson Blade United','Silver Vanguard','Nightwatch Rovers','Shadow Sentinels','Solar Knights','Rapid Strikers','Valor United','Wolfpack Athletic','Skyward FC','Aegis City','Hunter\'s Pride'],
+    teamNames:['Minsk Zubr','Brest Krepost','Grodno Neman','Vitebsk Dvina','Gomel Sozh','Mogilev Dnepr','Baranovichi Sokol','Pinsk Boloto','Orsha Volna','Bobruisk Bober','Soligorsk Shakhter','Zhlobin Kovka','Polotsk Drakon','Lida Zubronok','Slutsk Poyas','Mozyr Poles'],
     stageRewardCoins: 800,
     stageRewardPower: 25,
     cupWinCoins: 4000,
     xpPerWin: 200
   },
   {
-    id:'titans',
-    title:'КУБОК ТИТАНОВ',
-    icon:'🔥',
-    min:2001, max:2500,
-    teamCount:32,
-    teamNames:['Colossus United','Atlas Rovers','Kronos City','Titanfall FC','Bedrock Athletic','Ironclad Giants','Molten Core FC','Gigant United','Stonehammer City','Behemoth Rovers','Magma Strikers','Ridgeline United','Volcanic Athletic','Granite City FC','Thundergiant Rovers','Colossal Vanguard','Obsidian United','Earthshaker FC','Tremor City','Boulder Athletic','Pyroclast Rovers','Cinderforge United','Basalt City FC','Quakeline Athletic','Ashborne Rovers','Infernal Titans','Steelcore United','Forgefire City','Cratermakers FC','Rockslide Athletic','Emberfall Rovers','Magmawave United'],
-    stageRewardCoins: 1000,
-    stageRewardPower: 30,
-    cupWinCoins: 5000,
-    xpPerWin: 250
-  },
-  {
-    id:'immortals',
-    title:'КУБОК БЕССМЕРТНЫХ',
-    icon:'💫',
-    min:2501, max:3000,
-    teamCount:32,
-    teamNames:['Eternal City','Undying FC','Everlast Rovers','Timeless United','Infinity Athletic','Nova Eternal','Starforged City','Celestine Rovers','Neverending FC','Eonwatch United','Astral Immortals','Perpetua City','Radiant Legacy FC','Sempiterna Rovers','Vireo Eternal United','Lumina Athletic','Starlight Immortals','Comet City FC','Everglow Rovers','Zenith United','Halo Eternal Athletic','Solstice City FC','Wandering Stars','Nebula Rovers','Aurora Immortal United','Stardust Athletic','Meteor City FC','Cosmic Legacy Rovers','Galaxy Watch United','Twilight Eternal FC','Orbit Immortals','Constellation City'],
-    stageRewardCoins: 1200,
-    stageRewardPower: 35,
-    cupWinCoins: 6000,
-    xpPerWin: 300
-  },
-  {
-    id:'gods',
-    title:'КУБОК БОГОВ',
-    icon:'⚜️',
-    min:3001, max:4000,
-    teamCount:32,
-    teamNames:['Zeus United','Apollo City FC','Ares Rovers','Poseidon Athletic','Hermes United','Athena Guardians','Hades City FC','Odin\'s Chosen','Thor Athletic','Loki Rovers','Freya United','Ra\'s Ascension','Anubis City FC','Osiris Rovers','Indra United','Amaterasu FC','Jupiter Athletic','Mars City Rovers','Neptune United','Vulcan FC','Divine Sovereigns','Pantheon City','Olympian United','Celestial Throne FC','Godspeed Rovers','Almighty Athletic','Skyfather United','Immortal Throne FC','Deity Rovers','Sacred Ember United','Divinity City FC','Ascendant Gods'],
-    stageRewardCoins: 1500,
-    stageRewardPower: 40,
-    cupWinCoins: 8000,
-    xpPerWin: 350
-  },
-  {
-    id:'universe',
-    title:'КУБОК ВСЕЛЕННОЙ',
-    icon:'🌌',
-    min:4001, max:5000,
-    teamCount:64,
-    teamNames:['Galactic United','Nebula City FC','Andromeda Rovers','Quasar Athletic','Cosmos United','Interstellar FC','Nova Sphere City','Voidwalker Rovers','Blackhole United','Solaris FC','Pulsar City Athletic','Lightyear Rovers','Multiverse United','Astro City FC','Meteorite Rovers','Wormhole Athletic','Orbiter United','Star Cluster FC','Infinity Void City','Dark Matter Rovers','Celestial Reach United','Big Bang FC','Cosmic Drift City','Gravity Well Rovers','Photon United','Stargate Athletic','Event Horizon FC','Supernova City','Parallax Rovers','Dimension United','Zero Point FC','Singularity City','Astral Plane Rovers','Nova Genesis United','Hyperspace FC','Planetfall City','Orbital Drift Rovers','Cosmic Forge United','Stellar Wind FC','Galaxy Edge City','Quantum Leap Rovers','Vortex United','Skybound Cosmos FC','Ethereal City','Meridian Rovers','Celestara United','Novaburst FC','Ionosphere City','Solar Flare Rovers','Zenith Cosmos United','Aether Drift FC','Cosmic Pulse City','Umbra Rovers','Radiant Void United','Astro Nexus FC','Chronos City','Infinite Horizon Rovers','Starborn United','Nova Drift FC','Cosmic Ember City','Lightspeed Rovers','Galactic Pulse United','Void Ember FC','Celestial Drift City'],
-    stageRewardCoins: 2000,
-    stageRewardPower: 50,
-    cupWinCoins: 10000,
-    xpPerWin: 400
-  },
-  {
-    id:'absolute',
-    title:'КУБОК АБСОЛЮТА',
-    icon:'👾',
-    min:5001, max:7000,
-    teamCount:64,
-    teamNames:['Absolute United','Ultimatum FC','Apex Prime City','Omega Rovers','Infinity Zero United','Paradox FC','Anomaly City','Rift Rovers','Singular Prime United','Overdrive FC','Absolute Zero City','Vector Rovers','Prime United FC','Zenith Absolute City','Ultra Prime Rovers','Endgame United','Alpha Omega FC','Final Form City','Beyond Limits Rovers','Transcendent United','Hyper Prime FC','Glitch City','Byte Rovers','Neon Circuit United','Cyber Prime FC','Digital Abyss City','Matrix Rovers','Synth United','Overclock FC','Nano Prime City','Quantum Absolute Rovers','Void Prime United','Corrupted Signal FC','Firewall City','Static Rovers','Binary United','Circuit Board FC','Data Stream City','Encrypted Rovers','Terminal United','Reboot FC','Mainframe City','Protocol Rovers','Neural Link United','Override FC','Kernel Panic City','Backdoor Rovers','Malware United','Root Access FC','Ghost Protocol City','Zero Day Rovers','Deep Web United','Sandbox FC','Firmware City','Payload Rovers','Exploit United','Cache Prime FC','Buffer Overflow City','Stack Trace Rovers','Null Pointer United','Segfault FC','Recursion City','Infinite Loop Rovers','Runtime Prime United'],
-    stageRewardCoins: 3000,
-    stageRewardPower: 60,
-    cupWinCoins: 15000,
-    xpPerWin: 500
+    id:'europe',
+    title:'ЧЕМПИОНАТ ЕВРОПЫ',
+    icon:'⭐',
+    type:'group',
+    min:2001, max:3000,
+    groupsCount:8,
+    teamsPerGroup:10,
+    teamNames:['Berlin Adler','Madrid Toro','Rome Lupetto','Amsterdam Wiel','Vienna Habsburg','Lisbon Farol','Warsaw Orzel','Athens Olymp','Zurich Alpen','Prague Lev','Stockholm Vind','Copenhagen Skov','Dublin Trefoil','Oslo Fjord','Brussels Waffle','Budapest Dunai','Bucharest Vulpe','Sofia Roza','Helsinki Suomi','Zagreb Vatra','Belgrade Orao','Edinburgh Thistle','Cardiff Ddraig','Krakow Smok','Naples Vesuvio','Turin Mole','Valencia Naranja','Seville Flamenco','Porto Douro','Hamburg Hafen'],
+    stageRewardCoins: 900,
+    stageRewardPower: 22,
+    xpPerWin: 130,
+    groupWinBonusCoins: 6000,
+    groupWinBonusPower: 90,
+    koStageRewardCoins: 3000,
+    koStageRewardPower: 70,
+    koXpPerWin: 350,
+    cupWinCoins: 30000
   }
 ];
 function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
+
+/* ---------- round-robin group helper ---------- */
+function roundRobinRounds(n){
+  // circle method, n must be even. Returns array of rounds, each an array of [idxA, idxB] pairs.
+  const ids = Array.from({length:n}, (_,i)=>i);
+  const rounds = [];
+  for(let r=0; r<n-1; r++){
+    const pairs = [];
+    for(let i=0; i<n/2; i++){
+      pairs.push([ids[i], ids[n-1-i]]);
+    }
+    rounds.push(pairs);
+    ids.splice(1, 0, ids.pop());
+  }
+  return rounds;
+}
+
+function computeGroupTable(cup, teams){
+  const stats = {};
+  teams.forEach(tm => stats[tm.id] = { team:tm, played:0, wins:0, losses:0, gf:0, ga:0, pts:0 });
+  cup.matches
+    .filter(m => m.round <= cup.groupRoundsCount && m.played && m.teamA && m.teamB)
+    .forEach(m => {
+      const a = m.teamA, b = m.teamB;
+      if(!stats[a.id] || !stats[b.id]) return;
+      stats[a.id].played++; stats[b.id].played++;
+      stats[a.id].gf += m.scoreA; stats[a.id].ga += m.scoreB;
+      stats[b.id].gf += m.scoreB; stats[b.id].ga += m.scoreA;
+      if(m.winner && m.winner.id === a.id){ stats[a.id].wins++; stats[a.id].pts += 3; stats[b.id].losses++; }
+      else { stats[b.id].wins++; stats[b.id].pts += 3; stats[a.id].losses++; }
+    });
+  return Object.values(stats).sort((x,y)=>{
+    if(y.pts !== x.pts) return y.pts - x.pts;
+    const gdX = x.gf - x.ga, gdY = y.gf - y.ga;
+    if(gdY !== gdX) return gdY - gdX;
+    return y.gf - x.gf;
+  });
+}
 
 /* ---------- state ---------- */
 let state = null;
@@ -1604,7 +1603,8 @@ function onCupStart(){
     showToast(`❌ Соберите полный состав (${mainCount}/${MAIN_SQUAD_SIZE}), чтобы играть в турнире`);
     return;
   }
-  initCup(currentCupId);
+  const t = tournamentById(currentCupId);
+  if(t.type === 'group') initEuroCup(currentCupId); else initCup(currentCupId);
   document.getElementById('cup-intro').classList.add('hidden');
   document.getElementById('cup-bracket-wrap').classList.remove('hidden');
   renderBracket();
@@ -1614,6 +1614,46 @@ function onCupStart(){
 function renderCupRewardsList(t){
   const el = document.getElementById('cup-rewards');
   if(!el) return;
+
+  if(t.type === 'group'){
+    const rows = [];
+    rows.push(`
+      <div class="cup-reward-row">
+        <span class="cup-reward-stage">ГРУППОВОЙ ЭТАП (за победу в туре)</span>
+        <span class="cup-reward-values">
+          <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.stageRewardCoins.toLocaleString('ru-RU')}</span>
+          <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${t.stageRewardPower}</span>
+          <span class="cup-reward-chip xp">⭐ +${t.xpPerWin} XP</span>
+        </span>
+      </div>`);
+    rows.push(`
+      <div class="cup-reward-row">
+        <span class="cup-reward-stage">🥇 1-Е МЕСТО В ГРУППЕ</span>
+        <span class="cup-reward-values">
+          <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.groupWinBonusCoins.toLocaleString('ru-RU')}</span>
+          <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${t.groupWinBonusPower}</span>
+        </span>
+      </div>`);
+    const koTitles = ['ЧЕТВЕРТЬФИНАЛ','ПОЛУФИНАЛ','ФИНАЛ'];
+    koTitles.forEach((title, i)=>{
+      const isFinal = i === koTitles.length - 1;
+      rows.push(`
+        <div class="cup-reward-row ${isFinal ? 'final' : ''}">
+          <span class="cup-reward-stage">${isFinal ? '🏆 ' : ''}${title}</span>
+          <span class="cup-reward-values">
+            <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.koStageRewardCoins.toLocaleString('ru-RU')}</span>
+            <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${t.koStageRewardPower}</span>
+            <span class="cup-reward-chip xp">⭐ +${t.koXpPerWin} XP</span>
+            ${isFinal ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>` : ''}
+          </span>
+        </div>`);
+    });
+    el.innerHTML = `
+      <div class="cup-rewards-title">ПРИЗОВЫЕ ЗА ЭТАПЫ</div>
+      <div class="cup-rewards-list">${rows.join('')}</div>
+    `;
+    return;
+  }
 
   const totalRounds = Math.max(1, Math.round(Math.log2(t.teamCount)));
   const roundTitles = buildRoundTitles(t.teamCount);
@@ -1637,6 +1677,154 @@ function renderCupRewardsList(t){
     <div class="cup-rewards-title">ПРИЗОВЫЕ ЗА ЭТАПЫ</div>
     <div class="cup-rewards-list">${rows.join('')}</div>
   `;
+}
+
+function initEuroCup(cupId){
+  const t = tournamentById(cupId);
+  const power = calcClubPower(state.players);
+  const playerTeam = { id:'you', name: state.teamName, power, isPlayer:true, formation: state.formation };
+
+  const names = shuffle([...t.teamNames]);
+  const groupOpponents = [];
+  for(let i=0; i<t.teamsPerGroup-1; i++){
+    groupOpponents.push({
+      id: uid(),
+      name: names[i % names.length],
+      power: rnd(t.min, t.max),
+      isPlayer: false,
+      formation: pick(FORMATION_IDS)
+    });
+  }
+
+  const teams = shuffle([playerTeam, ...groupOpponents]);
+  const groupRounds = roundRobinRounds(teams.length);
+
+  const matches = [];
+  let matchIdx = 0;
+  groupRounds.forEach((pairs, rIdx)=>{
+    pairs.forEach(([ai, bi])=>{
+      matches.push({
+        round: rIdx + 1,
+        a: { type:'direct', idx: ai },
+        b: { type:'direct', idx: bi },
+        played:false, teamA:null, teamB:null, scoreA:0, scoreB:0, winner:null,
+        matchIdx: matchIdx++
+      });
+    });
+  });
+
+  state.cups[cupId] = {
+    type:'group',
+    stage:'groups',
+    teams,
+    matches,
+    nextIndex:0,
+    finished:false,
+    won:false,
+    groupRoundsCount: groupRounds.length,
+    currentRound:1
+  };
+  save();
+}
+
+function buildBracketFromIndices(indices, startRound, startMatchIdx){
+  const matches = [];
+  let matchIdx = startMatchIdx;
+  for(let i=0; i<indices.length; i+=2){
+    matches.push({
+      round: startRound,
+      a: { type:'direct', idx: indices[i] },
+      b: { type:'direct', idx: indices[i+1] },
+      played:false, teamA:null, teamB:null, scoreA:0, scoreB:0, winner:null,
+      matchIdx: matchIdx++
+    });
+  }
+
+  let round = startRound + 1;
+  let prevRoundMatches = matches.filter(m => m.round === round - 1);
+  while(prevRoundMatches.length > 1){
+    const roundMatches = [];
+    for(let i=0; i<prevRoundMatches.length; i+=2){
+      roundMatches.push({
+        round: round,
+        a: { type:'winner', m: prevRoundMatches[i].matchIdx },
+        b: { type:'winner', m: prevRoundMatches[i+1]?.matchIdx || prevRoundMatches[i].matchIdx },
+        played:false, teamA:null, teamB:null, scoreA:0, scoreB:0, winner:null,
+        matchIdx: matchIdx++
+      });
+    }
+    matches.push(...roundMatches);
+    prevRoundMatches = roundMatches;
+    round++;
+  }
+  return matches;
+}
+
+function simulateGroupWinner(t){
+  const names = shuffle([...t.teamNames]);
+  const teams = [];
+  for(let i=0; i<t.teamsPerGroup; i++){
+    teams.push({ id: uid(), name: names[i % names.length], power: rnd(t.min, t.max), isPlayer:false, formation: pick(FORMATION_IDS) });
+  }
+  const rounds = roundRobinRounds(teams.length);
+  const stats = {};
+  teams.forEach(tm => stats[tm.id] = { team:tm, pts:0, gf:0, ga:0 });
+  rounds.forEach(pairs=>{
+    pairs.forEach(([ai, bi])=>{
+      const A = teams[ai], B = teams[bi];
+      const r = simulateMatch(A.power, B.power, A.formation, B.formation);
+      stats[A.id].gf += r.scoreA; stats[A.id].ga += r.scoreB;
+      stats[B.id].gf += r.scoreB; stats[B.id].ga += r.scoreA;
+      if(r.aWon) stats[A.id].pts += 3; else stats[B.id].pts += 3;
+    });
+  });
+  const sorted = Object.values(stats).sort((x,y)=> y.pts - x.pts || ((y.gf-y.ga)-(x.gf-x.ga)) || (y.gf-x.gf));
+  return sorted[0].team;
+}
+
+function advanceGroupStage(t, cup){
+  const table = computeGroupTable(cup, cup.teams);
+  cup.groupStanding = table.findIndex(row => row.team.isPlayer) + 1;
+  const winner = table[0].team;
+
+  if(!winner.isPlayer){
+    cup.finished = true;
+    cup.won = false;
+    cup.stage = 'eliminated';
+    save();
+    renderCupScreen();
+    return;
+  }
+
+  state.coins += t.groupWinBonusCoins;
+  const bonus = rewardRandomPlayer(t.groupWinBonusPower);
+  save();
+  showToast(`🎉 Вы вышли из группы (1-е место)! +${t.groupWinBonusCoins.toLocaleString('ru-RU')} монет, +${t.groupWinBonusPower} силы (${bonus.player.name})`);
+
+  const otherWinners = [];
+  for(let g=0; g<t.groupsCount-1; g++){
+    otherWinners.push(simulateGroupWinner(t));
+  }
+
+  const playerIdx = cup.teams.findIndex(tm => tm.isPlayer);
+  const koStartIdx = cup.teams.length;
+  cup.teams.push(...otherWinners);
+
+  const koIndices = shuffle([playerIdx, ...otherWinners.map((_, i)=> koStartIdx + i)]);
+  const koMatches = buildBracketFromIndices(koIndices, cup.groupRoundsCount + 1, cup.matches.length);
+  cup.matches.push(...koMatches);
+  cup.stage = 'knockout';
+  save();
+
+  renderBracket();
+  ensureCupFlowRunning();
+}
+
+function getMatchRewards(t, match, cup){
+  if(t.type === 'group' && cup.groupRoundsCount && match.round > cup.groupRoundsCount){
+    return { coins: t.koStageRewardCoins, power: t.koStageRewardPower, xp: t.koXpPerWin };
+  }
+  return { coins: t.stageRewardCoins, power: t.stageRewardPower, xp: t.xpPerWin };
 }
 
 function initCup(cupId){
@@ -1801,6 +1989,7 @@ function onPlayNow(){
 function playCurrentRound() {
   const cup = state.cups[currentCupId];
   if(!cup || cup.finished) return;
+  const t = tournamentById(currentCupId);
   syncPlayerCupTeam(cup);
 
   const currentMatch = cup.matches[cup.nextIndex];
@@ -1865,7 +2054,9 @@ function playCurrentRound() {
       renderBracket();
       save();
 
-      if(!playerWon) {
+      const isGroupStage = t.type === 'group' && cup.stage === 'groups';
+
+      if(!playerWon && !isGroupStage) {
         tournamentEnded = true;
         cup.finished = true;
         cup.won = false;
@@ -1875,7 +2066,7 @@ function playCurrentRound() {
           renderCupScreen();
         });
       } else {
-        showMatchModal(actualMatch, true, () => {
+        showMatchModal(actualMatch, playerWon, () => {
           matchIndex++;
           playNextRoundMatch();
         });
@@ -1962,8 +2153,11 @@ function playNextMatch(){
 }
 
 function continueAfterMatch(keepGoing){
+  const t = tournamentById(currentCupId);
   const cup = state.cups[currentCupId];
-  if(!keepGoing){
+  const isGroupStage = t.type === 'group' && cup.stage === 'groups';
+
+  if(!keepGoing && !isGroupStage){
     cup.finished = true;
     cup.won = false;
     save();
@@ -1980,6 +2174,12 @@ function continueAfterMatch(keepGoing){
 function finishCup(){
   const t = tournamentById(currentCupId);
   const cup = state.cups[currentCupId];
+
+  if(t.type === 'group' && cup.stage === 'groups'){
+    advanceGroupStage(t, cup);
+    return;
+  }
+
   const finalMatch = cup.matches[cup.matches.length-1];
   const playerWonFinal = finalMatch.winner && finalMatch.winner.isPlayer;
   cup.finished = true;
@@ -2022,9 +2222,40 @@ function buildRoundTitles(teamCount){
   return titles;
 }
 
+function euroRoundTitle(round, cup){
+  if(round <= cup.groupRoundsCount) return `ТУР ${round}`;
+  const koRound = round - cup.groupRoundsCount;
+  const koTitles = ['ЧЕТВЕРТЬФИНАЛ','ПОЛУФИНАЛ','ФИНАЛ'];
+  return koTitles[koRound-1] || `РАУНД ${round}`;
+}
+
+function renderGroupTableHtml(cup){
+  const groupTeams = cup.teams.slice(0, cup.groupRoundsCount + 1);
+  const table = computeGroupTable(cup, groupTeams);
+  const rows = table.map((row, i) => `
+    <div class="group-table-row ${row.team.isPlayer ? 'you' : ''} ${i===0 ? 'leader' : ''}">
+      <span class="gt-pos">${i+1}</span>
+      <span class="gt-name">${row.team.isPlayer ? '<span class="bm-you-tag">ТЫ</span> ' : ''}${row.team.name}</span>
+      <span class="gt-p">${row.played}</span>
+      <span class="gt-w">${row.wins}</span>
+      <span class="gt-l">${row.losses}</span>
+      <span class="gt-gf">${row.gf}:${row.ga}</span>
+      <span class="gt-pts">${row.pts}</span>
+    </div>`).join('');
+  return `
+    <div class="group-table-wrap">
+      <div class="group-table-title">ТАБЛИЦА ГРУППЫ · выходит только 1-е место</div>
+      <div class="group-table-head">
+        <span>#</span><span>Команда</span><span>И</span><span>В</span><span>П</span><span>Мячи</span><span>О</span>
+      </div>
+      <div class="group-table-body">${rows}</div>
+    </div>`;
+}
+
 function renderBracket(){
   const cup = state.cups[currentCupId];
   if(!cup) return;
+  const t = tournamentById(currentCupId);
 
   const rounds = {};
   cup.matches.forEach(m => {
@@ -2032,12 +2263,14 @@ function renderBracket(){
     rounds[m.round].push(m);
   });
 
+  const isGroupType = t.type === 'group';
   const teamCount = cup.teams.length;
-  const roundTitles = buildRoundTitles(teamCount);
+  const roundTitles = isGroupType ? null : buildRoundTitles(teamCount);
+  const groupTableHtml = (isGroupType && cup.stage === 'groups') ? renderGroupTableHtml(cup) : '';
 
-  document.getElementById('bracket').innerHTML = Object.keys(rounds).sort((a,b) => a - b).map(round => `
+  document.getElementById('bracket').innerHTML = groupTableHtml + Object.keys(rounds).sort((a,b) => a - b).map(round => `
     <div class="bracket-round">
-      <div class="bracket-round-title">${roundTitles[round] || `РАУНД ${round}`}</div>
+      <div class="bracket-round-title">${isGroupType ? euroRoundTitle(Number(round), cup) : (roundTitles[round] || `РАУНД ${round}`)}</div>
       <div class="bracket-matches">
         ${rounds[round].map(m => bracketMatchHtml(m, cup)).join('')}
       </div>
@@ -2174,19 +2407,23 @@ function showMatchModal(match, playerWon, onClose){
 
   const t = tournamentById(currentCupId);
   const cup = state.cups[currentCupId];
-  const isFinal = match.round === Math.max(...cup.matches.map(m => m.round));
+  const isGroupStage = t.type === 'group' && cup.stage === 'groups';
+  // during the group stage, "final" status is decided once every group match has
+  // been played (handled by finishCup/advanceGroupStage), not per-match by round.
+  const isFinal = !isGroupStage && match.round === Math.max(...cup.matches.map(m => m.round));
 
   let rewardHtml = '';
   let xpEarned = 0;
 
   if(playerWon){
-    const powerIncrease = t.stageRewardPower;
+    const rewards = getMatchRewards(t, match, cup);
+    const powerIncrease = rewards.power;
     const r = rewardRandomPlayer(powerIncrease);
 
-    const stageCoins = t.stageRewardCoins;
+    const stageCoins = rewards.coins;
     state.coins += stageCoins;
 
-    xpEarned = t.xpPerWin;
+    xpEarned = rewards.xp;
     addXp(xpEarned);
 
     save();
@@ -2204,11 +2441,15 @@ function showMatchModal(match, playerWon, onClose){
     refreshTopbar();
   }
 
-  const loseMessage = !playerWon ? `
+  const loseMessage = (!playerWon && !isGroupStage) ? `
     <div style="color:var(--red); font-size:14px; font-weight:700; margin-top:10px;">
       ❌ Турнир завершён. Попробуйте снова!
     </div>
-  ` : '';
+  ` : (!playerWon && isGroupStage ? `
+    <div style="color:var(--text-dim); font-size:13px; margin-top:10px;">
+      Матч не решает всё — впереди ещё игры группового этапа.
+    </div>
+  ` : '');
 
   document.getElementById('match-modal-body').innerHTML = `
     <div class="mm-teams"><span>${you.name}</span><span style="color:var(--text-mute)">vs</span><span>${opp.name}</span></div>
@@ -2216,14 +2457,14 @@ function showMatchModal(match, playerWon, onClose){
     <div class="mm-result ${playerWon?'win':'lose'}">${playerWon ? 'ПОБЕДА!' : 'ПОРАЖЕНИЕ'}</div>
     ${rewardHtml}
     ${loseMessage}
-    <button id="mm-continue-btn" class="btn-primary btn-big mm-continue">${playerWon && !isFinal ? 'ПРОДОЛЖИТЬ' : 'ОК'}</button>
+    <button id="mm-continue-btn" class="btn-primary btn-big mm-continue">${(playerWon || isGroupStage) && !isFinal ? 'ПРОДОЛЖИТЬ' : 'ОК'}</button>
   `;
   document.getElementById('match-modal').classList.remove('hidden');
   document.getElementById('mm-continue-btn').addEventListener('click', ()=>{
     document.getElementById('match-modal').classList.add('hidden');
-    if(!playerWon) {
+    if(!playerWon && !isGroupStage) {
       renderCupScreen();
-    } else if(isFinal && playerWon){
+    } else if(isFinal){
       finishCup();
     } else {
       onClose();
