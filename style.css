@@ -223,57 +223,60 @@ input{ font-family: inherit; }
 .app{ display:flex; flex-direction:column; min-height:100vh; }
 
 /* ============================================================
-   TOPBAR — единый вид на всех устройствах (БЕЗ АНИМАЦИЙ)
+   TOPBAR — фон как у нижнего меню, всегда компактный (БЕЗ АНИМАЦИЙ)
    ============================================================ */
 .topbar{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
-  padding:14px 14px;
-  background: transparent;
-  border-bottom: none;
-  position: static;
-  z-index:auto;
+  padding:8px 16px;
+  margin:0;
+  width:100%;
+  background: rgb(0 0 0 / 37%);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 /* чипы статистики — группа справа */
 .topbar-stats{
   display:flex;
-  gap:6px;
+  gap:12px;
   flex-shrink:1;
   min-width:0;
   flex-wrap: nowrap;
   margin-left:auto;
+  align-items:center;
 }
 
 .stat-chip{
   display:flex;
   align-items:center;
   gap:5px;
-  border:1px solid var(--line);
-  padding:7px 11px;
-  border-radius:10px;
-  font-size:13px;
+  border:none;
+  background: transparent;
+  padding:0;
+  font-size:14px;
   font-weight:800;
   white-space:nowrap;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 3px 10px rgba(0,0,0,.35);
+  color: var(--text);
+  text-shadow: 0 1px 2px rgba(0,0,0,.9);
 }
 
-.stat-chip.coins{ color: var(--gold); border-color: rgba(242,183,5,.1); }
-.stat-chip.budget{ color: var(--green); border-color: rgba(34,197,94,.1); }
-.stat-chip.power{ color:#7fd3ff; border-color: rgba(127,211,255,.1); }
+.stat-chip.coins{ color: var(--gold); }
+.stat-chip.budget{ color: var(--green); }
+.stat-chip.power{ color:#7fd3ff; }
 
 /* уровень — золотой, с картинкой lvl.png */
 .stat-chip.level{
   color: var(--gold);
-  border-color: rgba(242,183,5,.1);
   font-family: var(--ff-display);
   font-size: 18px;
-  padding: 8px 14px;
-  gap: 7px;
+  gap: 6px;
   flex-shrink:0;
 }
 .stat-level-img{
@@ -283,7 +286,7 @@ input{ font-family: inherit; }
   display: inline-block;
   flex-shrink: 0;
   pointer-events: none;
-  filter: drop-shadow(0 0 5px rgba(242,183,5,.45));
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.9));
 }
 
 /* иконки в чипах */
@@ -292,31 +295,7 @@ input{ font-family: inherit; }
   height: 20px;
 }
 
-/* ============================================================
-   TOPBAR — КОМПАКТНЫЙ РЕЖИМ (при скролле вниз) — БЕЗ АНИМАЦИЙ
-   ============================================================ */
-.topbar.compact{
-  padding: 8px 14px;
-}
-.topbar.compact .topbar-stats{
-  gap: 4px;
-}
-.topbar.compact .stat-chip{
-  padding: 4px 8px;
-  font-size: 11px;
-}
-.topbar.compact .stat-chip.level{
-  padding: 5px 10px;
-  font-size: 13px;
-}
-.topbar.compact .stat-level-img{
-  width: 16px;
-  height: 16px;
-}
-.topbar.compact .img-icon-lg{
-  width: 15px;
-  height: 15px;
-}
+
 
 .views{ flex:1; padding:16px 14px 120px; max-width:640px; width:100%; margin:0 auto; }
 .view{ display:none; }
@@ -535,8 +514,8 @@ input{ font-family: inherit; }
 
 /* неактивная иконка */
 .nav-icon-img{
-  width: 34px;
-  height: 34px;
+  width: 46px;
+  height: 46px;
   object-fit: contain;
   display: block;
   transform-origin: center center;
