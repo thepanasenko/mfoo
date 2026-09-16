@@ -187,6 +187,13 @@ input{ font-family: inherit; }
 .btn-primary:hover{ filter: brightness(1.06); }
 .btn-primary:active{ transform: translateY(4px) scale(.98); box-shadow: 0 2px 0 #0c5c2b, 0 4px 8px rgba(0,0,0,.4); }
 .btn-primary.notched{ border-radius:0; }
+.btn-primary.btn-disabled-soft{
+  background: var(--surface-3);
+  color: var(--text-dim);
+  box-shadow: 0 6px 0 #0a1a13, 0 8px 16px rgba(0,0,0,.4);
+  cursor: default;
+}
+.btn-primary.btn-disabled-soft:active{ transform:none; }
 .btn-big{ width:100%; padding:16px; font-size:15px; }
 .btn-back{
   background: rgb(0 0 0 / 37%);

@@ -268,9 +268,149 @@ const TOURNAMENTS = [
       { coins:5000, power:10, xp:1500 }   // Финал
     ],
     cupWinCoins: 30000
+  },
+  {
+    id:'america',
+    title:'ЧЕМПИОНАТ АМЕРИКИ',
+    icon:'🗽',
+    type:'group',
+    min:2201, max:3300,
+    groupsCount:16,
+    teamsPerGroup:10,
+    teamNames:['New York Empire','LA Golden Wave','Chicago Windstorm','Toronto Maple FC','Mexico City Aztec','Sao Paulo Onça','Rio Carioca','Buenos Aires Pampa','Santiago Andes','Bogota Condor','Lima Inca','Montreal Nord','Miami Sunrise','Houston Lonestar','Vancouver Rain','Boston Patriots FC','Lima Andina','Quito Volcan','Caracas Llanero','Montevideo Charrua','Asuncion Guarani','La Paz Altura','Havana Habanero','San Juan Coqui','Panama Istmo','San Jose Tico','Kingston Reggae','Guadalajara Jalisco','Monterrey Acero','Brasilia Cerrado','Salvador Bahia','Cordoba Mediterranea'],
+    groupStageReward: { coins:1000, power:1, xp:150 },
+    groupWinBonus: { coins:1500, power:3, xp:350 },
+    // плей-офф на вылет (16 команд): 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:2500, power:5, xp:500 },    // 1/8 финала
+      { coins:5000, power:8, xp:750 },    // Четвертьфинал
+      { coins:7500, power:10, xp:1000 },  // Полуфинал
+      { coins:10000, power:15, xp:1500 }  // Финал
+    ],
+    cupWinCoins: 40000
+  },
+  {
+    id:'asia',
+    title:'ЧЕМПИОНАТ АЗИИ',
+    icon:'🏯',
+    type:'group',
+    min:3301, max:4400,
+    groupsCount:32,
+    teamsPerGroup:10,
+    teamNames:['Tokyo Rising Sun','Seoul Dragon','Beijing Panda','Shanghai Jade','Bangkok Siam','Jakarta Garuda','Manila Sampaguita','Riyadh Falcon','Doha Pearl','Dubai Skyline','Tehran Simorgh','Baghdad Lion','Delhi Peacock','Mumbai Tiger','Karachi Star','Lahore Minar','Dhaka Bengal','Hanoi Lotus','Ho Chi Minh Rong','Kuala Lumpur Harimau','Singapore Merlion','Taipei Bamboo','Hong Kong Jade','Osaka Castle','Yokohama Bay','Busan Wave','Pyongyang Chollima','Ulaanbaatar Steppe','Almaty Snow','Tashkent Silk','Astana Steppe','Baku Flame','Yerevan Ararat','Tbilisi Mountain','Amman Petra','Beirut Cedar','Jerusalem Olive','Colombo Lion','Kathmandu Peak','Islamabad Margalla'],
+    groupStageReward: { coins:1200, power:1, xp:200 },
+    groupWinBonus: { coins:1750, power:3, xp:500 },
+    // плей-офф на вылет (32 команды): 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:2500, power:5, xp:500 },    // 1/16 финала
+      { coins:5000, power:8, xp:750 },    // 1/8 финала
+      { coins:7500, power:10, xp:1000 },  // Четвертьфинал
+      { coins:10000, power:15, xp:1500 }, // Полуфинал
+      { coins:15000, power:20, xp:2500 }  // Финал
+    ],
+    cupWinCoins: 50000
+  },
+  {
+    id:'eurasia',
+    title:'ЧЕМПИОНАТ ЕВРАЗИИ',
+    icon:'🌍',
+    type:'group',
+    min:4401, max:5500,
+    groupsCount:64,
+    teamsPerGroup:10,
+    teamNames:['Moscow Bear','Istanbul Bosphorus','Ankara Anatolia','Novosibirsk Taiga','Yekaterinburg Ural','Vladivostok Pacific','Kyiv Dnipro','Minsk Zubr Elite','Warsaw Eagle Elite','Bucharest Carpathia','Athens Acropolis','Cairo Sphinx','Alexandria Nile','Casablanca Atlas','Tunis Carthage','Algiers Kasbah','Tripoli Oasis','Nicosia Cyprus','Valletta Malta','Reykjavik Geyser','Helsinki North','Riga Amber','Vilnius Hill','Tallinn Spire','Chisinau Vine','Sarajevo Bridge','Skopje Vardar','Podgorica Coast','Ljubljana Alps','Bratislava Castle','Vienna Ring','Zurich Peak','Geneva Lake','Brussels Grand','Luxembourg Fort','Monaco Riviera','Andorra Peak','San Marino Tower','Vatican Dome','Lisbon Coast','Madrid Central','Barcelona Sea','Milan Duomo','Naples Bay','Palermo Sun','Bern Alpine','Munich Beer','Frankfurt Bank','Hamburg Port','Copenhagen Spire','Stockholm Isle','Oslo Fjord Elite','Gothenburg Harbor','Krakow Dragon','Gdansk Amber','Wroclaw Bridge','Sofia Vitosha','Belgrade River','Zagreb Cathedral','Budapest Bath','Thessaloniki Bay','Rotterdam Port','Amsterdam Canal','Dublin Clover'],
+    groupStageReward: { coins:1500, power:1, xp:250 },
+    groupWinBonus: { coins:2000, power:3, xp:600 },
+    // плей-офф на вылет (64 команды): 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:3000, power:5, xp:600 },    // 1/32 финала
+      { coins:5000, power:8, xp:800 },    // 1/16 финала
+      { coins:7500, power:10, xp:1000 },  // 1/8 финала
+      { coins:10000, power:12, xp:1500 }, // Четвертьфинал
+      { coins:12500, power:15, xp:2000 }, // Полуфинал
+      { coins:20000, power:25, xp:3000 }  // Финал
+    ],
+    cupWinCoins: 60000
+  },
+  {
+    id:'bigleague',
+    title:'БОЛЬШАЯ ЛИГА',
+    icon:'💎',
+    type:'group',
+    scheduled:true,
+    schedule:{ timezone:'Europe/Kyiv', times:[ {h:12,m:0}, {h:20,m:0} ] },
+    min:100, max:5500,
+    groupsCount:128,
+    teamsPerGroup:10,
+    teamNames:['Titan FC','Legion United','Crown Athletic','Empire City','Dominion FC','Sovereign United','Vanguard Elite','Apex Rovers','Pinnacle City','Summit United','Zenith Athletic','Meridian FC','Horizon United','Odyssey City','Genesis FC','Infinity United','Eclipse Athletic','Aurora City FC','Prestige United','Majestic Rovers','Regal Athletic','Supreme City','Elite Vanguard','Champion Forge','Victory United','Triumph City','Glory Athletic','Honor FC','Legacy United','Dynasty City','Fortune Rovers','Diamond United','Platinum City','Golden Vanguard','Silver Athletic','Bronze United FC','Ruby Rovers','Sapphire City','Emerald United','Opal Athletic','Crystal FC','Stellar United','Cosmic City FC','Nova Athletic','Comet Rovers','Meteor United','Galaxy City FC','Orbit Athletic','Quantum United','Phantom Rovers'],
+    groupStageReward: { coins:2000, power:1, xp:300 },
+    groupWinBonus: { coins:3000, power:3, xp:750 },
+    // плей-офф на вылет (128 команд): 1/64, 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:4000, power:5, xp:700 },    // 1/64 финала
+      { coins:6000, power:8, xp:900 },    // 1/32 финала
+      { coins:8000, power:10, xp:1100 },  // 1/16 финала
+      { coins:12000, power:12, xp:1500 }, // 1/8 финала
+      { coins:16000, power:15, xp:2000 }, // Четвертьфинал
+      { coins:20000, power:18, xp:2500 }, // Полуфинал
+      { coins:30000, power:25, xp:4000 }  // Финал
+    ],
+    cupWinCoins: 100000,
+    // отдельный бонус чемпиону в бюджет (не в монеты)
+    leagueChampionBudget: 500000
   }
 ];
 function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
+
+/* ============================================================
+   BIG LEAGUE — SCHEDULING (Europe/Kyiv, дважды в день)
+   ============================================================ */
+function getTZOffsetMinutes(date, timeZone){
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone, hour12:false,
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit'
+  });
+  const parts = dtf.formatToParts(date).reduce((acc,p)=>{ if(p.type!=='literal') acc[p.type]=p.value; return acc; },{});
+  const hour = parts.hour === '24' ? 0 : Number(parts.hour);
+  const asUTC = Date.UTC(Number(parts.year), Number(parts.month)-1, Number(parts.day), hour, Number(parts.minute), Number(parts.second));
+  return Math.round((asUTC - date.getTime()) / 60000);
+}
+
+// возвращает {prev, next} — последний прошедший и ближайший будущий старт лиги
+function getLeagueSessions(t, from = new Date()){
+  const tz = t.schedule.timezone;
+  const offsetMin = getTZOffsetMinutes(from, tz);
+  const localMs = from.getTime() + offsetMin*60000;
+  const local = new Date(localMs);
+  const y = local.getUTCFullYear(), mo = local.getUTCMonth(), d = local.getUTCDate();
+
+  function wallToReal(wallMs){
+    const approxRealMs = wallMs - offsetMin*60000;
+    const offset2 = getTZOffsetMinutes(new Date(approxRealMs), tz);
+    return wallMs - offset2*60000;
+  }
+
+  const wallCandidates = [];
+  for(let dayOffset=-1; dayOffset<=1; dayOffset++){
+    t.schedule.times.forEach(({h,m})=>{
+      wallCandidates.push(Date.UTC(y, mo, d+dayOffset, h, m, 0));
+    });
+  }
+  wallCandidates.sort((a,b)=>a-b);
+
+  let prev = null, next = null;
+  for(const wallMs of wallCandidates){
+    const realMs = wallToReal(wallMs);
+    if(realMs <= from.getTime()) prev = realMs;
+    else if(next === null) next = realMs;
+  }
+  return { prev: prev !== null ? new Date(prev) : null, next: new Date(next) };
+}
+
+function leagueSessionId(date){
+  return date.toISOString();
+}
 
 /* ---------- round-robin group helper ---------- */
 function roundRobinRounds(n){
@@ -458,7 +598,9 @@ function newGameState(teamName){
     xp: 0,
     transferMarket: { players: [], generatedAt: 0 },
     formation: DEFAULT_FORMATION,
-    lineups: {}
+    lineups: {},
+    leagueRegisteredSessionId: null,
+    leagueNotifiedSessionId: null
   };
   ensureLineupsInit(s);
   autoFillEmptyLineup(s, s.formation);
@@ -497,6 +639,8 @@ function migrateState(s){
   if(s.level === undefined) s.level = 1;
   if(s.xp === undefined) s.xp = 0;
   if(!s.transferMarket) s.transferMarket = { players: [], generatedAt: 0 };
+  if(s.leagueRegisteredSessionId === undefined) s.leagueRegisteredSessionId = null;
+  if(s.leagueNotifiedSessionId === undefined) s.leagueNotifiedSessionId = null;
   if(!s.formation || !FORMATIONS[s.formation]) s.formation = DEFAULT_FORMATION;
   s.players.forEach(p => { if(p.slot === undefined) p.slot = null; });
 
@@ -539,6 +683,7 @@ function showApp(){
   refreshTopbar();
   navigate('manager');
   restoreTrainingTimers();
+  startLeagueNotificationPoll();
 }
 
 /* ============================================================
@@ -1510,6 +1655,49 @@ function renderManager(){
 /* ============================================================
    TOURNAMENTS LIST
    ============================================================ */
+function leagueListStatusText(t, opts){
+  const { inProgress, squadFull, mainCount, eligible } = opts;
+  if(inProgress) return 'Идёт групповой этап / плей-офф';
+  if(!squadFull) return `Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`;
+  if(!eligible) return `Нужна сила клуба ${t.min}–${t.max}`;
+  const { next } = getLeagueSessions(t);
+  const remaining = Math.max(0, next.getTime() - Date.now());
+  const hh = String(Math.floor(remaining / 3600000)).padStart(2,'0');
+  const mm = String(Math.floor((remaining % 3600000) / 60000)).padStart(2,'0');
+  const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
+  const registered = state.leagueRegisteredSessionId === leagueSessionId(next);
+  return `${registered ? '✅ Регистрация ' : ''}Старт через ${hh}:${mm}:${ss}`;
+}
+
+let leagueListInterval = null;
+
+function stopLeagueListTimer(){
+  if(leagueListInterval){ clearInterval(leagueListInterval); leagueListInterval = null; }
+}
+
+function startLeagueListTimer(){
+  stopLeagueListTimer();
+  if(!TOURNAMENTS.some(x => x.scheduled)) return;
+  leagueListInterval = setInterval(()=>{
+    const view = document.getElementById('view-play');
+    if(!view || !view.classList.contains('active')){
+      stopLeagueListTimer();
+      return;
+    }
+    TOURNAMENTS.filter(x => x.scheduled).forEach(t=>{
+      const statusEl = document.querySelector(`.tournament-card[data-cup="${t.id}"] .tournament-status`);
+      if(!statusEl) return;
+      const power = calcClubPower(state.players);
+      const mainCount = state.players.filter(p=>p.status==='main').length;
+      const squadFull = mainCount >= MAIN_SQUAD_SIZE;
+      const eligible = power >= t.min && power <= t.max;
+      const cup = state.cups[t.id];
+      const inProgress = !!(cup && !cup.finished);
+      statusEl.textContent = leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible });
+    });
+  }, 1000);
+}
+
 function renderTournaments(){
   const power = calcClubPower(state.players);
   const mainCount = state.players.filter(p=>p.status==='main').length;
@@ -1521,7 +1709,8 @@ function renderTournaments(){
     const inProgress = !!(cup && !cup.finished);
     const eligible = power >= t.min && power <= t.max;
     let statusText;
-    if(inProgress) statusText = 'Турнир в процессе';
+    if(t.scheduled) statusText = leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible });
+    else if(inProgress) statusText = 'Турнир в процессе';
     else if(!squadFull) statusText = `Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`;
     else if(eligible) statusText = `Сила клуба ${t.min}–${t.max}`;
     else statusText = `Нужна сила клуба ${t.min}–${t.max}`;
@@ -1540,6 +1729,8 @@ function renderTournaments(){
   list.querySelectorAll('[data-cup]').forEach(card=>{
     card.addEventListener('click', ()=> navigate('cup', card.dataset.cup));
   });
+
+  startLeagueListTimer();
 }
 
 /* ============================================================
@@ -1593,6 +1784,12 @@ function renderCupScreen(){
   introEl.classList.remove('hidden');
   stopCupTimer();
 
+  if(t.scheduled){
+    renderLeagueIntro(t, { power, mainCount, squadFull, eligible });
+    return;
+  }
+  stopLeagueCountdown();
+
   if(!squadFull){
     eligEl.classList.add('bad');
     eligEl.textContent = `Соберите полный основной состав (${mainCount}/${MAIN_SQUAD_SIZE}), чтобы играть в турнирах.`;
@@ -1612,13 +1809,160 @@ function renderCupScreen(){
   }
 }
 
+/* ============================================================
+   BIG LEAGUE — INTRO SCREEN (регистрация + таймер)
+   ============================================================ */
+let leagueCountdownInterval = null;
+
+function stopLeagueCountdown(){
+  if(leagueCountdownInterval){ clearInterval(leagueCountdownInterval); leagueCountdownInterval = null; }
+}
+
+function renderLeagueIntro(t, ctx){
+  const eligEl = document.getElementById('cup-eligibility');
+  const startBtn = document.getElementById('btn-cup-start');
+
+  if(!ctx.squadFull){
+    eligEl.classList.add('bad');
+    eligEl.textContent = `Соберите полный основной состав (${ctx.mainCount}/${MAIN_SQUAD_SIZE}), чтобы играть в турнирах.`;
+    startBtn.classList.add('hidden');
+    stopLeagueCountdown();
+    return;
+  }
+  if(!ctx.eligible){
+    eligEl.classList.add('bad');
+    eligEl.textContent = ctx.power < t.min
+      ? `Ваша команда слишком слабая для Большой Лиги. Нужна сила от ${t.min}.`
+      : `Ваша команда слишком сильная для Большой Лиги. Максимум ${t.max}.`;
+    startBtn.classList.add('hidden');
+    stopLeagueCountdown();
+    return;
+  }
+
+  eligEl.classList.remove('bad');
+  startBtn.classList.remove('hidden');
+  startBtn.classList.remove('btn-disabled-soft');
+
+  updateLeagueCountdown(t);
+  stopLeagueCountdown();
+  leagueCountdownInterval = setInterval(()=>{
+    const view = document.getElementById('view-cup');
+    if(!view || !view.classList.contains('active') || currentCupId !== t.id){
+      stopLeagueCountdown();
+      return;
+    }
+    updateLeagueCountdown(t);
+  }, 1000);
+}
+
+function updateLeagueCountdown(t){
+  const cup = state.cups[t.id];
+  if(cup && !cup.finished) return; // сессия уже идёт — обычный экран кубка
+
+  const eligEl = document.getElementById('cup-eligibility');
+  const startBtn = document.getElementById('btn-cup-start');
+  const { prev, next } = getLeagueSessions(t);
+  const graceMs = 30 * 60 * 1000; // 30 минут на вход после старта
+
+  if(prev && state.leagueRegisteredSessionId === leagueSessionId(prev)){
+    const elapsed = Date.now() - prev.getTime();
+    if(elapsed <= graceMs){
+      state.leagueRegisteredSessionId = null;
+      startLeagueSession(t, prev);
+      return;
+    } else {
+      state.leagueRegisteredSessionId = null;
+      save();
+      showToast('⌛ Вы не успели зайти к старту Большой Лиги. Регистрация на новый старт открыта.');
+    }
+  }
+
+  const remaining = Math.max(0, next.getTime() - Date.now());
+  const totalSec = Math.floor(remaining / 1000);
+  const hh = String(Math.floor(totalSec / 3600)).padStart(2,'0');
+  const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2,'0');
+  const ss = String(totalSec % 60).padStart(2,'0');
+  const registered = state.leagueRegisteredSessionId === leagueSessionId(next);
+
+  eligEl.innerHTML = registered
+    ? `✅ Вы зарегистрированы! До старта Большой Лиги: <b>${hh}:${mm}:${ss}</b>`
+    : `До старта Большой Лиги: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты каждый день в 12:00 и 20:00 по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`;
+
+  startBtn.textContent = registered ? 'ВЫ ЗАРЕГИСТРИРОВАНЫ ✅' : 'ЗАРЕГИСТРИРОВАТЬСЯ';
+  startBtn.classList.toggle('btn-disabled-soft', registered);
+}
+
+function onLeagueRegister(){
+  const t = tournamentById(currentCupId);
+  if(state.leagueRegisteredSessionId){
+    showToast('Вы уже зарегистрированы на ближайший старт Большой Лиги.');
+    return;
+  }
+  const { next } = getLeagueSessions(t);
+  state.leagueRegisteredSessionId = leagueSessionId(next);
+  state.leagueNotifiedSessionId = null;
+  save();
+  updateLeagueCountdown(t);
+  showToast('✅ Вы зарегистрированы на ближайший старт Большой Лиги!');
+}
+
+function startLeagueSession(t, sessionStartDate){
+  initEuroCup(t.id);
+  const cup = state.cups[t.id];
+  cup.sessionId = leagueSessionId(sessionStartDate);
+  save();
+  stopLeagueCountdown();
+  if(currentCupId === t.id){
+    document.getElementById('cup-intro').classList.add('hidden');
+    document.getElementById('cup-bracket-wrap').classList.remove('hidden');
+    renderBracket();
+    ensureCupFlowRunning();
+  }
+}
+
+// лёгкий фоновый опрос — уведомляет, если игрок не на экране лиги в момент старта
+function checkLeagueNotification(){
+  const t = TOURNAMENTS.find(x => x.scheduled);
+  if(!t || !state.leagueRegisteredSessionId) return;
+  const cup = state.cups[t.id];
+  if(cup && !cup.finished) return;
+
+  const { prev } = getLeagueSessions(t);
+  if(!prev) return;
+  const sid = leagueSessionId(prev);
+  if(state.leagueRegisteredSessionId !== sid) return;
+
+  const graceMs = 30 * 60 * 1000;
+  const elapsed = Date.now() - prev.getTime();
+
+  if(elapsed >= 0 && elapsed <= graceMs){
+    if(state.leagueNotifiedSessionId !== sid){
+      state.leagueNotifiedSessionId = sid;
+      save();
+      showToast('🏆 Большая Лига началась! Откройте «Играть» → «Большая Лига», чтобы сыграть.');
+    }
+  } else if(elapsed > graceMs){
+    state.leagueRegisteredSessionId = null;
+    save();
+  }
+}
+
+function startLeagueNotificationPoll(){
+  checkLeagueNotification();
+  setInterval(checkLeagueNotification, 30000);
+}
+
 function onCupStart(){
+  const t = tournamentById(currentCupId);
+  if(t.scheduled){
+    onLeagueRegister();
+    return;
+  }
   const mainCount = state.players.filter(p=>p.status==='main').length;
   if(mainCount < MAIN_SQUAD_SIZE){
     showToast(`❌ Соберите полный состав (${mainCount}/${MAIN_SQUAD_SIZE}), чтобы играть в турнире`);
     return;
   }
-  const t = tournamentById(currentCupId);
   if(t.type === 'group') initEuroCup(currentCupId); else initCup(currentCupId);
   document.getElementById('cup-intro').classList.add('hidden');
   document.getElementById('cup-bracket-wrap').classList.remove('hidden');
@@ -1650,7 +1994,9 @@ function renderCupRewardsList(t){
           <span class="cup-reward-chip xp">⭐ +${t.groupWinBonus.xp} XP</span>
         </span>
       </div>`);
-    const koTitles = ['ЧЕТВЕРТЬФИНАЛ','ПОЛУФИНАЛ','ФИНАЛ'];
+    const koTitlesMap = buildRoundTitles(t.groupsCount);
+    const koTitles = [];
+    for(let i=1; i<=t.koRounds.length; i++) koTitles.push(koTitlesMap[i] || `РАУНД ${i}`);
     koTitles.forEach((title, i)=>{
       const isFinal = i === koTitles.length - 1;
       const r = t.koRounds[i];
@@ -1662,6 +2008,7 @@ function renderCupRewardsList(t){
             <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${r.power}</span>
             <span class="cup-reward-chip xp">⭐ +${r.xp} XP</span>
             ${isFinal ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>` : ''}
+            ${isFinal && t.leagueChampionBudget ? `<span class="cup-reward-chip trophy"><img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${t.leagueChampionBudget.toLocaleString('ru-RU')}</span>` : ''}
           </span>
         </div>`);
     });
@@ -2211,9 +2558,14 @@ function finishCup(){
   if(playerWonFinal){
     const cupWinCoins = t.cupWinCoins;
     state.coins += cupWinCoins;
+    let budgetReward = 0;
+    if(t.leagueChampionBudget){
+      budgetReward = t.leagueChampionBudget;
+      state.budget += budgetReward;
+    }
     state.trophies.push({ name:t.title, icon:t.icon, date: Date.now() });
     save();
-    showTrophyModal(t, cupWinCoins);
+    showTrophyModal(t, cupWinCoins, budgetReward);
   } else {
     save();
     renderCupScreen();
@@ -2246,11 +2598,11 @@ function buildRoundTitles(teamCount){
   return titles;
 }
 
-function euroRoundTitle(round, cup){
+function euroRoundTitle(round, cup, t){
   if(round <= cup.groupRoundsCount) return `ТУР ${round}`;
   const koRound = round - cup.groupRoundsCount;
-  const koTitles = ['ЧЕТВЕРТЬФИНАЛ','ПОЛУФИНАЛ','ФИНАЛ'];
-  return koTitles[koRound-1] || `РАУНД ${round}`;
+  const koTitlesMap = buildRoundTitles(t.groupsCount);
+  return koTitlesMap[koRound] || `РАУНД ${round}`;
 }
 
 function renderGroupTableHtml(cup){
@@ -2294,7 +2646,7 @@ function renderBracket(){
 
   document.getElementById('bracket').innerHTML = groupTableHtml + Object.keys(rounds).sort((a,b) => a - b).map(round => `
     <div class="bracket-round">
-      <div class="bracket-round-title">${isGroupType ? euroRoundTitle(Number(round), cup) : (roundTitles[round] || `РАУНД ${round}`)}</div>
+      <div class="bracket-round-title">${isGroupType ? euroRoundTitle(Number(round), cup, t) : (roundTitles[round] || `РАУНД ${round}`)}</div>
       <div class="bracket-matches">
         ${rounds[round].map(m => bracketMatchHtml(m, cup)).join('')}
       </div>
@@ -2496,18 +2848,23 @@ function showMatchModal(match, playerWon, onClose){
   }, { once:true });
 }
 
-function showTrophyModal(t, coinReward){
+function showTrophyModal(t, coinReward, budgetReward){
   refreshTopbar();
   const trophySrc = TROPHY_IMG[t.id];
   const trophyHtml = trophySrc
     ? `<img src="${trophySrc}" class="cup-trophy-img" alt="${t.title}">`
     : `<div class="cup-trophy">${t.icon}</div>`;
 
+  const budgetHtml = budgetReward
+    ? `<div class="mm-coin-reward" style="margin-top:4px;"><img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${budgetReward.toLocaleString('ru-RU')}</div>`
+    : '';
+
   document.getElementById('match-modal-body').innerHTML = `
     <div class="mm-trophy-box">
       ${trophyHtml}
       <div class="mm-result win">${t.title} ЗАВОЁВАН!</div>
       <div class="mm-coin-reward"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${coinReward.toLocaleString('ru-RU')}</div>
+      ${budgetHtml}
     </div>
     <button id="mm-trophy-ok" class="btn-primary btn-big mm-continue">ОТЛИЧНО!</button>
   `;
