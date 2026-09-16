@@ -1775,6 +1775,8 @@ function renderCupScreen(){
     syncPlayerCupTeam(cup);
     introEl.classList.add('hidden');
     bracketWrap.classList.remove('hidden');
+    stopLeagueCountdown();
+    hideLeagueCancelBtn();
     renderBracket();
     ensureCupFlowRunning();
     return;
@@ -1789,6 +1791,10 @@ function renderCupScreen(){
     return;
   }
   stopLeagueCountdown();
+  hideLeagueCancelBtn();
+  startBtn.textContent = 'ИГРАТЬ';
+  startBtn.disabled = false;
+  startBtn.classList.remove('btn-disabled-soft');
 
   if(!squadFull){
     eligEl.classList.add('bad');
@@ -1826,15 +1832,17 @@ function renderLeagueIntro(t, ctx){
     eligEl.classList.add('bad');
     eligEl.textContent = `Соберите полный основной состав (${ctx.mainCount}/${MAIN_SQUAD_SIZE}), чтобы играть в турнирах.`;
     startBtn.classList.add('hidden');
+    hideLeagueCancelBtn();
     stopLeagueCountdown();
     return;
   }
   if(!ctx.eligible){
     eligEl.classList.add('bad');
     eligEl.textContent = ctx.power < t.min
-      ? `Ваша команда слишком слабая для Большой Лиги. Нужна сила от ${t.min}.`
-      : `Ваша команда слишком сильная для Большой Лиги. Максимум ${t.max}.`;
+      ? `Ваша команда слишком слабая для Большой Лиги. Нужна сила от ${t.min} до ${t.max}.`
+      : `Ваша команда слишком сильная для Большой Лиги. Нужна сила от ${t.min} до ${t.max}.`;
     startBtn.classList.add('hidden');
+    hideLeagueCancelBtn();
     stopLeagueCountdown();
     return;
   }
@@ -1842,6 +1850,7 @@ function renderLeagueIntro(t, ctx){
   eligEl.classList.remove('bad');
   startBtn.classList.remove('hidden');
   startBtn.classList.remove('btn-disabled-soft');
+  startBtn.disabled = false;
 
   updateLeagueCountdown(t);
   stopLeagueCountdown();
@@ -1853,6 +1862,25 @@ function renderLeagueIntro(t, ctx){
     }
     updateLeagueCountdown(t);
   }, 1000);
+}
+
+function getLeagueCancelBtn(){
+  let btn = document.getElementById('btn-league-cancel');
+  if(!btn){
+    const startBtn = document.getElementById('btn-cup-start');
+    btn = document.createElement('button');
+    btn.id = 'btn-league-cancel';
+    btn.className = 'btn-reset';
+    btn.textContent = '❌ Отменить регистрацию';
+    startBtn.insertAdjacentElement('afterend', btn);
+    btn.addEventListener('click', onLeagueCancelRegistration);
+  }
+  return btn;
+}
+
+function hideLeagueCancelBtn(){
+  const btn = document.getElementById('btn-league-cancel');
+  if(btn) btn.classList.add('hidden');
 }
 
 function updateLeagueCountdown(t){
@@ -1884,12 +1912,28 @@ function updateLeagueCountdown(t){
   const ss = String(totalSec % 60).padStart(2,'0');
   const registered = state.leagueRegisteredSessionId === leagueSessionId(next);
 
-  eligEl.innerHTML = registered
+  const rangeLine = `<br><span style="font-size:12px;color:var(--text-dim)">Диапазон силы клуба для Большой Лиги: ${t.min}–${t.max}. Ваша сила: ${calcClubPower(state.players)}.</span>`;
+
+  eligEl.innerHTML = (registered
     ? `✅ Вы зарегистрированы! До старта Большой Лиги: <b>${hh}:${mm}:${ss}</b>`
-    : `До старта Большой Лиги: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты каждый день в 12:00 и 20:00 по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`;
+    : `До старта Большой Лиги: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты каждый день в 12:00 и 20:00 по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`
+  ) + rangeLine;
 
   startBtn.textContent = registered ? 'ВЫ ЗАРЕГИСТРИРОВАНЫ ✅' : 'ЗАРЕГИСТРИРОВАТЬСЯ';
+  startBtn.disabled = registered;
   startBtn.classList.toggle('btn-disabled-soft', registered);
+
+  const cancelBtn = getLeagueCancelBtn();
+  cancelBtn.classList.toggle('hidden', !registered);
+}
+
+function onLeagueCancelRegistration(){
+  state.leagueRegisteredSessionId = null;
+  state.leagueNotifiedSessionId = null;
+  save();
+  const t = tournamentById(currentCupId);
+  if(t && t.scheduled) updateLeagueCountdown(t);
+  showToast('Регистрация в Большую Лигу отменена.');
 }
 
 function onLeagueRegister(){
@@ -1912,6 +1956,7 @@ function startLeagueSession(t, sessionStartDate){
   cup.sessionId = leagueSessionId(sessionStartDate);
   save();
   stopLeagueCountdown();
+  hideLeagueCancelBtn();
   if(currentCupId === t.id){
     document.getElementById('cup-intro').classList.add('hidden');
     document.getElementById('cup-bracket-wrap').classList.remove('hidden');
