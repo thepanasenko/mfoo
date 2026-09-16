@@ -662,10 +662,34 @@ input{ font-family: inherit; }
 #btn-play-now{ display:block; margin:0 auto 20px; }
 
 .bracket{ display:flex; flex-direction:column; gap:22px; }
+.bracket-stage-progress{
+  font-size:10px; letter-spacing:1px; color: var(--text-mute); font-weight:700; margin-bottom:4px; text-transform:uppercase;
+}
 .bracket-round-title{
   font-size:12px; letter-spacing:1.5px; color: var(--text-dim); font-weight:800; margin-bottom:8px;
 }
 .bracket-matches{ display:flex; flex-direction:column; gap:8px; }
+
+/* переключатель этапов (лига / чемпионаты) */
+.stage-nav{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.stage-nav-info{ flex:1; text-align:center; }
+.stage-nav-info .bracket-stage-progress{ margin-bottom:2px; }
+.stage-nav-info .bracket-round-title{ margin-bottom:0; }
+.stage-nav-btn{
+  flex:0 0 auto; width:36px; height:36px; border-radius:10px;
+  background: var(--surface-3); border:1px solid var(--line);
+  color: var(--text); font-size:20px; line-height:1; font-weight:800;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.stage-nav-btn:disabled{ opacity:.25; cursor:default; }
+.stage-nav-current{
+  display:block; width:100%; margin:0 0 10px;
+  background: transparent; border:1px dashed var(--line);
+  color: var(--text-dim); font-size:12px; font-weight:700;
+  padding:7px 10px; border-radius:10px; cursor:pointer;
+}
+.bracket-round.current > .bracket-round-title,
+.bracket-round.current .stage-nav-info .bracket-round-title{ color: var(--gold); }
 .bracket-match{
   background: rgb(0 0 0 / 37%);
     border: 1px solid var(--line);

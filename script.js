@@ -843,6 +843,7 @@ function refreshTopbar(){
   document.getElementById('stat-budget').textContent = state.budget.toLocaleString('ru-RU');
   document.getElementById('stat-power').textContent = power;
   document.getElementById('topbar-level').textContent = state.level;
+  if(typeof checkLeagueRegistrationEligibility === 'function') checkLeagueRegistrationEligibility();
 }
 
 /* ============================================================
@@ -1685,6 +1686,7 @@ function startLeagueListTimer(){
       return;
     }
     TOURNAMENTS.filter(x => x.scheduled).forEach(t=>{
+      checkLeagueRegistrationEligibility();
       const statusEl = document.querySelector(`.tournament-card[data-cup="${t.id}"] .tournament-status`);
       if(!statusEl) return;
       const power = calcClubPower(state.players);
@@ -1699,6 +1701,7 @@ function startLeagueListTimer(){
 }
 
 function renderTournaments(){
+  checkLeagueRegistrationEligibility();
   const power = calcClubPower(state.players);
   const mainCount = state.players.filter(p=>p.status==='main').length;
   const squadFull = mainCount >= MAIN_SQUAD_SIZE;
@@ -1905,9 +1908,10 @@ function updateLeagueCountdown(t){
     }
   }
 
+  checkLeagueRegistrationEligibility();
+
   const remaining = Math.max(0, next.getTime() - Date.now());
-  const totalSec = Math.floor(remaining / 1000);
-  const hh = String(Math.floor(totalSec / 3600)).padStart(2,'0');
+  const totalSec = Math.floor(remaining / 1000);  const hh = String(Math.floor(totalSec / 3600)).padStart(2,'0');
   const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2,'0');
   const ss = String(totalSec % 60).padStart(2,'0');
   const registered = state.leagueRegisteredSessionId === leagueSessionId(next);
@@ -1925,6 +1929,28 @@ function updateLeagueCountdown(t){
 
   const cancelBtn = getLeagueCancelBtn();
   cancelBtn.classList.toggle('hidden', !registered);
+}
+
+/* авто-отмена регистрации, если сила клуба вышла за диапазон ДО старта сессии.
+   Если сессия уже стартовала — сила не проверяется, играем как есть. */
+function checkLeagueRegistrationEligibility(){
+  const t = TOURNAMENTS.find(x => x.scheduled);
+  if(!t || !state.leagueRegisteredSessionId) return false;
+
+  const cup = state.cups[t.id];
+  if(cup && !cup.finished) return false;          // сессия уже идёт
+
+  const { next } = getLeagueSessions(t);
+  if(state.leagueRegisteredSessionId !== leagueSessionId(next)) return false; // регистрация на уже стартовавшую сессию
+
+  const power = calcClubPower(state.players);
+  if(power >= t.min && power <= t.max) return false;
+
+  state.leagueRegisteredSessionId = null;
+  state.leagueNotifiedSessionId = null;
+  save();
+  showToast(`❌ Регистрация в Большую Лигу отменена: сила клуба ${power} вне диапазона ${t.min}–${t.max}.`);
+  return true;
 }
 
 function onLeagueCancelRegistration(){
@@ -1967,6 +1993,7 @@ function startLeagueSession(t, sessionStartDate){
 
 // лёгкий фоновый опрос — уведомляет, если игрок не на экране лиги в момент старта
 function checkLeagueNotification(){
+  checkLeagueRegistrationEligibility();
   const t = TOURNAMENTS.find(x => x.scheduled);
   if(!t || !state.leagueRegisteredSessionId) return;
   const cup = state.cups[t.id];
@@ -2673,30 +2700,101 @@ function renderGroupTableHtml(cup){
     </div>`;
 }
 
+/* какой этап сейчас актуален (ближайший несыгранный) */
+function cupCurrentRound(cup){
+  if(!cup.matches.length) return 1;
+  if(cup.nextIndex < cup.matches.length) return cup.matches[cup.nextIndex].round;
+  return cup.matches[cup.matches.length - 1].round;
+}
+
+/* просматриваемый этап в лигах/чемпионатах (переключается кнопками) */
+let bracketViewRound = null;
+let bracketViewKey = '';
+
 function renderBracket(){
   const cup = state.cups[currentCupId];
   if(!cup) return;
   const t = tournamentById(currentCupId);
 
-  const rounds = {};
-  cup.matches.forEach(m => {
-    if (!rounds[m.round]) rounds[m.round] = [];
-    rounds[m.round].push(m);
-  });
-
   const isGroupType = t.type === 'group';
   const teamCount = cup.teams.length;
   const roundTitles = isGroupType ? null : buildRoundTitles(teamCount);
-  const groupTableHtml = (isGroupType && cup.stage === 'groups') ? renderGroupTableHtml(cup) : '';
 
-  document.getElementById('bracket').innerHTML = groupTableHtml + Object.keys(rounds).sort((a,b) => a - b).map(round => `
-    <div class="bracket-round">
-      <div class="bracket-round-title">${isGroupType ? euroRoundTitle(Number(round), cup, t) : (roundTitles[round] || `РАУНД ${round}`)}</div>
-      <div class="bracket-matches">
-        ${rounds[round].map(m => bracketMatchHtml(m, cup)).join('')}
-      </div>
-    </div>
-  `).join('');
+  const actualRound = cupCurrentRound(cup);
+  const rounds = [...new Set(cup.matches.map(m => m.round))].sort((a,b)=>a-b);
+  if(!rounds.length) rounds.push(1);
+
+  const totalStages = isGroupType
+    ? cup.groupRoundsCount + t.koRounds.length
+    : Math.round(Math.log2(teamCount));
+
+  const titleFor = (round) => isGroupType
+    ? euroRoundTitle(round, cup, t)
+    : (roundTitles[round] || `РАУНД ${round}`);
+
+  let html = '';
+
+  if(isGroupType){
+    // ЛИГА / ЧЕМПИОНАТЫ — по одному этапу + кнопки «назад / вперёд»
+    const key = currentCupId + '#' + actualRound;
+    if(bracketViewKey !== key){        // новый турнир или этап сменился — возвращаемся к актуальному
+      bracketViewKey = key;
+      bracketViewRound = actualRound;
+    }
+    if(!rounds.includes(bracketViewRound)) bracketViewRound = actualRound;
+
+    const displayRound = bracketViewRound;
+    const idx = rounds.indexOf(displayRound);
+    const isGroupRound = displayRound <= cup.groupRoundsCount;
+    const groupTableHtml = (cup.stage === 'groups' && isGroupRound) ? renderGroupTableHtml(cup) : '';
+    const roundMatches = cup.matches.filter(m => m.round === displayRound);
+
+    html = groupTableHtml + `
+      <div class="bracket-round ${displayRound === actualRound ? 'current' : ''}">
+        <div class="stage-nav">
+          <button class="stage-nav-btn" id="btn-stage-prev" ${idx <= 0 ? 'disabled' : ''}>‹</button>
+          <div class="stage-nav-info">
+            <div class="bracket-stage-progress">Этап ${displayRound} из ${totalStages}${displayRound === actualRound ? ' · текущий' : ''}</div>
+            <div class="bracket-round-title">${titleFor(displayRound)}</div>
+          </div>
+          <button class="stage-nav-btn" id="btn-stage-next" ${idx >= rounds.length - 1 ? 'disabled' : ''}>›</button>
+        </div>
+        ${displayRound !== actualRound ? '<button class="stage-nav-current" id="btn-stage-current">↺ К текущему этапу</button>' : ''}
+        <div class="bracket-matches">
+          ${roundMatches.map(m => bracketMatchHtml(m, cup)).join('')}
+        </div>
+      </div>`;
+  } else {
+    // КУБКИ — сразу вся сетка, все этапы
+    html = rounds.map(round => {
+      const roundMatches = cup.matches.filter(m => m.round === round);
+      const isCurrent = round === actualRound && !cup.finished;
+      return `
+      <div class="bracket-round ${isCurrent ? 'current' : ''}">
+        <div class="bracket-round-title">${titleFor(round)}</div>
+        <div class="bracket-matches">
+          ${roundMatches.map(m => bracketMatchHtml(m, cup)).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('bracket').innerHTML = html;
+
+  const prevBtn = document.getElementById('btn-stage-prev');
+  const nextBtn = document.getElementById('btn-stage-next');
+  const curBtn  = document.getElementById('btn-stage-current');
+  if(prevBtn) prevBtn.addEventListener('click', ()=>{
+    const i = rounds.indexOf(bracketViewRound);
+    if(i > 0){ bracketViewRound = rounds[i-1]; renderBracket(); }
+  });
+  if(nextBtn) nextBtn.addEventListener('click', ()=>{
+    const i = rounds.indexOf(bracketViewRound);
+    if(i >= 0 && i < rounds.length-1){ bracketViewRound = rounds[i+1]; renderBracket(); }
+  });
+  if(curBtn) curBtn.addEventListener('click', ()=>{
+    bracketViewRound = actualRound; renderBracket();
+  });
 
   document.querySelectorAll('.bm-team').forEach(el => {
     el.addEventListener('click', (e) => {
