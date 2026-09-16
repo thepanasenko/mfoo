@@ -737,7 +737,7 @@ input{ font-family: inherit; }
 }
 .group-table-head, .group-table-row{
   display:grid;
-  grid-template-columns: 20px 1fr 24px 24px 24px 48px 28px;
+  grid-template-columns: 20px 1fr 22px 22px 22px 22px 46px 26px;
   align-items:center;
   gap:6px;
 }
@@ -757,6 +757,7 @@ input{ font-family: inherit; }
 .group-table-row.you{ font-weight:800; color:#eaf3ec; }
 .gt-pos{ color: var(--text-dim); font-weight:800; }
 .gt-name{ text-align:left; display:flex; align-items:center; gap:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.gt-d{ color: var(--text-dim); }
 .gt-pts{ color: var(--gold); font-weight:800; }
 .group-table-row.leader .gt-pos{ color: var(--green); }
 
@@ -1255,3 +1256,21 @@ input{ font-family: inherit; }
   width:100%;
   box-shadow: 0 4px 0 #0c5c2b, 0 6px 12px rgba(0,0,0,.35);
 }
+
+/* ничья */
+.bracket-match.draw{ border-color: rgba(255,193,7,.35); }
+.mm-result.draw{ color: var(--gold); }
+
+/* окно подтверждения (замена системного confirm) */
+.confirm-overlay{ z-index: 1200; }
+.confirm-card{ max-width:320px; text-align:center; padding:22px 18px 18px; }
+.confirm-icon{ font-size:34px; margin-bottom:8px; }
+.confirm-title{ font-family: var(--ff-display); font-size:19px; color: var(--text); margin-bottom:8px; }
+.confirm-text{ font-size:13.5px; color: var(--text-dim); line-height:1.45; }
+.confirm-actions{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:18px; }
+.confirm-btn{
+  padding:12px 10px; border-radius:10px; font-weight:800; font-size:13px;
+  border:1px solid var(--line); background: var(--surface-3); color: var(--text); cursor:pointer;
+}
+.confirm-btn.confirm-yes{ background: var(--green); border-color: var(--green); color:#07240f; }
+.confirm-btn.confirm-yes.danger{ background: var(--red); border-color: var(--red); color:#fff; }

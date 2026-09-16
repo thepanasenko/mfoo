@@ -430,7 +430,7 @@ function roundRobinRounds(n){
 
 function computeGroupTable(cup, teams){
   const stats = {};
-  teams.forEach(tm => stats[tm.id] = { team:tm, played:0, wins:0, losses:0, gf:0, ga:0, pts:0 });
+  teams.forEach(tm => stats[tm.id] = { team:tm, played:0, wins:0, draws:0, losses:0, gf:0, ga:0, pts:0 });
   cup.matches
     .filter(m => m.round <= cup.groupRoundsCount && m.played && m.teamA && m.teamB)
     .forEach(m => {
@@ -439,7 +439,11 @@ function computeGroupTable(cup, teams){
       stats[a.id].played++; stats[b.id].played++;
       stats[a.id].gf += m.scoreA; stats[a.id].ga += m.scoreB;
       stats[b.id].gf += m.scoreB; stats[b.id].ga += m.scoreA;
-      if(m.winner && m.winner.id === a.id){ stats[a.id].wins++; stats[a.id].pts += 3; stats[b.id].losses++; }
+      if(m.draw || !m.winner){
+        stats[a.id].draws++; stats[a.id].pts += 1;
+        stats[b.id].draws++; stats[b.id].pts += 1;
+      }
+      else if(m.winner.id === a.id){ stats[a.id].wins++; stats[a.id].pts += 3; stats[b.id].losses++; }
       else { stats[b.id].wins++; stats[b.id].pts += 3; stats[a.id].losses++; }
     });
   return Object.values(stats).sort((x,y)=>{
@@ -463,6 +467,8 @@ function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function pick(arr){ return arr[rnd(0,arr.length-1)]; }
 function uid(){ return 'p'+Math.random().toString(36).slice(2,9); }
 function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+/* формат чисел с разделителем тысяч: 1250 -> 1 250 */
+function fmt(n){ return Number(n || 0).toLocaleString('ru-RU'); }
 
 function shuffle(arr){
   const a = arr.slice();
@@ -798,13 +804,14 @@ function onRegisterConfirm(){
 }
 
 function onResetGame(){
-  if(!confirm('Точно сбросить весь прогресс игры?')) return;
-  localStorage.removeItem(SAVE_KEY);
-  stopCupTimer();
-  clearAllTrainingTimers();
-  state = null;
-  document.getElementById('team-name-input').value = '';
-  showRegister();
+  showConfirm('Весь прогресс будет удалён без возможности восстановления.', ()=>{
+    localStorage.removeItem(SAVE_KEY);
+    stopCupTimer();
+    clearAllTrainingTimers();
+    state = null;
+    document.getElementById('team-name-input').value = '';
+    showRegister();
+  }, { icon:'🗑️', title:'Сбросить игру?', yesText:'Сбросить' });
 }
 
 /* ============================================================
@@ -841,7 +848,7 @@ function refreshTopbar(){
   const power = calcClubPower(state.players);
   document.getElementById('stat-coins').textContent = state.coins.toLocaleString('ru-RU');
   document.getElementById('stat-budget').textContent = state.budget.toLocaleString('ru-RU');
-  document.getElementById('stat-power').textContent = power;
+  document.getElementById('stat-power').textContent = fmt(power);
   document.getElementById('topbar-level').textContent = state.level;
   if(typeof checkLeagueRegistrationEligibility === 'function') checkLeagueRegistrationEligibility();
 }
@@ -1330,24 +1337,22 @@ function onSellPlayer(playerId){
     return;
   }
   const price = sellPlayerPrice(p.power);
-  if(!confirm(`Продать ${p.name} за ${price.toLocaleString('ru-RU')} монет? Это действие нельзя отменить.`)){
-    return;
-  }
+  showConfirm(`Продать <b>${p.name}</b> за ${fmt(price)} монет? Это действие нельзя отменить.`, ()=>{
+    if(state.lineups){
+      Object.keys(state.lineups).forEach(fid=>{
+        const lineup = state.lineups[fid];
+        for(let i=0;i<lineup.length;i++){ if(lineup[i]===playerId) lineup[i] = null; }
+      });
+    }
+    state.players = state.players.filter(pl=>pl.id!==playerId);
+    state.coins += price;
 
-  if(state.lineups){
-    Object.keys(state.lineups).forEach(fid=>{
-      const lineup = state.lineups[fid];
-      for(let i=0;i<lineup.length;i++){ if(lineup[i]===playerId) lineup[i] = null; }
-    });
-  }
-  state.players = state.players.filter(pl=>pl.id!==playerId);
-  state.coins += price;
-
-  save();
-  refreshTopbar();
-  closePlayerModal();
-  renderTeam();
-  showToast(`💰 ${p.name} продан за ${price.toLocaleString('ru-RU')} монет`);
+    save();
+    refreshTopbar();
+    closePlayerModal();
+    renderTeam();
+    showToast(`💰 ${p.name} продан за ${fmt(price)} монет`);
+  }, { icon:'💰', title:'Продать игрока?', yesText:'Продать' });
 }
 
 const MAIN_SQUAD_SIZE = 11;
@@ -1541,17 +1546,13 @@ function onLeaveCup() {
   const t = tournamentById(currentCupId);
   if (!t) return;
 
-  if (!confirm(`Вы уверены, что хотите покинуть "${t.title}"? Весь прогресс в этом турнире будет потерян.`)) {
-    return;
-  }
-
-  stopCupTimer();
-
-  state.cups[currentCupId] = null;
-  save();
-
-  navigate('play');
-  showToast(`Вы покинули "${t.title}"`);
+  showConfirm(`Весь прогресс в турнире «${t.title}» будет потерян.`, ()=>{
+    stopCupTimer();
+    state.cups[currentCupId] = null;
+    save();
+    navigate('play');
+    showToast(`Вы покинули «${t.title}»`);
+  }, { icon:'🚪', title:'Покинуть турнир?', yesText:'Покинуть' });
 }
 
 /* ============================================================
@@ -1561,7 +1562,7 @@ function renderManager(){
   refreshTopbar();
   const power = calcClubPower(state.players);
   const heroPowerEl = document.getElementById('hero-power');
-  if(heroPowerEl) heroPowerEl.textContent = power;
+  if(heroPowerEl) heroPowerEl.textContent = fmt(power);
   const s = state.stats;
 
   const progress = getLevelProgress(state.xp);
@@ -1601,7 +1602,7 @@ function renderManager(){
     <div class="mgr-card">
       <div class="mgr-club-row">
         <span class="mgr-club-name">${state.teamName}</span>
-        <span class="mgr-power-pill">СИЛА ${power}</span>
+        <span class="mgr-power-pill">СИЛА ${fmt(power)}</span>
       </div>
 
       <div style="margin: 12px 0; background: var(--surface-3); padding: 12px; border-radius: 10px;">
@@ -1660,7 +1661,7 @@ function leagueListStatusText(t, opts){
   const { inProgress, squadFull, mainCount, eligible } = opts;
   if(inProgress) return 'Идёт групповой этап / плей-офф';
   if(!squadFull) return `Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`;
-  if(!eligible) return `Нужна сила клуба ${t.min}–${t.max}`;
+  if(!eligible) return `Нужна сила клуба ${fmt(t.min)}–${fmt(t.max)}`;
   const { next } = getLeagueSessions(t);
   const remaining = Math.max(0, next.getTime() - Date.now());
   const hh = String(Math.floor(remaining / 3600000)).padStart(2,'0');
@@ -1715,8 +1716,8 @@ function renderTournaments(){
     if(t.scheduled) statusText = leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible });
     else if(inProgress) statusText = 'Турнир в процессе';
     else if(!squadFull) statusText = `Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`;
-    else if(eligible) statusText = `Сила клуба ${t.min}–${t.max}`;
-    else statusText = `Нужна сила клуба ${t.min}–${t.max}`;
+    else if(eligible) statusText = `Сила клуба ${fmt(t.min)}–${fmt(t.max)}`;
+    else statusText = `Нужна сила клуба ${fmt(t.min)}–${fmt(t.max)}`;
 
     return `
       <div class="tournament-card" data-cup="${t.id}">
@@ -1805,11 +1806,11 @@ function renderCupScreen(){
     startBtn.classList.add('hidden');
   } else if(eligible){
     eligEl.classList.remove('bad');
-    eligEl.textContent = `Сила клуба: ${power}. Ваша команда подходит для участия.`;
+    eligEl.textContent = `Сила клуба: ${fmt(power)}. Ваша команда подходит для участия.`;
     startBtn.classList.remove('hidden');
   } else if(power < t.min){
     eligEl.classList.add('bad');
-    eligEl.textContent = `Ваша команда слишком слабая для этого турнира. Нужна сила от ${t.min}.`;
+    eligEl.textContent = `Ваша команда слишком слабая для этого турнира. Нужна сила от ${fmt(t.min)}.`;
     startBtn.classList.add('hidden');
   } else {
     eligEl.classList.add('bad');
@@ -1842,8 +1843,8 @@ function renderLeagueIntro(t, ctx){
   if(!ctx.eligible){
     eligEl.classList.add('bad');
     eligEl.textContent = ctx.power < t.min
-      ? `Ваша команда слишком слабая для Большой Лиги. Нужна сила от ${t.min} до ${t.max}.`
-      : `Ваша команда слишком сильная для Большой Лиги. Нужна сила от ${t.min} до ${t.max}.`;
+      ? `Ваша команда слишком слабая для Большой Лиги. Нужна сила от ${fmt(t.min)} до ${fmt(t.max)}.`
+      : `Ваша команда слишком сильная для Большой Лиги. Нужна сила от ${fmt(t.min)} до ${fmt(t.max)}.`;
     startBtn.classList.add('hidden');
     hideLeagueCancelBtn();
     stopLeagueCountdown();
@@ -1916,7 +1917,7 @@ function updateLeagueCountdown(t){
   const ss = String(totalSec % 60).padStart(2,'0');
   const registered = state.leagueRegisteredSessionId === leagueSessionId(next);
 
-  const rangeLine = `<br><span style="font-size:12px;color:var(--text-dim)">Диапазон силы клуба для Большой Лиги: ${t.min}–${t.max}. Ваша сила: ${calcClubPower(state.players)}.</span>`;
+  const rangeLine = `<br><span style="font-size:12px;color:var(--text-dim)">Диапазон силы клуба для Большой Лиги: ${fmt(t.min)}–${fmt(t.max)}. Ваша сила: ${fmt(calcClubPower(state.players))}.</span>`;
 
   eligEl.innerHTML = (registered
     ? `✅ Вы зарегистрированы! До старта Большой Лиги: <b>${hh}:${mm}:${ss}</b>`
@@ -1949,7 +1950,7 @@ function checkLeagueRegistrationEligibility(){
   state.leagueRegisteredSessionId = null;
   state.leagueNotifiedSessionId = null;
   save();
-  showToast(`❌ Регистрация в Большую Лигу отменена: сила клуба ${power} вне диапазона ${t.min}–${t.max}.`);
+  showToast(`❌ Регистрация в Большую Лигу отменена: сила клуба ${fmt(power)} вне диапазона ${fmt(t.min)}–${fmt(t.max)}.`);
   return true;
 }
 
@@ -2209,10 +2210,12 @@ function simulateGroupWinner(t){
   rounds.forEach(pairs=>{
     pairs.forEach(([ai, bi])=>{
       const A = teams[ai], B = teams[bi];
-      const r = simulateMatch(A.power, B.power, A.formation, B.formation);
+      const r = simulateMatch(A.power, B.power, A.formation, B.formation, true);
       stats[A.id].gf += r.scoreA; stats[A.id].ga += r.scoreB;
       stats[B.id].gf += r.scoreB; stats[B.id].ga += r.scoreA;
-      if(r.aWon) stats[A.id].pts += 3; else stats[B.id].pts += 3;
+      if(r.draw){ stats[A.id].pts += 1; stats[B.id].pts += 1; }
+      else if(r.aWon) stats[A.id].pts += 3;
+      else stats[B.id].pts += 3;
     });
   });
   const sorted = Object.values(stats).sort((x,y)=> y.pts - x.pts || ((y.gf-y.ga)-(x.gf-x.ga)) || (y.gf-x.gf));
@@ -2478,19 +2481,26 @@ function playCurrentRound() {
     if(!actualMatch.teamA) actualMatch.teamA = resolveTeam(actualMatch.a, cup);
     if(!actualMatch.teamB) actualMatch.teamB = resolveTeam(actualMatch.b, cup);
 
-    const result = simulateMatch(actualMatch.teamA.power, actualMatch.teamB.power, actualMatch.teamA.formation, actualMatch.teamB.formation);
+    const result = simulateMatch(
+      actualMatch.teamA.power, actualMatch.teamB.power,
+      actualMatch.teamA.formation, actualMatch.teamB.formation,
+      drawsAllowed(t, cup, actualMatch.round)
+    );
     actualMatch.scoreA = result.scoreA;
     actualMatch.scoreB = result.scoreB;
-    actualMatch.winner = result.aWon ? actualMatch.teamA : actualMatch.teamB;
+    actualMatch.draw = !!result.draw;
+    actualMatch.winner = result.draw ? null : (result.aWon ? actualMatch.teamA : actualMatch.teamB);
     actualMatch.played = true;
     cup.nextIndex++;
 
     const playerInvolved = actualMatch.teamA.isPlayer || actualMatch.teamB.isPlayer;
-    const playerWon = playerInvolved && actualMatch.winner.isPlayer;
+    const playerWon = playerInvolved && !!actualMatch.winner && actualMatch.winner.isPlayer;
 
     if(playerInvolved){
       state.stats.matchesPlayed++;
-      if(playerWon) state.stats.wins++; else state.stats.losses++;
+      if(actualMatch.draw) state.stats.draws++;
+      else if(playerWon) state.stats.wins++;
+      else state.stats.losses++;
     }
 
     if(playerInvolved) {
@@ -2499,7 +2509,7 @@ function playCurrentRound() {
 
       const isGroupStage = t.type === 'group' && cup.stage === 'groups';
 
-      if(!playerWon && !isGroupStage) {
+      if(!playerWon && !actualMatch.draw && !isGroupStage) {
         tournamentEnded = true;
         cup.finished = true;
         cup.won = false;
@@ -2532,9 +2542,28 @@ function resolveTeam(ref, cup){
   return m ? m.winner : null;
 }
 
-function simulateMatch(powerA, powerB, formationA, formationB){
+/* порог ничьей: разница эффективной силы не больше 1% */
+const DRAW_THRESHOLD = 0.01;
+
+/* ничьи разрешены только в групповом этапе чемпионатов и Большой Лиги */
+function drawsAllowed(t, cup, round){
+  if(!t || t.type !== 'group') return false;
+  if(!cup) return false;
+  return round <= cup.groupRoundsCount;
+}
+
+function simulateMatch(powerA, powerB, formationA, formationB, allowDraw){
   const effA = powerA * formationMatchupMultiplier(formationA, formationB);
   const effB = powerB * formationMatchupMultiplier(formationB, formationA);
+
+  // ничья: эффективная сила (уже с учётом схемы) равна или отличается не больше чем на 1%
+  if(allowDraw){
+    const maxEff = Math.max(effA, effB) || 1;
+    if(Math.abs(effA - effB) / maxEff <= DRAW_THRESHOLD){
+      const goals = rnd(0, 3);
+      return { scoreA: goals, scoreB: goals, aWon:false, draw:true };
+    }
+  }
 
   let aWins;
   if(effA !== effB){
@@ -2548,8 +2577,8 @@ function simulateMatch(powerA, powerB, formationA, formationB){
   const winnerGoals = 1 + rnd(0,3);
   const loserGoals = rnd(0, Math.max(0, winnerGoals-1));
   return aWins
-    ? { scoreA: winnerGoals, scoreB: loserGoals, aWon:true }
-    : { scoreA: loserGoals, scoreB: winnerGoals, aWon:false };
+    ? { scoreA: winnerGoals, scoreB: loserGoals, aWon:true, draw:false }
+    : { scoreA: loserGoals, scoreB: winnerGoals, aWon:false, draw:false };
 }
 
 function syncPlayerCupTeam(cup){
@@ -2569,26 +2598,33 @@ function playNextMatch(){
   match.teamA = resolveTeam(match.a, cup);
   match.teamB = resolveTeam(match.b, cup);
 
-  const result = simulateMatch(match.teamA.power, match.teamB.power, match.teamA.formation, match.teamB.formation);
+  const result = simulateMatch(
+    match.teamA.power, match.teamB.power,
+    match.teamA.formation, match.teamB.formation,
+    drawsAllowed(tournamentById(currentCupId), cup, match.round)
+  );
   match.scoreA = result.scoreA;
   match.scoreB = result.scoreB;
-  match.winner = result.aWon ? match.teamA : match.teamB;
+  match.draw = !!result.draw;
+  match.winner = result.draw ? null : (result.aWon ? match.teamA : match.teamB);
   match.played = true;
   cup.nextIndex++;
 
   const playerInvolved = match.teamA.isPlayer || match.teamB.isPlayer;
-  const playerWon = playerInvolved && match.winner.isPlayer;
+  const playerWon = playerInvolved && !!match.winner && match.winner.isPlayer;
 
   if(playerInvolved){
     state.stats.matchesPlayed++;
-    if(playerWon) state.stats.wins++; else state.stats.losses++;
+    if(match.draw) state.stats.draws++;
+    else if(playerWon) state.stats.wins++;
+    else state.stats.losses++;
   }
 
   renderBracket();
   save();
 
   if(playerInvolved){
-    showMatchModal(match, playerWon, () => continueAfterMatch(playerWon));
+    showMatchModal(match, playerWon, () => continueAfterMatch(playerWon || match.draw));
   } else {
     showToast(`${match.teamA.name} ${match.scoreA}:${match.scoreB} ${match.teamB.name}`);
     setTimeout(continueAfterMatch, 900, true);
@@ -2686,6 +2722,7 @@ function renderGroupTableHtml(cup){
       <span class="gt-name">${row.team.isPlayer ? '<span class="bm-you-tag">ТЫ</span> ' : ''}${row.team.name}</span>
       <span class="gt-p">${row.played}</span>
       <span class="gt-w">${row.wins}</span>
+      <span class="gt-d">${row.draws}</span>
       <span class="gt-l">${row.losses}</span>
       <span class="gt-gf">${row.gf}:${row.ga}</span>
       <span class="gt-pts">${row.pts}</span>
@@ -2694,7 +2731,7 @@ function renderGroupTableHtml(cup){
     <div class="group-table-wrap">
       <div class="group-table-title">ТАБЛИЦА ГРУППЫ · выходит только 1-е место</div>
       <div class="group-table-head">
-        <span>#</span><span>Команда</span><span>И</span><span>В</span><span>П</span><span>Мячи</span><span>О</span>
+        <span>#</span><span>Команда</span><span>И</span><span>В</span><span>Н</span><span>П</span><span>Мячи</span><span>О</span>
       </div>
       <div class="group-table-body">${rows}</div>
     </div>`;
@@ -2799,13 +2836,13 @@ function renderBracket(){
   document.querySelectorAll('.bm-team').forEach(el => {
     el.addEventListener('click', (e) => {
       e.stopPropagation();
-      const teamName = el.dataset.team;
-      if(!teamName) return;
+      const teamId = el.dataset.teamid;
+      if(!teamId) return;
 
       const cup = state.cups[currentCupId];
       if(!cup) return;
 
-      const team = cup.teams.find(t => t.name === teamName);
+      const team = cup.teams.find(t => t.id === teamId);
       if(team && !team.isPlayer) {
         openBotModal(team);
       }
@@ -2833,6 +2870,7 @@ function bracketMatchHtml(m, cup){
 
   let cls = 'bracket-match';
   if(!m.played) cls += ' pending';
+  if(m.played && m.draw) cls += ' draw';
 
   const scoreHtml = m.played ? `${m.scoreA} : ${m.scoreB}` : '—:—';
   const winA = m.played && m.winner && teamA && m.winner.id === teamA.id;
@@ -2840,14 +2878,14 @@ function bracketMatchHtml(m, cup){
 
   return `
     <div class="${cls}">
-      <span class="bm-team ${winA?'win':''} ${isYouA?'you':''}" data-team="${nameA}" data-isplayer="${isYouA}">
+      <span class="bm-team ${winA?'win':''} ${isYouA?'you':''}" data-teamid="${teamA ? teamA.id : ''}" data-isplayer="${isYouA}">
         ${isYouA ? '<span class="bm-you-tag">ТЫ</span> ' : ''}
         ${nameA}
-        <span class="bm-power">${teamA ? teamA.power : ''}</span>
+        <span class="bm-power">${teamA ? fmt(teamA.power) : ''}</span>
       </span>
       <span class="bm-score">${scoreHtml}</span>
-      <span class="bm-team ${winB?'win':''} ${isYouB?'you':''}" data-team="${nameB}" data-isplayer="${isYouB}" style="text-align:right; justify-content:flex-end">
-        <span class="bm-power">${teamB ? teamB.power : ''}</span>
+      <span class="bm-team ${winB?'win':''} ${isYouB?'you':''}" data-teamid="${teamB ? teamB.id : ''}" data-isplayer="${isYouB}" style="text-align:right; justify-content:flex-end">
+        <span class="bm-power">${teamB ? fmt(teamB.power) : ''}</span>
         ${nameB}
         ${isYouB ? ' <span class="bm-you-tag">ТЫ</span>' : ''}
       </span>
@@ -2886,7 +2924,7 @@ function openBotModal(team) {
         <div style="margin-top: 20px; background: var(--surface-3); padding: 16px; border-radius: 10px;">
           <div style="font-size: 11px; color: var(--text-dim); letter-spacing: 1px;">СИЛА КОМАНДЫ</div>
           <div style="font-family: var(--ff-display); font-size: 42px; color: var(--green); margin: 4px 0;">
-            ${team.power}
+            ${fmt(team.power)}
           </div>
         </div>
 
@@ -2931,6 +2969,8 @@ function showMatchModal(match, playerWon, onClose){
   // been played (handled by finishCup/advanceGroupStage), not per-match by round.
   const isFinal = !isGroupStage && match.round === Math.max(...cup.matches.map(m => m.round));
 
+  const isDraw = !!match.draw;
+
   let rewardHtml = '';
   let xpEarned = 0;
 
@@ -2950,17 +2990,21 @@ function showMatchModal(match, playerWon, onClose){
     rewardHtml = `
       <div class="mm-reward">
         <div>Ваш игрок: <span class="mm-reward-player">${r.player.name}</span></div>
-        <div class="mm-power-change">${r.before} → <span class="mm-power-plus">${r.after}</span></div>
+        <div class="mm-power-change">${fmt(r.before)} → <span class="mm-power-plus">${fmt(r.after)}</span></div>
         <div style="color:var(--gold); font-weight:800; display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap;">
           <span><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${powerIncrease} силы</span>
-          <span><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${stageCoins}</span>
+          <span><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fmt(stageCoins)}</span>
           <span>⭐ +${xpEarned} XP</span>
         </div>
       </div>`;
     refreshTopbar();
   }
 
-  const loseMessage = (!playerWon && !isGroupStage) ? `
+  const loseMessage = isDraw ? `
+    <div style="color:var(--gold); font-size:13px; font-weight:700; margin-top:10px;">
+      🤝 Ничья — силы команд отличаются не больше чем на 1%. +1 очко в таблицу.
+    </div>
+  ` : (!playerWon && !isGroupStage) ? `
     <div style="color:var(--red); font-size:14px; font-weight:700; margin-top:10px;">
       ❌ Турнир завершён. Попробуйте снова!
     </div>
@@ -2970,18 +3014,22 @@ function showMatchModal(match, playerWon, onClose){
     </div>
   ` : '');
 
+  const resultClass = isDraw ? 'draw' : (playerWon ? 'win' : 'lose');
+  const resultText = isDraw ? 'НИЧЬЯ' : (playerWon ? 'ПОБЕДА!' : 'ПОРАЖЕНИЕ');
+  const keepGoing = playerWon || isDraw || isGroupStage;
+
   document.getElementById('match-modal-body').innerHTML = `
     <div class="mm-teams"><span>${you.name}</span><span style="color:var(--text-mute)">vs</span><span>${opp.name}</span></div>
     <div class="mm-score">${yourScore} : ${oppScore}</div>
-    <div class="mm-result ${playerWon?'win':'lose'}">${playerWon ? 'ПОБЕДА!' : 'ПОРАЖЕНИЕ'}</div>
+    <div class="mm-result ${resultClass}">${resultText}</div>
     ${rewardHtml}
     ${loseMessage}
-    <button id="mm-continue-btn" class="btn-primary btn-big mm-continue">${(playerWon || isGroupStage) && !isFinal ? 'ПРОДОЛЖИТЬ' : 'ОК'}</button>
+    <button id="mm-continue-btn" class="btn-primary btn-big mm-continue">${keepGoing && !isFinal ? 'ПРОДОЛЖИТЬ' : 'ОК'}</button>
   `;
   document.getElementById('match-modal').classList.remove('hidden');
   document.getElementById('mm-continue-btn').addEventListener('click', ()=>{
     document.getElementById('match-modal').classList.add('hidden');
-    if(!playerWon && !isGroupStage) {
+    if(!playerWon && !isDraw && !isGroupStage) {
       renderCupScreen();
     } else if(isFinal){
       finishCup();
@@ -3021,6 +3069,36 @@ function showTrophyModal(t, coinReward, budgetReward){
 /* ============================================================
    TOAST
    ============================================================ */
+/* собственное окно подтверждения вместо системного confirm() */
+function showConfirm(text, onYes, opts){
+  const o = opts || {};
+  const old = document.getElementById('confirm-overlay');
+  if(old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'confirm-overlay';
+  overlay.className = 'modal-overlay confirm-overlay';
+  overlay.innerHTML = `
+    <div class="modal-card confirm-card">
+      <div class="confirm-icon">${o.icon || '⚠️'}</div>
+      <div class="confirm-title">${o.title || 'Подтвердите действие'}</div>
+      <div class="confirm-text">${text}</div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-no">${o.noText || 'Отмена'}</button>
+        <button class="confirm-btn confirm-yes ${o.danger === false ? '' : 'danger'}">${o.yesText || 'Да'}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const close = ()=> overlay.remove();
+  overlay.querySelector('.confirm-no').addEventListener('click', close);
+  overlay.querySelector('.confirm-yes').addEventListener('click', ()=>{
+    close();
+    if(typeof onYes === 'function') onYes();
+  });
+  overlay.addEventListener('click', e => { if(e.target === overlay) close(); });
+}
+
 function showToast(text){
   let container = document.getElementById('toast-container');
   if(!container){
