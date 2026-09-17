@@ -210,19 +210,33 @@ input{ font-family: inherit; }
 .btn-reset{
   margin-top:22px;
   margin-bottom:6px;
-  background:none;
-  border:1px dashed var(--line);
-  color: var(--text-mute);
+  background: rgba(239,68,68,.10);
+  border:1px solid rgba(239,68,68,.45);
+  color: #ff9d9d;
   padding:12px 14px;
   border-radius:8px;
   font-size:12px;
-  font-weight:700;
+  font-weight:800;
   letter-spacing:.3px;
   width:100%;
   transition: color .15s ease, border-color .15s ease, background .15s ease;
 }
-.btn-reset:hover{ color: var(--red); border-color: var(--red); background: rgba(239,68,68,.06); }
+.btn-reset:hover{ color:#fff; border-color: var(--red); background: rgba(239,68,68,.22); }
 .btn-reset:active{ transform: scale(.98); }
+
+/* качелька-пагинация пар (если в этапе больше 10 пар) */
+.matches-pager{
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  margin-top:6px;
+}
+.pager-btn{
+  flex:0 0 auto; width:34px; height:34px; border-radius:9px;
+  background: var(--surface-3); border:1px solid var(--line);
+  color: var(--text); font-size:18px; line-height:1; font-weight:800;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+}
+.pager-btn:disabled{ opacity:.25; cursor:default; }
+.pager-info{ font-size:11.5px; color: var(--text-dim); font-weight:700; text-align:center; }
 
 /* ============================================================
    APP SHELL

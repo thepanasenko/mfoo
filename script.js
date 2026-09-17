@@ -11,7 +11,11 @@ const IMG = {
   cash:       'images/cash.png',
   sila:       'images/sila.png',
   lvl:        'images/lvl.png',
+  xp:         'images/opit.png',
   cupYam:     'images/cup/cupyam.png',
+  cupFran:    'images/cup/cupfran.png',
+  cupUsa:     'images/cup/cupusa.png',
+  cupBel:     'images/cup/cupbel.png',
   navManager: 'images/manager.png',
   navPlay:    'images/play.png',
   navTeam:    'images/comands.png',
@@ -21,7 +25,10 @@ const IMG = {
 };
 /* per-tournament trophy images (falls back to emoji icon) */
 const TROPHY_IMG = {
-  jamaica: IMG.cupYam
+  jamaica: IMG.cupYam,
+  france:  IMG.cupFran,
+  usa:     IMG.cupUsa,
+  belarus: IMG.cupBel
 };
 function trophyIconHtml(tournament){
   const src = tournament && TROPHY_IMG[tournament.id];
@@ -2055,7 +2062,7 @@ function renderCupRewardsList(t){
         <span class="cup-reward-values">
           <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.groupStageReward.coins.toLocaleString('ru-RU')}</span>
           <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${t.groupStageReward.power}</span>
-          <span class="cup-reward-chip xp">⭐ +${t.groupStageReward.xp} XP</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${t.groupStageReward.xp} XP</span>
         </span>
       </div>`);
     rows.push(`
@@ -2064,7 +2071,7 @@ function renderCupRewardsList(t){
         <span class="cup-reward-values">
           <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.groupWinBonus.coins.toLocaleString('ru-RU')}</span>
           <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${t.groupWinBonus.power}</span>
-          <span class="cup-reward-chip xp">⭐ +${t.groupWinBonus.xp} XP</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${t.groupWinBonus.xp} XP</span>
         </span>
       </div>`);
     const koTitlesMap = buildRoundTitles(t.groupsCount);
@@ -2079,7 +2086,7 @@ function renderCupRewardsList(t){
           <span class="cup-reward-values">
             <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${r.coins.toLocaleString('ru-RU')}</span>
             <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${r.power}</span>
-            <span class="cup-reward-chip xp">⭐ +${r.xp} XP</span>
+            <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${r.xp} XP</span>
             ${isFinal ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>` : ''}
             ${isFinal && t.leagueChampionBudget ? `<span class="cup-reward-chip trophy"><img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${t.leagueChampionBudget.toLocaleString('ru-RU')}</span>` : ''}
           </span>
@@ -2105,7 +2112,7 @@ function renderCupRewardsList(t){
         <span class="cup-reward-values">
           <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${r.coins.toLocaleString('ru-RU')}</span>
           <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${r.power}</span>
-          <span class="cup-reward-chip xp">⭐ +${r.xp} XP</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${r.xp} XP</span>
           ${isFinal ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>` : ''}
         </span>
       </div>`);
@@ -2748,6 +2755,34 @@ function cupCurrentRound(cup){
 let bracketViewRound = null;
 let bracketViewKey = '';
 
+/* пагинация пар внутри этапа: если пар больше 10 — качелька «страница X из Y» */
+const MATCHES_PAGE_SIZE = 10;
+let bracketPageIndex = {};
+
+function matchesPageHtml(key, matches, cup){
+  const totalPages = Math.max(1, Math.ceil(matches.length / MATCHES_PAGE_SIZE));
+  let page = bracketPageIndex[key] || 0;
+  if(page > totalPages - 1) page = totalPages - 1;
+  if(page < 0) page = 0;
+  bracketPageIndex[key] = page;
+
+  const pageMatches = matches.slice(page * MATCHES_PAGE_SIZE, (page + 1) * MATCHES_PAGE_SIZE);
+  const matchesHtml = pageMatches.map(m => bracketMatchHtml(m, cup)).join('');
+
+  let pagerHtml = '';
+  if(totalPages > 1){
+    const from = page * MATCHES_PAGE_SIZE + 1;
+    const to = Math.min((page + 1) * MATCHES_PAGE_SIZE, matches.length);
+    pagerHtml = `
+      <div class="matches-pager" data-pager-key="${key}">
+        <button class="pager-btn pager-prev" ${page <= 0 ? 'disabled' : ''}>‹</button>
+        <span class="pager-info">Пары ${from}–${to} из ${matches.length} · стр. ${page + 1}/${totalPages}</span>
+        <button class="pager-btn pager-next" ${page >= totalPages - 1 ? 'disabled' : ''}>›</button>
+      </div>`;
+  }
+  return `<div class="bracket-matches">${matchesHtml}</div>${pagerHtml}`;
+}
+
 function renderBracket(){
   const cup = state.cups[currentCupId];
   if(!cup) return;
@@ -2785,6 +2820,7 @@ function renderBracket(){
     const isGroupRound = displayRound <= cup.groupRoundsCount;
     const groupTableHtml = (cup.stage === 'groups' && isGroupRound) ? renderGroupTableHtml(cup) : '';
     const roundMatches = cup.matches.filter(m => m.round === displayRound);
+    const pagerKey = currentCupId + '#g#' + displayRound;
 
     html = groupTableHtml + `
       <div class="bracket-round ${displayRound === actualRound ? 'current' : ''}">
@@ -2797,26 +2833,37 @@ function renderBracket(){
           <button class="stage-nav-btn" id="btn-stage-next" ${idx >= rounds.length - 1 ? 'disabled' : ''}>›</button>
         </div>
         ${displayRound !== actualRound ? '<button class="stage-nav-current" id="btn-stage-current">↺ К текущему этапу</button>' : ''}
-        <div class="bracket-matches">
-          ${roundMatches.map(m => bracketMatchHtml(m, cup)).join('')}
-        </div>
+        ${matchesPageHtml(pagerKey, roundMatches, cup)}
       </div>`;
   } else {
     // КУБКИ — сразу вся сетка, все этапы
     html = rounds.map(round => {
       const roundMatches = cup.matches.filter(m => m.round === round);
       const isCurrent = round === actualRound && !cup.finished;
+      const pagerKey = currentCupId + '#k#' + round;
       return `
       <div class="bracket-round ${isCurrent ? 'current' : ''}">
         <div class="bracket-round-title">${titleFor(round)}</div>
-        <div class="bracket-matches">
-          ${roundMatches.map(m => bracketMatchHtml(m, cup)).join('')}
-        </div>
+        ${matchesPageHtml(pagerKey, roundMatches, cup)}
       </div>`;
     }).join('');
   }
 
   document.getElementById('bracket').innerHTML = html;
+
+  document.querySelectorAll('.matches-pager').forEach(el => {
+    const key = el.dataset.pagerKey;
+    const prev = el.querySelector('.pager-prev');
+    const next = el.querySelector('.pager-next');
+    if(prev) prev.addEventListener('click', ()=>{
+      bracketPageIndex[key] = (bracketPageIndex[key] || 0) - 1;
+      renderBracket();
+    });
+    if(next) next.addEventListener('click', ()=>{
+      bracketPageIndex[key] = (bracketPageIndex[key] || 0) + 1;
+      renderBracket();
+    });
+  });
 
   const prevBtn = document.getElementById('btn-stage-prev');
   const nextBtn = document.getElementById('btn-stage-next');
@@ -2994,7 +3041,7 @@ function showMatchModal(match, playerWon, onClose){
         <div style="color:var(--gold); font-weight:800; display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap;">
           <span><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${powerIncrease} силы</span>
           <span><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fmt(stageCoins)}</span>
-          <span>⭐ +${xpEarned} XP</span>
+          <span><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${xpEarned} XP</span>
         </div>
       </div>`;
     refreshTopbar();
