@@ -12,6 +12,8 @@ const IMG = {
   sila:       'images/sila.png',
   lvl:        'images/lvl.png',
   xp:         'images/opit.png',
+  cupNew:     'images/cup/cupnew.png',
+  bliga:      'images/cup/bliga.png',
   cupYam:     'images/cup/cupyam.png',
   cupFran:    'images/cup/cupfran.png',
   cupUsa:     'images/cup/cupusa.png',
@@ -29,6 +31,8 @@ const IMG = {
 };
 /* per-tournament trophy images (falls back to emoji icon) */
 const TROPHY_IMG = {
+  novice:  IMG.cupNew,
+  bigleague: IMG.bliga,
   jamaica: IMG.cupYam,
   france:  IMG.cupFran,
   usa:     IMG.cupUsa,
@@ -1635,7 +1639,7 @@ function renderManager(){
         <span class="mgr-power-pill">СИЛА ${fmt(power)}</span>
       </div>
 
-      <div style="margin: 12px 0; background: var(--surface-3); padding: 12px; border-radius: 10px;">
+      <div style="margin: 12px 0; background: rgb(0 0 0 / 37%); border: 1px solid var(--line); padding: 12px; border-radius: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-size: 11px; color: var(--text-dim); letter-spacing: 1px;">УРОВЕНЬ</div>

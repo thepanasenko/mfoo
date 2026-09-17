@@ -1227,7 +1227,7 @@ input{ font-family: inherit; }
    ============================================================ */
 .transfer-head{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
-  background: linear-gradient(160deg, var(--surface-3), var(--surface-2));
+  background: rgb(0 0 0 / 37%);
   border:1px solid var(--line);
   border-radius:14px;
   padding:14px 16px;
