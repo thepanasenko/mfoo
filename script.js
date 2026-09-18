@@ -12,6 +12,7 @@ const IMG = {
   sila:       'images/sila.png',
   lvl:        'images/lvl.png',
   xp:         'images/opit.png',
+  training:   'images/trenirovka.png',
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
   cupYam:     'images/cup/cupyam.png',
@@ -739,6 +740,10 @@ function bindGlobalEvents(){
     el.addEventListener('click', ()=> navigate(el.dataset.nav));
   });
 
+  document.querySelectorAll('.team-tab-btn[data-team-tab]').forEach(el=>{
+    el.addEventListener('click', ()=> switchTeamTab(el.dataset.teamTab));
+  });
+
   document.getElementById('btn-reset-game').addEventListener('click', onResetGame);
 
   document.getElementById('player-modal-close').addEventListener('click', closePlayerModal);
@@ -890,17 +895,64 @@ function refreshTopbar(){
 /* ============================================================
    TEAM VIEW
    ============================================================ */
+let teamActiveTab = 'roster';
+
+function switchTeamTab(tab){
+  teamActiveTab = tab;
+  document.querySelectorAll('.team-tab-btn[data-team-tab]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.teamTab === tab);
+  });
+  document.querySelectorAll('.team-tab-panel').forEach(panel=>{
+    panel.classList.toggle('active', panel.id === `team-tab-${tab}`);
+  });
+}
+
+function playerListRowHtml(p){
+  const pos = posByCode(p.pos);
+  let statusText;
+  if(p.training){
+    let timeLeft = '';
+    if(p.trainingEndTime){
+      const remaining = Math.max(0, Math.floor((p.trainingEndTime - Date.now()) / 1000));
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      timeLeft = ` — осталось ${mins}:${secs.toString().padStart(2,'0')}`;
+    }
+    statusText = `⏳ На тренировке${timeLeft}`;
+  } else {
+    statusText = `${posLabel(p.pos)} · Сила ${fmt(p.power)}`;
+  }
+
+  return `
+    <div class="tournament-card player-row ${p.training ? 'training' : ''}" data-id="${p.id}">
+      <span class="player-pos player-row-icon ${pos.css}">${pos.code}</span>
+      <div class="tournament-info">
+        <div class="tournament-name">${p.name}</div>
+        <div class="tournament-status">${statusText}</div>
+      </div>
+      <div class="tournament-arrow">›</div>
+    </div>`;
+}
+
 function renderTeam(){
+  switchTeamTab(teamActiveTab);
+
   renderFormationSelector();
   renderPitch();
 
+  const main = state.players.filter(p=>p.status==='main');
   const bench = state.players.filter(p=>p.status==='bench');
-  document.getElementById('squad-bench').innerHTML = bench.length
-    ? bench.map(p => playerCardHtml(p, false)).join('')
+
+  document.getElementById('roster-main').innerHTML = main.length
+    ? main.map(playerListRowHtml).join('')
+    : `<div class="stub-card"><div class="stub-icon">🧍</div><p>Основной состав пуст</p></div>`;
+
+  document.getElementById('roster-bench').innerHTML = bench.length
+    ? bench.map(playerListRowHtml).join('')
     : `<div class="stub-card"><div class="stub-icon">🪑</div><p>Нет запасных игроков</p></div>`;
 
-  document.querySelectorAll('#squad-bench .player-card').forEach(card=>{
-    card.addEventListener('click', ()=> openPlayerModal(card.dataset.id));
+  document.querySelectorAll('#roster-main .player-row, #roster-bench .player-row').forEach(row=>{
+    row.addEventListener('click', ()=> openPlayerModal(row.dataset.id));
   });
 
   renderTrainingSlotsPanel();
@@ -1102,7 +1154,7 @@ function renderTrainingSlotsPanel(){
   container.innerHTML = `
     <div class="slots-card">
       <div class="slots-card-head">
-        <span class="slots-card-icon">💪</span>
+        <span class="slots-card-icon"><img src="${IMG.training}" class="slots-card-icon-img" alt="Тренировка"></span>
         <div>
           <div class="slots-card-title">Слоты тренировок</div>
           <div class="slots-card-sub">Занято ${occupied.length}/${maxSlots} · только запасные · 30 мин · +8…+25 силы</div>
@@ -1175,7 +1227,7 @@ function openTrainingPicker(){
   overlay.innerHTML = `
     <div class="modal-card training-picker-card">
       <button class="modal-close" id="training-picker-close">✕</button>
-      <div class="tp-title">💪 Кого отправить на тренировку?</div>
+      <div class="tp-title"><img src="${IMG.training}" class="tp-title-icon" alt="Тренировка"> Кого отправить на тренировку?</div>
       <div class="tp-sub">Только запасные · 30 минут · +8…+25 силы · деньги списываются сразу</div>
       <div class="tp-list">
         ${eligible.map(p=>{
@@ -1397,25 +1449,6 @@ function onBuyTransferPlayer(playerId, btnEl){
 
   showToast(`✅ ${p.name} куплен и добавлен в запас!`);
   renderTransferMarket();
-}
-
-function playerCardHtml(p, isMain){
-  const pos = posByCode(p.pos);
-  const pct = clamp(Math.round((p.power/60)*100), 4, 100);
-  const isTraining = p.training;
-
-  return `
-  <div class="player-card ${isTraining ? 'training' : ''}" data-id="${p.id}">
-    ${p.status==='bench' ? '<span class="bench-tag">ЗАП</span>' : ''}
-    ${isTraining ? '<span class="training-badge">⏳ ТРЕНИРОВКА</span>' : ''}
-    <span class="player-pos ${pos.css}">${pos.code}</span>
-    <span class="player-name">${p.name}</span>
-    <div class="power-bar"><div class="power-bar-fill" style="width:${pct}%"></div></div>
-    <div class="player-power-row">
-      <span style="font-size:11px;color:var(--text-mute)">Сила</span>
-      <span class="player-power">${p.power}</span>
-    </div>
-  </div>`;
 }
 
 function openPlayerModal(id){

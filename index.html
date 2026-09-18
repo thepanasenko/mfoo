@@ -59,18 +59,35 @@
     <!-- КОМАНДА -->
     <section id="view-team" class="view">
       <h2 class="view-title">Моя команда</h2>
-      <div id="team-slots-card"></div>
 
-      <h3 class="squad-heading">СХЕМА ИГРЫ</h3>
-      <div id="formation-select" class="formation-select"></div>
-
-      <div class="pitch-wrap">
-        <div id="pitch" class="pitch"></div>
+      <div class="team-tabs">
+        <button class="team-tab-btn active" data-team-tab="roster">Команда</button>
+        <button class="team-tab-btn" data-team-tab="formation">Схема</button>
+        <button class="team-tab-btn" data-team-tab="training">Тренировка</button>
       </div>
 
-      <div class="squad-block">
+      <!-- вкладка: КОМАНДА (список игроков) -->
+      <div id="team-tab-roster" class="team-tab-panel active">
+        <h3 class="squad-heading">ОСНОВНОЙ СОСТАВ</h3>
+        <div id="roster-main" class="tournament-list"></div>
+
         <h3 class="squad-heading">ЗАПАСНЫЕ</h3>
-        <div id="squad-bench" class="squad-list"></div>
+        <div id="roster-bench" class="tournament-list"></div>
+      </div>
+
+      <!-- вкладка: СХЕМА -->
+      <div id="team-tab-formation" class="team-tab-panel">
+        <h3 class="squad-heading">СХЕМА ИГРЫ</h3>
+        <div id="formation-select" class="formation-select"></div>
+
+        <div class="pitch-wrap">
+          <div id="pitch" class="pitch"></div>
+        </div>
+      </div>
+
+      <!-- вкладка: ТРЕНИРОВКА -->
+      <div id="team-tab-training" class="team-tab-panel">
+        <div id="team-slots-card"></div>
       </div>
     </section>
 
