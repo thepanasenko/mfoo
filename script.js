@@ -159,7 +159,7 @@ function autoFillEmptyLineup(s, formationId){
   const codes = FORMATIONS[formationId].slots.map(sl=>sl.pos);
   const usedIds = new Set();
   codes.forEach((code, idx)=>{
-    const candidate = s.players.find(p => p.pos===code && !usedIds.has(p.id));
+    const candidate = s.players.find(p => p.pos===code && !p.training && !usedIds.has(p.id));
     if(candidate){
       lineup[idx] = candidate.id;
       usedIds.add(candidate.id);
@@ -903,11 +903,7 @@ function renderTeam(){
     card.addEventListener('click', ()=> openPlayerModal(card.dataset.id));
   });
 
-  document.getElementById('team-slots-card').innerHTML = trainingSlotUpgradeHtml();
-  const slotBtn = document.getElementById('btn-buy-slot');
-  if(slotBtn){
-    slotBtn.addEventListener('click', onBuySlotUpgrade);
-  }
+  renderTrainingSlotsPanel();
 }
 
 function renderFormationSelector(){
@@ -998,7 +994,7 @@ function openSlotPicker(slotIdx){
   const slot = formation.slots[slotIdx];
   if(!slot) return;
   const pos = posByCode(slot.pos);
-  const eligible = state.players.filter(p => p.status==='bench' && p.pos===slot.pos);
+  const eligible = state.players.filter(p => p.status==='bench' && p.pos===slot.pos && !p.training);
 
   document.getElementById('player-modal-body').innerHTML = `
     <div class="pm-name">Выбор игрока</div>
@@ -1030,6 +1026,10 @@ function assignPlayerToSlot(playerId, slotIdx){
   const slot = formation.slots[slotIdx];
   const p = state.players.find(pl => pl.id === playerId);
   if(!p || !slot || p.pos !== slot.pos) return false;
+  if(p.training){
+    showToast('❌ Нельзя поставить в основу тренирующегося игрока');
+    return false;
+  }
 
   ensureLineupsInit(state);
   const lineup = state.lineups[state.formation];
@@ -1046,42 +1046,188 @@ function assignPlayerToSlot(playerId, slotIdx){
 /* ============================================================
    TRAINING SLOT UPGRADES
    ============================================================ */
-const SLOT_UPGRADE_COSTS = { 4: 500000, 5: 1000000 };
-const SLOT_UPGRADE_MAX = 5;
+const SLOT_UPGRADE_COSTS = { 4: 500000, 5: 1000000, 6: 2500000 };
+const SLOT_UPGRADE_MAX = 6;
 
-function trainingSlotUpgradeHtml(){
-  const current = state.trainingSlotsMax || 3;
+/* тренировка: только запасные игроки, 30 минут, стоимость = сила × 10, прирост 8–25 силы */
+const TRAINING_DURATION_MS = 30 * 60 * 1000;
+function trainingCostForPower(power){ return power * 10; }
+function trainingPowerGain(){ return rnd(8, 25); }
 
-  if(current >= SLOT_UPGRADE_MAX){
-    return `
-      <div class="slots-card">
-        <div class="slots-card-head">
-          <span class="slots-card-icon">⏱️</span>
-          <div>
-            <div class="slots-card-title">Слоты тренировок</div>
-            <div class="slots-card-sub">Максимум достигнут — ${current}/${SLOT_UPGRADE_MAX}</div>
-          </div>
-        </div>
-      </div>`;
-  }
-
+function trainingSlotUpgradeCtaHtml(current){
+  if(current >= SLOT_UPGRADE_MAX) return '';
   const nextMax = current + 1;
   const cost = SLOT_UPGRADE_COSTS[nextMax];
   const affordable = state.budget >= cost;
-
   return `
+    <button id="btn-buy-slot" class="ts-upgrade-btn" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
+      ⏫ Открыть слот №${nextMax} — <img src="${IMG.cash}" class="img-icon" alt="€"> ${fmt(cost)}
+    </button>`;
+}
+
+function trainingSlotOccupiedHtml(p){
+  const pos = posByCode(p.pos);
+  return `
+    <div class="training-slot occupied">
+      <span class="player-pos ${pos.css}">${pos.code}</span>
+      <div class="ts-name">${p.name}</div>
+      <div class="ts-power">Сила ${fmt(p.power)}</div>
+      <div class="ts-timer" data-training-timer="${p.id}">⏳ --:--</div>
+      <button class="ts-cancel-btn" data-player-id="${p.id}">✕ Снять</button>
+    </div>`;
+}
+
+function trainingSlotEmptyHtml(){
+  return `
+    <div class="training-slot empty">
+      <div class="ts-empty-icon">➕</div>
+      <div class="ts-empty-label">Пустой слот</div>
+      <button class="ts-add-btn">Добавить игрока</button>
+    </div>`;
+}
+
+function renderTrainingSlotsPanel(){
+  const container = document.getElementById('team-slots-card');
+  if(!container) return;
+
+  const maxSlots = state.trainingSlotsMax || 3;
+  const occupied = state.trainingSlots
+    .map(id => state.players.find(p=>p.id===id))
+    .filter(Boolean);
+  const emptyCount = Math.max(0, maxSlots - occupied.length);
+
+  const slotsHtml = occupied.map(trainingSlotOccupiedHtml).join('')
+    + Array.from({length: emptyCount}).map(trainingSlotEmptyHtml).join('');
+
+  container.innerHTML = `
     <div class="slots-card">
       <div class="slots-card-head">
-        <span class="slots-card-icon">⏱️</span>
+        <span class="slots-card-icon">💪</span>
         <div>
           <div class="slots-card-title">Слоты тренировок</div>
-          <div class="slots-card-sub">Сейчас доступно: ${current}/${SLOT_UPGRADE_MAX} одновременных тренировок</div>
+          <div class="slots-card-sub">Занято ${occupied.length}/${maxSlots} · только запасные · 30 мин · +8…+25 силы</div>
         </div>
       </div>
-      <button id="btn-buy-slot" class="btn-primary btn-big" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
-        ⏫ Увеличить до ${nextMax} — <img src="${IMG.cash}" class="img-icon" alt="€"> ${cost.toLocaleString('ru-RU')}
-      </button>
+      <div class="training-slots-grid">${slotsHtml}</div>
+      ${trainingSlotUpgradeCtaHtml(maxSlots)}
     </div>`;
+
+  container.querySelectorAll('.ts-add-btn').forEach(btn=>{
+    btn.addEventListener('click', openTrainingPicker);
+  });
+  container.querySelectorAll('.ts-cancel-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> onCancelTraining(btn.dataset.playerId));
+  });
+  const slotBtn = document.getElementById('btn-buy-slot');
+  if(slotBtn) slotBtn.addEventListener('click', onBuySlotUpgrade);
+
+  startTrainingSlotsTimer();
+}
+
+let trainingSlotsInterval = null;
+function startTrainingSlotsTimer(){
+  if(trainingSlotsInterval){ clearInterval(trainingSlotsInterval); trainingSlotsInterval = null; }
+  updateTrainingSlotsTimers();
+  trainingSlotsInterval = setInterval(()=>{
+    const view = document.getElementById('view-team');
+    if(!view || !view.classList.contains('active')){
+      clearInterval(trainingSlotsInterval);
+      trainingSlotsInterval = null;
+      return;
+    }
+    updateTrainingSlotsTimers();
+  }, 1000);
+}
+
+function updateTrainingSlotsTimers(){
+  document.querySelectorAll('[data-training-timer]').forEach(el=>{
+    const id = el.dataset.trainingTimer;
+    const p = state.players.find(pl=>pl.id===id);
+    if(!p || !p.training || !p.trainingEndTime) return;
+    const remaining = Math.max(0, Math.floor((p.trainingEndTime - Date.now()) / 1000));
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    el.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
+  });
+}
+
+/* окно выбора запасного игрока для отправки на тренировку */
+function openTrainingPicker(){
+  const maxSlots = state.trainingSlotsMax || 3;
+  if(state.trainingSlots.length >= maxSlots){
+    showToast(`Все слоты тренировок заняты (${state.trainingSlots.length}/${maxSlots})`);
+    return;
+  }
+  const eligible = state.players
+    .filter(p => p.status === 'bench' && !p.training)
+    .sort((a,b) => POSITIONS.findIndex(pos=>pos.code===a.pos) - POSITIONS.findIndex(pos=>pos.code===b.pos));
+  if(!eligible.length){
+    showToast('Нет свободных запасных игроков для тренировки');
+    return;
+  }
+
+  const old = document.getElementById('training-picker-overlay');
+  if(old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'training-picker-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-card training-picker-card">
+      <button class="modal-close" id="training-picker-close">✕</button>
+      <div class="tp-title">💪 Кого отправить на тренировку?</div>
+      <div class="tp-sub">Только запасные · 30 минут · +8…+25 силы · деньги списываются сразу</div>
+      <div class="tp-list">
+        ${eligible.map(p=>{
+          const pos = posByCode(p.pos);
+          const cost = trainingCostForPower(p.power);
+          const affordable = state.coins >= cost;
+          return `
+            <button class="tp-row ${affordable ? '' : 'disabled'}" data-player-id="${p.id}" ${affordable ? '' : 'disabled'}>
+              <span class="player-pos ${pos.css}">${pos.code}</span>
+              <span class="tp-row-name">${p.name}</span>
+              <span class="tp-row-power">Сила ${fmt(p.power)}</span>
+              <span class="tp-row-cost"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${fmt(cost)}</span>
+            </button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const close = ()=> overlay.remove();
+  overlay.querySelector('#training-picker-close').addEventListener('click', close);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+  overlay.querySelectorAll('.tp-row').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.playerId;
+      close();
+      startTraining(id);
+    });
+  });
+}
+
+function closeTrainingPicker(){
+  const overlay = document.getElementById('training-picker-overlay');
+  if(overlay) overlay.remove();
+}
+
+function onCancelTraining(playerId){
+  const p = state.players.find(pl=>pl.id===playerId);
+  if(!p || !p.training) return;
+  showConfirm(`Снять <b>${p.name}</b> с тренировки? Потраченные монеты не вернутся, сила не увеличится.`, ()=>{
+    if(trainingTimers[playerId]){
+      clearTimeout(trainingTimers[playerId]);
+      delete trainingTimers[playerId];
+    }
+    p.training = false;
+    p.trainingEndTime = null;
+    const idx = state.trainingSlots.indexOf(playerId);
+    if(idx !== -1) state.trainingSlots.splice(idx, 1);
+    save();
+    refreshTopbar();
+    renderTeam();
+    showToast(`${p.name} снят с тренировки`);
+  }, { icon:'🚫', title:'Снять с тренировки?', yesText:'Снять' });
 }
 
 function onBuySlotUpgrade(){
@@ -1099,8 +1245,8 @@ function onBuySlotUpgrade(){
   state.trainingSlotsMax = nextMax;
   save();
   refreshTopbar();
-  renderTeam();
-  showToast(`⏱️ Слоты тренировок увеличены до ${nextMax}!`);
+  renderTrainingSlotsPanel();
+  showToast(`⏱️ Открыт новый слот тренировок! (${nextMax}/${SLOT_UPGRADE_MAX})`);
 }
 
 /* ============================================================
@@ -1277,12 +1423,8 @@ function openPlayerModal(id){
   if(!p) return;
   const pos = posByCode(p.pos);
   const isTraining = p.training;
-  const trainingSlots = state.trainingSlots.length;
-  const maxSlots = state.trainingSlotsMax || 3;
 
-  let trainingButton = '';
   let timeDisplay = '';
-
   if(isTraining) {
     let timeLeft = '0:00';
     if(p.trainingEndTime) {
@@ -1291,19 +1433,16 @@ function openPlayerModal(id){
       const secs = remaining % 60;
       timeLeft = `${mins}:${secs.toString().padStart(2, '0')}`;
     }
-    timeDisplay = `<div style="color:var(--gold);font-weight:700;margin-top:8px;font-size:18px;">⏳ Осталось: ${timeLeft}</div>`;
-    trainingButton = `<button class="btn-secondary" disabled style="opacity:0.5;cursor:not-allowed;">⏳ Тренировка идёт...</button>`;
-  } else if(trainingSlots >= maxSlots) {
-    trainingButton = `<button class="btn-secondary" disabled style="opacity:0.5;cursor:not-allowed;">❌ Все слоты заняты (${trainingSlots}/${maxSlots})</button>`;
-  } else if(state.coins < 1000) {
-    trainingButton = `<button class="btn-secondary" disabled style="opacity:0.5;cursor:not-allowed;">💰 Недостаточно монет (нужно 1000)</button>`;
-  } else {
-    trainingButton = `<button id="btn-train-player" class="btn-primary" style="margin-top:12px;">💪 ТРЕНИРОВАТЬ (1000 <img src="${IMG.coin}" class="img-icon" alt="Монеты">)</button>`;
+    timeDisplay = `<div style="color:var(--gold);font-weight:700;margin-top:8px;font-size:18px;">⏳ На тренировке — осталось ${timeLeft}</div>`;
+  } else if(p.status === 'bench') {
+    timeDisplay = `<div style="color:var(--text-mute);font-size:12px;margin-top:8px;">Отправить на тренировку можно в «Команде», в слотах тренировок.</div>`;
   }
 
   let swapButton = '';
   if(p.status === 'main'){
     swapButton = `<button id="btn-swap-status" class="btn-secondary btn-big" style="margin-top:10px;">🔻 Отправить в запас</button>`;
+  } else if(isTraining){
+    swapButton = `<button class="btn-secondary btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">⏳ Снимите с тренировки, чтобы поставить в основу</button>`;
   } else {
     const canPlace = hasAvailableSlotForPos(p.pos);
     swapButton = canPlace
@@ -1313,8 +1452,12 @@ function openPlayerModal(id){
 
   let sellButton = '';
   if(p.status === 'bench'){
-    const price = sellPlayerPrice(p.power);
-    sellButton = `<button id="btn-sell-player" class="btn-danger btn-big" style="margin-top:10px;">💰 Продать за ${price.toLocaleString('ru-RU')} <img src="${IMG.coin}" class="img-icon" alt="Монеты"></button>`;
+    if(isTraining){
+      sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">⏳ Нельзя продать во время тренировки</button>`;
+    } else {
+      const price = sellPlayerPrice(p.power);
+      sellButton = `<button id="btn-sell-player" class="btn-danger btn-big" style="margin-top:10px;">💰 Продать за ${fmt(price)} <img src="${IMG.coin}" class="img-icon" alt="Монеты"></button>`;
+    }
   }
 
   document.getElementById('player-modal-body').innerHTML = `
@@ -1322,13 +1465,9 @@ function openPlayerModal(id){
     <div class="pm-name">${p.name}</div>
     <div class="pm-pos">${posLabel(p.pos)}</div>
     <div class="pm-power-label">СИЛА ИГРОКА</div>
-    <div class="pm-power-value">${p.power}</div>
+    <div class="pm-power-value">${fmt(p.power)}</div>
     <div class="pm-status">Статус: ${p.status==='main' ? 'Основной состав' : 'Запасной'}</div>
     ${timeDisplay}
-    <div style="margin-top:8px;font-size:11px;color:var(--text-mute);">
-      Слоты тренировок: ${trainingSlots}/${maxSlots}
-    </div>
-    ${trainingButton}
     ${swapButton}
     ${sellButton}
   `;
@@ -1336,14 +1475,6 @@ function openPlayerModal(id){
 
   if(isTraining && p.trainingEndTime) {
     startTrainingTimeUpdate(id);
-  }
-
-  const btn = document.getElementById('btn-train-player');
-  if(btn) {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      startTraining(id);
-    });
   }
 
   const swapBtn = document.getElementById('btn-swap-status');
@@ -1368,6 +1499,10 @@ function onSellPlayer(playerId){
   if(!p) return;
   if(p.status !== 'bench'){
     showToast('❌ Нельзя продать игрока из основного состава — сначала отправьте в запас');
+    return;
+  }
+  if(p.training){
+    showToast('❌ Нельзя продать игрока во время тренировки — сначала снимите его со слота');
     return;
   }
   const price = sellPlayerPrice(p.power);
@@ -1407,6 +1542,10 @@ function toggleSquadStatus(playerId){
     openPlayerModal(playerId);
     showToast(`🔻 ${p.name} отправлен в запас`);
   } else {
+    if(p.training){
+      showToast('❌ Нельзя поставить в основу тренирующегося игрока — сначала снимите с тренировки');
+      return;
+    }
     const targetSlot = firstAvailableSlotForPos(p.pos);
     if(targetSlot === -1){
       showToast(`❌ Нет места на позиции «${posLabel(p.pos)}» в схеме ${state.formation}`);
@@ -1472,32 +1611,47 @@ function startTraining(playerId){
     return;
   }
 
+  if(p.status !== 'bench') {
+    showToast('❌ Тренировать можно только запасных игроков');
+    return;
+  }
+
   const maxSlots = state.trainingSlotsMax || 3;
   if(state.trainingSlots.length >= maxSlots) {
-    showToast(`Все слоты тренировок заняты (${maxSlots}/${maxSlots})`);
+    showToast(`Все слоты тренировок заняты (${state.trainingSlots.length}/${maxSlots})`);
     return;
   }
 
-  if(state.coins < 1000) {
-    showToast('Недостаточно монет! Нужно 1000');
+  const cost = trainingCostForPower(p.power);
+  if(state.coins < cost) {
+    showToast(`Недостаточно монет! Нужно ${fmt(cost)}`);
     return;
   }
 
-  state.coins -= 1000;
+  state.coins -= cost;
   p.training = true;
-  const endTime = Date.now() + 60000;
+  const endTime = Date.now() + TRAINING_DURATION_MS;
   p.trainingEndTime = endTime;
   state.trainingSlots.push(playerId);
+
+  /* снимаем игрока со всех схем расстановки, чтобы он не мог
+     «выскочить» в основу при переключении на другую схему */
+  ensureLineupsInit(state);
+  Object.keys(state.lineups).forEach(fid=>{
+    const lineup = state.lineups[fid];
+    for(let i=0;i<lineup.length;i++){ if(lineup[i]===playerId) lineup[i] = null; }
+  });
+  syncStatusFromLineup(state);
+
   save();
   refreshTopbar();
-  closePlayerModal();
   renderTeam();
 
-  showToast(`⏳ Тренировка ${p.name} началась! (1 мин.)`);
+  showToast(`⏳ Тренировка ${p.name} началась! (30 мин, −${fmt(cost)} монет)`);
 
   const timerId = setTimeout(() => {
     finishTraining(playerId);
-  }, 60000);
+  }, TRAINING_DURATION_MS);
 
   trainingTimers[playerId] = timerId;
 }
@@ -1508,7 +1662,7 @@ function finishTraining(playerId){
 
   if(!p.training) return;
 
-  const powerGain = 10;
+  const powerGain = trainingPowerGain();
   p.power += powerGain;
   p.training = false;
   p.trainingEndTime = null;
@@ -1520,16 +1674,11 @@ function finishTraining(playerId){
 
   delete trainingTimers[playerId];
 
-  if(trainingUpdateInterval) {
-    clearInterval(trainingUpdateInterval);
-    trainingUpdateInterval = null;
-  }
-
   save();
   refreshTopbar();
   renderTeam();
 
-  showToast(`✅ ${p.name} завершил тренировку! +${powerGain} силы (теперь ${p.power})`);
+  showToast(`✅ ${p.name} завершил тренировку! +${powerGain} силы (теперь ${fmt(p.power)})`);
 }
 
 function restoreTrainingTimers(){
