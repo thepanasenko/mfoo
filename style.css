@@ -478,7 +478,8 @@ input{ font-family: inherit; }
   font-size: 16px;
   color: var(--gold);
   font-weight: 800;
-  background: var(--surface-3);
+  background: rgb(0 0 0 / 37%);
+  border: 1px solid var(--line);
   padding: 2px 10px;
   border-radius: 12px;
   min-width: 30px;
@@ -836,7 +837,8 @@ input{ font-family: inherit; }
 
 /* stub sections */
 .stub-card{
-  background: var(--surface-2); border:1px solid var(--line);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   border-radius:14px;
   padding:34px 18px; text-align:center; color: var(--text-dim);
 }
