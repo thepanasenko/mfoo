@@ -919,16 +919,12 @@ input{ font-family: inherit; }
 }
 .slots-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
 .slots-card-icon{
-  font-size:22px;
   width:42px; height:42px; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
-  background: rgba(242,183,5,.12);
-  border:1px solid rgba(242,183,5,.35);
-  border-radius:50%;
 }
 .slots-card-title{ font-weight:800; font-size:14px; color: var(--text); }
 .slots-card-sub{ font-size:11.5px; color: var(--text-mute); margin-top:2px; }
-.slots-card-icon-img{ width:24px; height:24px; object-fit:contain; }
+.slots-card-icon-img{ width:46px; height:46px; object-fit:contain; }
 .tp-title-icon{ width:20px; height:20px; object-fit:contain; vertical-align:-4px; margin-right:2px; }
 
 /* сетка слотов тренировок */
@@ -951,6 +947,7 @@ input{ font-family: inherit; }
   min-height:118px;
 }
 .ts-empty-icon{ font-size:20px; color: var(--text-mute); }
+.ts-empty-icon-img{ width:28px; height:28px; object-fit:contain; opacity:.8; }
 .ts-empty-label{ font-size:11px; color: var(--text-mute); margin-bottom:4px; }
 .ts-add-btn{
   background: rgb(0 0 0 / 37%);
@@ -1337,8 +1334,8 @@ input{ font-family: inherit; }
   font-family: var(--ff-display);
   font-size:18px;
   color: var(--gold);
-  background: var(--surface-3);
-  border:1px solid rgba(242,183,5,.35);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line);
   padding:6px 14px;
   border-radius:20px;
   min-width:70px;
@@ -1346,27 +1343,25 @@ input{ font-family: inherit; }
   flex-shrink:0;
 }
 
-.transfer-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-@media (min-width:520px){ .transfer-grid{ grid-template-columns:1fr 1fr 1fr; } }
+/* фильтр по позиции в трансфере */
+.transfer-filter{ display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; }
+.transfer-filter-btn{
+  flex:0 0 auto; background: rgb(0 0 0 / 37%); border:1px solid var(--line); color: var(--text-mute);
+  font-weight:800; font-size:12px; letter-spacing:.3px;
+  padding:9px 16px; border-radius:10px; cursor:pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.transfer-filter-btn.active{ background: var(--surface-3); border-color: var(--gold); color: var(--gold); }
 
-.transfer-card{
+/* строка игрока в трансфере (стиль карточек турниров) */
+.transfer-row-buy{
+  flex-shrink:0; display:flex; align-items:center; gap:5px;
   background: rgb(0 0 0 / 37%);
-    border: 1px solid var(--line);
-  border-radius:12px;
-  padding:12px;
-  display:flex; flex-direction:column; gap:6px;
-  transition: transform .18s var(--ease-bounce), border-color .18s ease, box-shadow .18s ease;
+    border: 1px solid var(--line); color: var(--gold);
+  font-weight:800; font-size:12.5px; padding:9px 12px; border-radius:10px; cursor:pointer;
 }
-.transfer-card:hover{ transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.3); border-color: var(--gold); }
-
-.transfer-buy-btn{
-  margin-top:6px;
-  padding:9px 8px;
-  font-size:12.5px;
-  border-radius:10px;
-  width:100%;
-  box-shadow: 0 4px 0 #0c5c2b, 0 6px 12px rgba(0,0,0,.35);
-}
+.transfer-row-buy:hover{ border-color: var(--gold); }
+.transfer-row-buy:disabled{ opacity:.5; cursor:not-allowed; }
 
 /* ничья */
 .bracket-match.draw{ border-color: rgba(255,193,7,.35); }

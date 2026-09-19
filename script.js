@@ -13,6 +13,7 @@ const IMG = {
   lvl:        'images/lvl.png',
   xp:         'images/opit.png',
   training:   'images/trenirovka.png',
+  plus:       'images/plus.png',
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
   cupYam:     'images/cup/cupyam.png',
@@ -1132,7 +1133,7 @@ function trainingSlotOccupiedHtml(p){
 function trainingSlotEmptyHtml(){
   return `
     <div class="training-slot empty">
-      <div class="ts-empty-icon">➕</div>
+      <div class="ts-empty-icon"><img src="${IMG.plus}" class="ts-empty-icon-img" alt="+"></div>
       <div class="ts-empty-label">Пустой слот</div>
       <button class="ts-add-btn">Добавить игрока</button>
     </div>`;
@@ -1347,38 +1348,61 @@ function ensureTransferMarket(){
   }
 }
 
-function transferPlayerCardHtml(p){
+let transferActiveFilter = 'all';
+
+function transferPlayerRowHtml(p){
   const pos = posByCode(p.pos);
-  const pct = clamp(Math.round((p.power/1000)*100), 4, 100);
   const affordable = state.coins >= p.price;
   return `
-  <div class="transfer-card">
-    <span class="player-pos ${pos.css}">${pos.code}</span>
-    <span class="player-name">${p.name}</span>
-    <div class="power-bar"><div class="power-bar-fill" style="width:${pct}%"></div></div>
-    <div class="player-power-row">
-      <span style="font-size:11px;color:var(--text-mute)">Сила</span>
-      <span class="player-power">${p.power}</span>
+  <div class="tournament-card transfer-row" data-id="${p.id}">
+    <span class="player-pos player-row-icon ${pos.css}">${pos.code}</span>
+    <div class="tournament-info">
+      <div class="tournament-name">${p.name}</div>
+      <div class="tournament-status">${posLabel(p.pos)} · Сила ${fmt(p.power)}</div>
     </div>
-    <button class="btn-primary transfer-buy-btn" data-id="${p.id}" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
-      <img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${p.price.toLocaleString('ru-RU')}
+    <button class="transfer-row-buy" data-buy-id="${p.id}" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
+      <img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${fmt(p.price)}
     </button>
   </div>`;
+}
+
+function transferFilterHtml(){
+  const filters = [
+    { code:'all', label:'ВСЕ' },
+    ...POSITIONS.map(pos => ({ code: pos.code, label: pos.code }))
+  ];
+  return filters.map(f => `
+    <button class="transfer-filter-btn ${transferActiveFilter === f.code ? 'active' : ''}" data-filter="${f.code}">${f.label}</button>
+  `).join('');
 }
 
 function renderTransferMarket(){
   ensureTransferMarket();
 
-  const list = document.getElementById('transfer-list');
-  const players = state.transferMarket.players;
-  list.innerHTML = players.length
-    ? players.map(p => transferPlayerCardHtml(p)).join('')
-    : `<div class="stub-card"><div class="stub-icon">🔁</div><p>Рынок пуст. Загляните позже.</p></div>`;
+  const filterEl = document.getElementById('transfer-filter');
+  filterEl.innerHTML = transferFilterHtml();
+  filterEl.querySelectorAll('.transfer-filter-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      transferActiveFilter = btn.dataset.filter;
+      renderTransferMarket();
+    });
+  });
 
-  list.querySelectorAll('.transfer-buy-btn').forEach(btn=>{
+  const list = document.getElementById('transfer-list');
+  const players = state.transferMarket.players.filter(p =>
+    transferActiveFilter === 'all' || p.pos === transferActiveFilter
+  );
+  list.innerHTML = players.length
+    ? players.map(transferPlayerRowHtml).join('')
+    : `<div class="stub-card"><div class="stub-icon">🔁</div><p>${state.transferMarket.players.length ? 'Нет игроков по этому фильтру' : 'Рынок пуст. Загляните позже.'}</p></div>`;
+
+  list.querySelectorAll('.transfer-row').forEach(row=>{
+    row.addEventListener('click', ()=> openTransferPlayerModal(row.dataset.id));
+  });
+  list.querySelectorAll('.transfer-row-buy').forEach(btn=>{
     btn.addEventListener('click', (e)=>{
       e.stopPropagation();
-      onBuyTransferPlayer(btn.dataset.id, btn);
+      onBuyTransferPlayer(btn.dataset.buyId, btn);
     });
   });
 
@@ -1448,7 +1472,38 @@ function onBuyTransferPlayer(playerId, btnEl){
   }
 
   showToast(`✅ ${p.name} куплен и добавлен в запас!`);
+  closePlayerModal();
   renderTransferMarket();
+}
+
+function openTransferPlayerModal(id){
+  const market = state.transferMarket;
+  const p = market.players.find(pl => pl.id === id);
+  if(!p) return;
+
+  const pos = posByCode(p.pos);
+  const affordable = state.coins >= p.price;
+
+  document.getElementById('player-modal-body').innerHTML = `
+    <span class="player-pos ${pos.css}">${pos.code}</span>
+    <div class="pm-name">${p.name}</div>
+    <div class="pm-pos">${posLabel(p.pos)}</div>
+    <div class="pm-power-label">СИЛА ИГРОКА</div>
+    <div class="pm-power-value">${fmt(p.power)}</div>
+    <div class="pm-status">Свободный агент — доступен на трансфере</div>
+    <button id="btn-buy-transfer-player" class="btn-primary btn-big" style="margin-top:14px;" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
+      <img src="${IMG.coin}" class="img-icon" alt="Монеты"> Купить за ${fmt(p.price)}
+    </button>
+  `;
+  document.getElementById('player-modal').classList.remove('hidden');
+
+  const buyBtn = document.getElementById('btn-buy-transfer-player');
+  if(buyBtn){
+    buyBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      onBuyTransferPlayer(p.id);
+    });
+  }
 }
 
 function openPlayerModal(id){
