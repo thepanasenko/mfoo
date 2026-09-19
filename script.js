@@ -1887,15 +1887,15 @@ function renderManager(){
           <div style="text-align: right;">
             <div style="font-size: 11px; color: var(--text-dim);">ОПЫТ</div>
             <div style="font-family: var(--ff-display); font-size: 18px; color: var(--text);">
-              ${isMaxLevel ? 'MAX' : `${state.xp} / ${getXpForLevel(level + 1)}`}
+              ${isMaxLevel ? 'MAX' : `${fmt(state.xp)} / ${fmt(getXpForLevel(level + 1))}`}
             </div>
           </div>
         </div>
         ${!isMaxLevel ? `
         <div style="margin-top: 8px;">
           <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-mute);">
-            <span>${xpInCurrentLevel} XP</span>
-            <span>До ${level + 1} уровня: ${xpToNext} XP</span>
+            <span>${fmt(xpInCurrentLevel)} XP</span>
+            <span>До ${level + 1} уровня: ${fmt(xpToNext)} XP</span>
           </div>
           <div style="height: 6px; background: var(--surface); border-radius: 4px; overflow: hidden; margin-top: 2px;">
             <div style="height: 100%; width: ${xpPercent}%; background: linear-gradient(90deg, var(--green-dark), var(--gold)); border-radius: 4px; transition: width 0.3s;"></div>
@@ -2337,7 +2337,7 @@ function renderCupRewardsList(t){
         <span class="cup-reward-values">
           <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.groupStageReward.coins.toLocaleString('ru-RU')}</span>
           <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${t.groupStageReward.power}</span>
-          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${t.groupStageReward.xp} XP</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(t.groupStageReward.xp)} XP</span>
         </span>
       </div>`);
     rows.push(`
@@ -2346,7 +2346,7 @@ function renderCupRewardsList(t){
         <span class="cup-reward-values">
           <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.groupWinBonus.coins.toLocaleString('ru-RU')}</span>
           <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${t.groupWinBonus.power}</span>
-          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${t.groupWinBonus.xp} XP</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(t.groupWinBonus.xp)} XP</span>
         </span>
       </div>`);
     const koTitlesMap = buildRoundTitles(t.groupsCount);
@@ -2361,7 +2361,7 @@ function renderCupRewardsList(t){
           <span class="cup-reward-values">
             <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${r.coins.toLocaleString('ru-RU')}</span>
             <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${r.power}</span>
-            <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${r.xp} XP</span>
+            <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(r.xp)} XP</span>
             ${isFinal ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>` : ''}
             ${isFinal && t.leagueChampionBudget ? `<span class="cup-reward-chip trophy"><img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${t.leagueChampionBudget.toLocaleString('ru-RU')}</span>` : ''}
           </span>
@@ -2387,7 +2387,7 @@ function renderCupRewardsList(t){
         <span class="cup-reward-values">
           <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${r.coins.toLocaleString('ru-RU')}</span>
           <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${r.power}</span>
-          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${r.xp} XP</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(r.xp)} XP</span>
           ${isFinal ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>` : ''}
         </span>
       </div>`);
@@ -2525,7 +2525,7 @@ function advanceGroupStage(t, cup){
   addXp(t.groupWinBonus.xp);
   save();
   refreshTopbar();
-  showToast(`🎉 Вы вышли из группы (1-е место)! +${t.groupWinBonus.coins.toLocaleString('ru-RU')} монет, +${t.groupWinBonus.power} силы, +${t.groupWinBonus.xp} XP (${bonus.player.name})`);
+  showToast(`🎉 Вы вышли из группы (1-е место)! +${t.groupWinBonus.coins.toLocaleString('ru-RU')} монет, +${t.groupWinBonus.power} силы, +${fmt(t.groupWinBonus.xp)} XP (${bonus.player.name})`);
 
   const range = cup.powerRange || { min: t.min, max: t.max };
   const otherWinners = [];
@@ -3319,7 +3319,7 @@ function showMatchModal(match, playerWon, onClose){
         <div style="color:var(--gold); font-weight:800; display:flex; align-items:center; justify-content:center; gap:5px; flex-wrap:wrap;">
           <span><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${powerIncrease} силы</span>
           <span><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fmt(stageCoins)}</span>
-          <span><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${xpEarned} XP</span>
+          <span><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(xpEarned)} XP</span>
         </div>
       </div>`;
     refreshTopbar();
