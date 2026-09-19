@@ -178,8 +178,8 @@ input{ font-family: inherit; }
 .btn-primary{
   background: linear-gradient(180deg, var(--green) 0%, var(--green-dark) 100%);
   border:none;
-  color:#04160b;
-  text-shadow:none;
+  color:#fff;
+  text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
   font-weight:800;
   letter-spacing:.5px;
   padding:14px 22px;
@@ -1117,8 +1117,8 @@ input{ font-family: inherit; }
 }
 .cup-action-primary{
   background: linear-gradient(180deg, var(--green) 0%, var(--green-dark) 100%);
-  color:#04160b;
-  text-shadow:none;
+  color:#fff;
+  text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
   box-shadow: 0 6px 0 #0c5c2b, 0 8px 16px rgba(0,0,0,.4);
 }
 .cup-action-primary:hover{ filter: brightness(1.06); }
@@ -1387,5 +1387,5 @@ input{ font-family: inherit; }
   padding:12px 10px; border-radius:10px; font-weight:800; font-size:13px;
   border:1px solid var(--line); background: var(--surface-3); color: var(--text); cursor:pointer;
 }
-.confirm-btn.confirm-yes{ background: var(--green); border-color: var(--green); color:#07240f; text-shadow:none; }
+.confirm-btn.confirm-yes{ background: var(--green); border-color: var(--green); color:#fff; text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55); }
 .confirm-btn.confirm-yes.danger{ background: var(--red); border-color: var(--red); color:#fff; }
