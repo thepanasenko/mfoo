@@ -1351,7 +1351,7 @@ input{ font-family: inherit; }
   padding:9px 16px; border-radius:10px; cursor:pointer;
   transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
-.transfer-filter-btn.active{ background: rgb(0 0 0 / 37%); border-color: var(--gold); color: var(--gold); }
+.transfer-filter-btn.active{ background: rgb(0 0 0 / 50%); border-color: var(--gold); color: var(--gold); }
 
 /* строка игрока в трансфере (стиль карточек турниров) */
 .transfer-row-buy{
