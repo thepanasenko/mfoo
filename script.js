@@ -1920,7 +1920,7 @@ function renderManager(){
         <div class="mgr-stat xp"><div class="mgr-stat-value">${state.xp.toLocaleString('ru-RU')}</div><div class="mgr-stat-label">ВСЕГО ОПЫТА</div></div>
       </div>
     </div>
-    <h3 class="squad-heading">КУБКИ</h3>
+    <h3 class="squad-heading">ЗАЛ СЛАВЫ</h3>
     <div class="mgr-trophy-list">${trophiesHtml}</div>
   `;
 }

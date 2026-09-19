@@ -433,8 +433,8 @@ input{ font-family: inherit; }
 .mgr-power-pill{ box-shadow: 0 0 12px rgba(34,197,94,.15); }
 .mgr-club-name{ font-family: var(--ff-display); font-size:20px; }
 .mgr-power-pill{
-  background: var(--surface-3); border:1px solid var(--green);
-  color: var(--green); font-weight:800; padding:4px 10px; border-radius:20px; font-size:13px;
+  background: rgb(0 0 0 / 37%); border:1px solid var(--green);
+  color: var(--green); font-weight:800; padding:4px 10px; border-radius:6px; font-size:13px;
 }
 .mgr-stats-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
 @media (min-width:480px){ .mgr-stats-grid{ grid-template-columns:repeat(3,1fr); } }
@@ -593,7 +593,7 @@ input{ font-family: inherit; }
   transition: background .15s ease, color .15s ease;
 }
 .team-tab-btn.active{ background: rgb(0 0 0 / 37%);
-    border: 1px solid var(--line); color: var(--gold); }
+    border: 1px solid var(--line); color: #e39500; }
 .team-tab-panel{ display:none; }
 .team-tab-panel.active{ display:block; }
 
@@ -1344,7 +1344,7 @@ input{ font-family: inherit; }
   font-family: var(--ff-display);
   font-size:18px;
   color: var(--gold);
-  background: var(--surface-3);
+  background: rgb(0 0 0 / 37%);
   border:1px solid rgba(242,183,5,.35);
   padding:6px 14px;
   border-radius:20px;
@@ -1361,12 +1361,13 @@ input{ font-family: inherit; }
   padding:9px 16px; border-radius:10px; cursor:pointer;
   transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
-.transfer-filter-btn.active{ background: var(--surface-3); border-color: var(--gold); color: var(--gold); }
+.transfer-filter-btn.active{ background: rgb(0 0 0 / 55%); border-color: var(--gold); color: var(--gold); }
 
 /* строка игрока в трансфере (стиль карточек турниров) */
 .transfer-row-buy{
   flex-shrink:0; display:flex; align-items:center; gap:5px;
-  background: var(--surface-3); border:1px solid rgba(242,183,5,.35); color: var(--gold);
+  background: rgb(0 0 0 / 37%);
+    border: 1px solid var(--line); color: var(--gold);
   font-weight:800; font-size:12.5px; padding:9px 12px; border-radius:10px; cursor:pointer;
 }
 .transfer-row-buy:hover{ border-color: var(--gold); }
