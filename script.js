@@ -1857,7 +1857,7 @@ function renderManager(){
   const trophiesHtml = Object.keys(trophiesCount).length
     ? Object.keys(trophiesCount).map(name => {
         const data = trophiesCount[name];
-        const countText = data.count > 1 ? `×${data.count}` : '';
+        const countText = `×${data.count}`;
         return `
           <div class="mgr-trophy-item">
             ${trophyIconHtml(data.tournament)}
