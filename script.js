@@ -16,7 +16,6 @@ const IMG = {
   plus:       'images/plus.png',
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
-  cliga:      'images/cup/cliga.png',
   cupYam:     'images/cup/cupyam.png',
   cupFran:    'images/cup/cupfran.png',
   cupUsa:     'images/cup/cupusa.png',
@@ -36,7 +35,6 @@ const IMG = {
 const TROPHY_IMG = {
   novice:  IMG.cupNew,
   bigleague: IMG.bliga,
-  championsleague: IMG.cliga,
   jamaica: IMG.cupYam,
   france:  IMG.cupFran,
   usa:     IMG.cupUsa,
@@ -381,34 +379,6 @@ const TOURNAMENTS = [
     cupWinCoins: 100000,
     // отдельный бонус чемпиону в бюджет (не в монеты)
     leagueChampionBudget: 500000
-  },
-  {
-    id:'championsleague',
-    title:'ЛИГА ЧЕМПИОНОВ',
-    icon:'🏆',
-    type:'group',
-    scheduled:true,
-    schedule:{ timezone:'Europe/Kyiv', times:[ {h:13,m:0}, {h:22,m:0} ] },
-    min:100, max:5500,
-    groupsCount:256,
-    teamsPerGroup:10,
-    teamNames:['Titan FC','Legion United','Crown Athletic','Empire City','Dominion FC','Sovereign United','Vanguard Elite','Apex Rovers','Pinnacle City','Summit United','Zenith Athletic','Meridian FC','Horizon United','Odyssey City','Genesis FC','Infinity United','Eclipse Athletic','Aurora City FC','Prestige United','Majestic Rovers','Regal Athletic','Supreme City','Elite Vanguard','Champion Forge','Victory United','Triumph City','Glory Athletic','Honor FC','Legacy United','Dynasty City','Fortune Rovers','Diamond United','Platinum City','Golden Vanguard','Silver Athletic','Bronze United FC','Ruby Rovers','Sapphire City','Emerald United','Opal Athletic','Crystal FC','Stellar United','Cosmic City FC','Nova Athletic','Comet Rovers','Meteor United','Galaxy City FC','Orbit Athletic','Quantum United','Phantom Rovers'],
-    groupStageReward: { coins:3000, power:2, xp:450 },
-    groupWinBonus: { coins:5000, power:5, xp:1200 },
-    // плей-офф на вылет (256 команд): 1/128, 1/64, 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
-    koRounds:[
-      { coins:6000, power:8, xp:1000 },   // 1/128 финала
-      { coins:9000, power:12, xp:1300 },  // 1/64 финала
-      { coins:12000, power:15, xp:1700 }, // 1/32 финала
-      { coins:16000, power:18, xp:2200 }, // 1/16 финала
-      { coins:22000, power:22, xp:2800 }, // 1/8 финала
-      { coins:28000, power:26, xp:3500 }, // Четвертьфинал
-      { coins:36000, power:30, xp:4500 }, // Полуфинал
-      { coins:50000, power:35, xp:6000 }  // Финал
-    ],
-    cupWinCoins: 180000,
-    // отдельный бонус чемпиону в бюджет (не в монеты)
-    leagueChampionBudget: 750000
   }
 ];
 function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
@@ -426,14 +396,6 @@ function getTZOffsetMinutes(date, timeZone){
   const hour = parts.hour === '24' ? 0 : Number(parts.hour);
   const asUTC = Date.UTC(Number(parts.year), Number(parts.month)-1, Number(parts.day), hour, Number(parts.minute), Number(parts.second));
   return Math.round((asUTC - date.getTime()) / 60000);
-}
-
-/* состояние регистрации для конкретного турнира по расписанию (Большая Лига,
-   Лига чемпионов и т.д.) — у каждого турнира своя запись */
-function leagueReg(t){
-  if(!state.leagueRegistrations) state.leagueRegistrations = {};
-  if(!state.leagueRegistrations[t.id]) state.leagueRegistrations[t.id] = { sessionId:null, range:null, notifiedSessionId:null };
-  return state.leagueRegistrations[t.id];
 }
 
 // возвращает {prev, next} — последний прошедший и ближайший будущий старт лиги
@@ -679,7 +641,8 @@ function newGameState(teamName){
     transferMarket: { players: [], generatedAt: 0 },
     formation: DEFAULT_FORMATION,
     lineups: {},
-    leagueRegistrations: {}
+    leagueRegisteredSessionId: null,
+    leagueNotifiedSessionId: null
   };
   ensureLineupsInit(s);
   autoFillEmptyLineup(s, s.formation);
@@ -718,25 +681,8 @@ function migrateState(s){
   if(s.level === undefined) s.level = 1;
   if(s.xp === undefined) s.xp = 0;
   if(!s.transferMarket) s.transferMarket = { players: [], generatedAt: 0 };
-
-  /* регистрация в лигах по расписанию — теперь отдельно на каждый турнир
-     (раньше был один общий набор полей, действовавший только на Большую Лигу) */
-  if(!s.leagueRegistrations) s.leagueRegistrations = {};
-  if(s.leagueRegisteredSessionId !== undefined){
-    if(s.leagueRegisteredSessionId){
-      s.leagueRegistrations['bigleague'] = {
-        sessionId: s.leagueRegisteredSessionId,
-        range: s.leagueRegisteredRange || null,
-        notifiedSessionId: s.leagueNotifiedSessionId || null
-      };
-    }
-    delete s.leagueRegisteredSessionId;
-    delete s.leagueRegisteredRange;
-    delete s.leagueNotifiedSessionId;
-  }
-  TOURNAMENTS.filter(t => t.scheduled).forEach(t=>{
-    if(!s.leagueRegistrations[t.id]) s.leagueRegistrations[t.id] = { sessionId:null, range:null, notifiedSessionId:null };
-  });
+  if(s.leagueRegisteredSessionId === undefined) s.leagueRegisteredSessionId = null;
+  if(s.leagueNotifiedSessionId === undefined) s.leagueNotifiedSessionId = null;
   if(!s.formation || !FORMATIONS[s.formation]) s.formation = DEFAULT_FORMATION;
   s.players.forEach(p => { if(p.slot === undefined) p.slot = null; });
 
@@ -912,6 +858,7 @@ function onResetGame(){
    NAVIGATION
    ============================================================ */
 function navigate(name, cupId){
+  window.scrollTo(0, 0);
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
 
@@ -1992,7 +1939,7 @@ function leagueListStatusText(t, opts){
   const hh = String(Math.floor(remaining / 3600000)).padStart(2,'0');
   const mm = String(Math.floor((remaining % 3600000) / 60000)).padStart(2,'0');
   const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
-  const registered = leagueReg(t).sessionId === leagueSessionId(next);
+  const registered = state.leagueRegisteredSessionId === leagueSessionId(next);
   return `${registered ? '✅ Регистрация ' : ''}Старт через ${hh}:${mm}:${ss}`;
 }
 
@@ -2011,8 +1958,8 @@ function startLeagueListTimer(){
       stopLeagueListTimer();
       return;
     }
-    checkLeagueRegistrationEligibility();
     TOURNAMENTS.filter(x => x.scheduled).forEach(t=>{
+      checkLeagueRegistrationEligibility();
       const statusEl = document.querySelector(`.tournament-card[data-cup="${t.id}"] .tournament-status`);
       if(!statusEl) return;
       const power = calcClubPower(state.players);
@@ -2171,8 +2118,8 @@ function renderLeagueIntro(t, ctx){
   if(!ctx.eligible){
     eligEl.classList.add('bad');
     eligEl.textContent = ctx.power < ctx.range.min
-      ? `Ваша команда слишком слабая для турнира «${t.title}». Нужна сила от ${fmt(ctx.range.min)}.`
-      : `Ваша команда слишком сильная для своего диапазона в «${t.title}» (${fmt(ctx.range.min)}–${fmt(ctx.range.max)}).`;
+      ? `Ваша команда слишком слабая для Большой Лиги. Нужна сила от ${fmt(ctx.range.min)}.`
+      : `Ваша команда слишком сильная для своего диапазона Большой Лиги (${fmt(ctx.range.min)}–${fmt(ctx.range.max)}).`;
     startBtn.classList.add('hidden');
     hideLeagueCancelBtn();
     stopLeagueCountdown();
@@ -2215,10 +2162,6 @@ function hideLeagueCancelBtn(){
   if(btn) btn.classList.add('hidden');
 }
 
-function scheduleTimesLabel(t){
-  return t.schedule.times.map(x => `${String(x.h).padStart(2,'0')}:${String(x.m).padStart(2,'0')}`).join(' и ');
-}
-
 function updateLeagueCountdown(t){
   const cup = state.cups[t.id];
   if(cup && !cup.finished) return; // сессия уже идёт — обычный экран кубка
@@ -2227,18 +2170,17 @@ function updateLeagueCountdown(t){
   const startBtn = document.getElementById('btn-cup-start');
   const { prev, next } = getLeagueSessions(t);
   const graceMs = 30 * 60 * 1000; // 30 минут на вход после старта
-  const reg = leagueReg(t);
 
-  if(prev && reg.sessionId === leagueSessionId(prev)){
+  if(prev && state.leagueRegisteredSessionId === leagueSessionId(prev)){
     const elapsed = Date.now() - prev.getTime();
     if(elapsed <= graceMs){
-      reg.sessionId = null;
+      state.leagueRegisteredSessionId = null;
       startLeagueSession(t, prev);
       return;
     } else {
-      reg.sessionId = null;
+      state.leagueRegisteredSessionId = null;
       save();
-      showToast(`⌛ Вы не успели зайти к старту «${t.title}». Регистрация на новый старт открыта.`);
+      showToast('⌛ Вы не успели зайти к старту Большой Лиги. Регистрация на новый старт открыта.');
     }
   }
 
@@ -2248,15 +2190,15 @@ function updateLeagueCountdown(t){
   const totalSec = Math.floor(remaining / 1000);  const hh = String(Math.floor(totalSec / 3600)).padStart(2,'0');
   const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2,'0');
   const ss = String(totalSec % 60).padStart(2,'0');
-  const registered = reg.sessionId === leagueSessionId(next);
+  const registered = state.leagueRegisteredSessionId === leagueSessionId(next);
 
   const power = calcClubPower(state.players);
-  const range = registered && reg.range ? reg.range : bigLeagueRangeForPower(power);
+  const range = registered && state.leagueRegisteredRange ? state.leagueRegisteredRange : bigLeagueRangeForPower(power);
   const rangeLine = `<br><span style="font-size:12px;color:var(--text-dim)">Диапазон силы клуба ${registered ? '(закреплён при регистрации)' : 'для вашей текущей силы'}: ${fmt(range.min)}–${fmt(range.max)}. Ваша сила: ${fmt(power)}.</span>`;
 
   eligEl.innerHTML = (registered
-    ? `✅ Вы зарегистрированы! До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b>`
-    : `До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты каждый день в ${scheduleTimesLabel(t)} по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`
+    ? `✅ Вы зарегистрированы! До старта Большой Лиги: <b>${hh}:${mm}:${ss}</b>`
+    : `До старта Большой Лиги: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты каждый день в 12:00 и 20:00 по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`
   ) + rangeLine;
 
   startBtn.textContent = registered ? 'ВЫ ЗАРЕГИСТРИРОВАНЫ ✅' : 'ЗАРЕГИСТРИРОВАТЬСЯ';
@@ -2268,62 +2210,54 @@ function updateLeagueCountdown(t){
 }
 
 /* авто-отмена регистрации, если сила клуба вышла за диапазон, закреплённый
-   при регистрации. Проверяется для КАЖДОГО турнира по расписанию отдельно.
-   Если сессия уже стартовала — сила не проверяется, играем как есть. */
+   при регистрации. Если сессия уже стартовала — сила не проверяется, играем как есть. */
 function checkLeagueRegistrationEligibility(){
-  let anyCancelled = false;
-  TOURNAMENTS.filter(x => x.scheduled).forEach(t=>{
-    const reg = leagueReg(t);
-    if(!reg.sessionId) return;
+  const t = TOURNAMENTS.find(x => x.scheduled);
+  if(!t || !state.leagueRegisteredSessionId) return false;
 
-    const cup = state.cups[t.id];
-    if(cup && !cup.finished) return; // сессия уже идёт
+  const cup = state.cups[t.id];
+  if(cup && !cup.finished) return false;          // сессия уже идёт
 
-    const { next } = getLeagueSessions(t);
-    if(reg.sessionId !== leagueSessionId(next)) return; // регистрация на уже стартовавшую сессию
+  const { next } = getLeagueSessions(t);
+  if(state.leagueRegisteredSessionId !== leagueSessionId(next)) return false; // регистрация на уже стартовавшую сессию
 
-    const power = calcClubPower(state.players);
-    const range = reg.range || bigLeagueRangeForPower(power);
-    if(power >= range.min && power <= range.max) return;
+  const power = calcClubPower(state.players);
+  const range = state.leagueRegisteredRange || bigLeagueRangeForPower(power);
+  if(power >= range.min && power <= range.max) return false;
 
-    reg.sessionId = null;
-    reg.range = null;
-    reg.notifiedSessionId = null;
-    save();
-    showToast(`❌ Регистрация в «${t.title}» отменена: сила клуба ${fmt(power)} вышла из диапазона ${fmt(range.min)}–${fmt(range.max)}.`);
-    anyCancelled = true;
-  });
-  return anyCancelled;
+  state.leagueRegisteredSessionId = null;
+  state.leagueRegisteredRange = null;
+  state.leagueNotifiedSessionId = null;
+  save();
+  showToast(`❌ Регистрация в Большую Лигу отменена: сила клуба ${fmt(power)} вышла из диапазона ${fmt(range.min)}–${fmt(range.max)}.`);
+  return true;
 }
 
 function onLeagueCancelRegistration(){
-  const t = tournamentById(currentCupId);
-  if(!t) return;
-  const reg = leagueReg(t);
-  reg.sessionId = null;
-  reg.range = null;
-  reg.notifiedSessionId = null;
+  state.leagueRegisteredSessionId = null;
+  state.leagueRegisteredRange = null;
+  state.leagueNotifiedSessionId = null;
   save();
-  if(t.scheduled) updateLeagueCountdown(t);
-  showToast(`Регистрация в «${t.title}» отменена.`);
+  const t = tournamentById(currentCupId);
+  if(t && t.scheduled) updateLeagueCountdown(t);
+  showToast('Регистрация в Большую Лигу отменена.');
 }
 
 function onLeagueRegister(){
   const t = tournamentById(currentCupId);
-  const reg = leagueReg(t);
-  if(reg.sessionId){
-    showToast(`Вы уже зарегистрированы на ближайший старт «${t.title}».`);
+  if(state.leagueRegisteredSessionId){
+    showToast('Вы уже зарегистрированы на ближайший старт Большой Лиги.');
     return;
   }
   const power = calcClubPower(state.players);
   const range = bigLeagueRangeForPower(power);
   const { next } = getLeagueSessions(t);
-  reg.sessionId = leagueSessionId(next);
-  reg.range = range;
-  reg.notifiedSessionId = null;
+  state.leagueRegisteredSessionId = leagueSessionId(next);
+  state.leagueRegisteredRange = range;
+  state.leagueNotifiedSessionId = null;
   save();
   updateLeagueCountdown(t);
-  showToast(`✅ Вы зарегистрированы на ближайший старт «${t.title}»! Диапазон: ${fmt(range.min)}–${fmt(range.max)}.`);
+  showToast(`✅ Вы зарегистрированы на ближайший старт Большой Лиги! Диапазон: ${fmt(range.min)}–${fmt(range.max)}.`);
 }
 
 function startLeagueSession(t, sessionStartDate){
@@ -2344,31 +2278,29 @@ function startLeagueSession(t, sessionStartDate){
 // лёгкий фоновый опрос — уведомляет, если игрок не на экране лиги в момент старта
 function checkLeagueNotification(){
   checkLeagueRegistrationEligibility();
-  TOURNAMENTS.filter(x => x.scheduled).forEach(t=>{
-    const reg = leagueReg(t);
-    if(!reg.sessionId) return;
-    const cup = state.cups[t.id];
-    if(cup && !cup.finished) return;
+  const t = TOURNAMENTS.find(x => x.scheduled);
+  if(!t || !state.leagueRegisteredSessionId) return;
+  const cup = state.cups[t.id];
+  if(cup && !cup.finished) return;
 
-    const { prev } = getLeagueSessions(t);
-    if(!prev) return;
-    const sid = leagueSessionId(prev);
-    if(reg.sessionId !== sid) return;
+  const { prev } = getLeagueSessions(t);
+  if(!prev) return;
+  const sid = leagueSessionId(prev);
+  if(state.leagueRegisteredSessionId !== sid) return;
 
-    const graceMs = 30 * 60 * 1000;
-    const elapsed = Date.now() - prev.getTime();
+  const graceMs = 30 * 60 * 1000;
+  const elapsed = Date.now() - prev.getTime();
 
-    if(elapsed >= 0 && elapsed <= graceMs){
-      if(reg.notifiedSessionId !== sid){
-        reg.notifiedSessionId = sid;
-        save();
-        showToast(`🏆 «${t.title}» началась! Откройте «Играть» → «${t.title}», чтобы сыграть.`);
-      }
-    } else if(elapsed > graceMs){
-      reg.sessionId = null;
+  if(elapsed >= 0 && elapsed <= graceMs){
+    if(state.leagueNotifiedSessionId !== sid){
+      state.leagueNotifiedSessionId = sid;
       save();
+      showToast('🏆 Большая Лига началась! Откройте «Играть» → «Большая Лига», чтобы сыграть.');
     }
-  });
+  } else if(elapsed > graceMs){
+    state.leagueRegisteredSessionId = null;
+    save();
+  }
 }
 
 function startLeagueNotificationPoll(){
@@ -2471,7 +2403,7 @@ function renderCupRewardsList(t){
 function initEuroCup(cupId){
   const t = tournamentById(cupId);
   const power = calcClubPower(state.players);
-  const range = t.scheduled ? (leagueReg(t).range || bigLeagueRangeForPower(power)) : { min: t.min, max: t.max };
+  const range = t.scheduled ? (state.leagueRegisteredRange || bigLeagueRangeForPower(power)) : { min: t.min, max: t.max };
   const playerTeam = { id:'you', name: state.teamName, power, isPlayer:true, formation: state.formation };
 
   const names = shuffle([...t.teamNames]);
@@ -3051,7 +2983,7 @@ function rewardRandomPlayer(powerIncrease){
    ============================================================ */
 function buildRoundTitles(teamCount){
   const totalRounds = Math.round(Math.log2(teamCount));
-  const namesFromFinal = ['ФИНАЛ', 'ПОЛУФИНАЛ', 'ЧЕТВЕРТЬФИНАЛ', '1/8 ФИНАЛА', '1/16 ФИНАЛА', '1/32 ФИНАЛА', '1/64 ФИНАЛА', '1/128 ФИНАЛА'];
+  const namesFromFinal = ['ФИНАЛ', 'ПОЛУФИНАЛ', 'ЧЕТВЕРТЬФИНАЛ', '1/8 ФИНАЛА', '1/16 ФИНАЛА', '1/32 ФИНАЛА', '1/64 ФИНАЛА'];
   const titles = {};
   for(let round = 1; round <= totalRounds; round++){
     const fromEnd = totalRounds - round;
