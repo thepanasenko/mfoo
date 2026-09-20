@@ -421,7 +421,7 @@ function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
 const TASK_CHAINS = [
   {
     id:'level',
-    icon:'🌟',
+    icon:`<img src="${IMG.lvl}" class="task-icon-img" alt="Уровень">`,
     tiers:[
       {
         title:'Достигните 5-го уровня менеджера',
@@ -436,6 +436,34 @@ const TASK_CHAINS = [
         target:10,
         progress:(s)=> Math.min(s.level, 10),
         isComplete:(s)=> s.level >= 10
+      },
+      {
+        title:'Достигните 15-го уровня менеджера',
+        reward:{ coins:25000 },
+        target:15,
+        progress:(s)=> Math.min(s.level, 15),
+        isComplete:(s)=> s.level >= 15
+      },
+      {
+        title:'Достигните 25-го уровня менеджера',
+        reward:{ budget:250000 },
+        target:25,
+        progress:(s)=> Math.min(s.level, 25),
+        isComplete:(s)=> s.level >= 25
+      },
+      {
+        title:'Достигните 40-го уровня менеджера',
+        reward:{ budget:500000 },
+        target:40,
+        progress:(s)=> Math.min(s.level, 40),
+        isComplete:(s)=> s.level >= 40
+      },
+      {
+        title:'Достигните 50-го уровня менеджера',
+        reward:{ coins:100000, budget:1000000 },
+        target:50,
+        progress:(s)=> Math.min(s.level, 50),
+        isComplete:(s)=> s.level >= 50
       }
     ]
   },
