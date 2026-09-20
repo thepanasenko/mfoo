@@ -463,6 +463,30 @@ input{ font-family: inherit; }
    ЗАДАНИЯ (TASKS)
    ============================================================ */
 #btn-open-tasks{ position:relative; }
+
+/* красивая кнопка «Задания» на экране менеджера */
+.btn-tasks{
+  display:flex; align-items:center; gap:12px; width:100%;
+  background: linear-gradient(135deg, rgba(242,183,5,.14), rgba(0,0,0,.30));
+  border:1px solid rgba(242,183,5,.4);
+  border-radius:14px; padding:14px 16px; margin:16px 0;
+  cursor:pointer; text-align:left;
+  box-shadow: 0 6px 16px rgba(0,0,0,.28);
+  transition: transform .18s var(--ease-bounce), border-color .15s ease, box-shadow .18s ease;
+}
+.btn-tasks:hover{ transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 10px 22px rgba(0,0,0,.35); }
+.btn-tasks:active{ transform: translateY(1px) scale(.99); }
+.btn-tasks-icon{
+  flex-shrink:0; width:46px; height:46px;
+  display:flex; align-items:center; justify-content:center;
+}
+.btn-tasks-icon-img{ width:46px; height:46px; object-fit:contain; display:block; }
+.btn-tasks-text{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.btn-tasks-title{ font-family: var(--ff-display); font-size:15px; color: var(--text); letter-spacing:.3px; }
+.btn-tasks-sub{ font-size:11px; color: var(--text-dim); }
+.btn-tasks-arrow{ flex-shrink:0; font-size:20px; color: var(--gold); }
+
+.task-icon-img{ width:26px; height:26px; object-fit:contain; margin-top:2px; }
 .task-badge{
   position:absolute; top:-6px; right:-6px;
   min-width:20px; height:20px; padding:0 5px;

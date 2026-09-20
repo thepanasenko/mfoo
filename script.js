@@ -13,6 +13,7 @@ const IMG = {
   lvl:        'images/lvl.png',
   xp:         'images/opit.png',
   training:   'images/trenirovka.png',
+  tasks:      'images/zadanie.png',
   plus:       'images/plus.png',
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
@@ -414,35 +415,85 @@ const TOURNAMENTS = [
 function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
 
 /* ============================================================
-   ЗАДАНИЯ (TASKS)
+   ЗАДАНИЯ (TASKS) — цепочки: забрал награду за текущий этап →
+   тут же на его месте открылся следующий, посложнее
    ============================================================ */
-const TASKS = [
+const TASK_CHAINS = [
   {
-    id:'level5',
-    title:'Достигните 5-го уровня менеджера',
+    id:'level',
     icon:'🌟',
-    reward:{ coins:3000 },
-    target:5,
-    progress:(s)=> Math.min(s.level, 5),
-    isComplete:(s)=> s.level >= 5
+    tiers:[
+      {
+        title:'Достигните 5-го уровня менеджера',
+        reward:{ coins:3000 },
+        target:5,
+        progress:(s)=> Math.min(s.level, 5),
+        isComplete:(s)=> s.level >= 5
+      },
+      {
+        title:'Достигните 10-го уровня менеджера',
+        reward:{ coins:10000 },
+        target:10,
+        progress:(s)=> Math.min(s.level, 10),
+        isComplete:(s)=> s.level >= 10
+      }
+    ]
   },
   {
-    id:'novice_cup_1',
-    title:'Сыграйте Кубок новичков 1 раз',
+    id:'cups',
     icon:'🏆',
-    reward:{ coins:1000 },
-    target:1,
-    progress:(s)=> Math.min((s.taskStats?.cupPlays?.novice) || 0, 1),
-    isComplete:(s)=> ((s.taskStats?.cupPlays?.novice) || 0) >= 1
+    tiers:[
+      {
+        title:'Сыграйте Кубок новичков 1 раз',
+        reward:{ coins:1000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.novice,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.novice) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.novice) || 0) >= 1
+      },
+      {
+        title:'Сыграйте Кубок Ямайки 1 раз',
+        reward:{ coins:2000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.jamaica,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.jamaica) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.jamaica) || 0) >= 1
+      }
+    ]
   },
   {
     id:'power1000',
-    title:'Достигните силы клуба 1000',
     icon:'💪',
-    reward:{ slots:1 },
-    target:1000,
-    progress:(s)=> Math.min(calcClubPower(s.players), 1000),
-    isComplete:(s)=> calcClubPower(s.players) >= 1000
+    tiers:[
+      {
+        title:'Достигните силы клуба 1100',
+        reward:{ slots:1 },
+        target:1100,
+        progress:(s)=> Math.min(calcClubPower(s.players), 1100),
+        isComplete:(s)=> calcClubPower(s.players) >= 1100
+      },
+      {
+        title:'Достигните силы клуба 2200',
+        reward:{ budget:50000 },
+        target:2200,
+        progress:(s)=> Math.min(calcClubPower(s.players), 2200),
+        isComplete:(s)=> calcClubPower(s.players) >= 2200
+      },
+      {
+        title:'Достигните силы клуба 3300',
+        reward:{ budget:100000 },
+        target:3300,
+        progress:(s)=> Math.min(calcClubPower(s.players), 3300),
+        isComplete:(s)=> calcClubPower(s.players) >= 3300
+      },
+      {
+        title:'Достигните силы клуба 4400',
+        reward:{ budget:250000 },
+        target:4400,
+        progress:(s)=> Math.min(calcClubPower(s.players), 4400),
+        isComplete:(s)=> calcClubPower(s.players) >= 4400
+      }
+    ]
   }
 ];
 
@@ -452,17 +503,24 @@ function recordCupPlayed(cupId){
   state.taskStats.cupPlays[cupId] = (state.taskStats.cupPlays[cupId] || 0) + 1;
 }
 
-function isTaskClaimed(id){
-  return Array.isArray(state.claimedTasks) && state.claimedTasks.includes(id);
+/* индекс текущего (ещё не забранного) этапа цепочки; null, если цепочка вся пройдена */
+function currentChainTier(chain){
+  if(!state.taskChainTier) state.taskChainTier = {};
+  const idx = state.taskChainTier[chain.id] || 0;
+  return { idx, tier: chain.tiers[idx] || null };
 }
 
 function hasClaimableTasks(){
-  return TASKS.some(task => task.isComplete(state) && !isTaskClaimed(task.id));
+  return TASK_CHAINS.some(chain=>{
+    const { tier } = currentChainTier(chain);
+    return tier && tier.isComplete(state);
+  });
 }
 
 function taskRewardText(reward){
   const parts = [];
   if(reward.coins) parts.push(`+${fmt(reward.coins)} монет`);
+  if(reward.budget) parts.push(`+${fmt(reward.budget)} евро`);
   if(reward.slots) parts.push(`+${reward.slots} слот для тренировок`);
   return parts.join(' · ');
 }
@@ -470,54 +528,71 @@ function taskRewardText(reward){
 function taskRewardHtml(reward){
   const parts = [];
   if(reward.coins) parts.push(`<img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fmt(reward.coins)}`);
+  if(reward.budget) parts.push(`<img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${fmt(reward.budget)}`);
   if(reward.slots) parts.push(`<img src="${IMG.training}" class="img-icon" alt="Слот тренировки"> +${reward.slots} слот`);
   return parts.join(' &nbsp;·&nbsp; ');
 }
 
-function claimTask(id){
-  const task = TASKS.find(x=>x.id===id);
-  if(!task) return;
-  if(isTaskClaimed(id)) return;
-  if(!task.isComplete(state)) return;
+function claimTask(chainId){
+  const chain = TASK_CHAINS.find(c=>c.id===chainId);
+  if(!chain) return;
+  const { idx, tier } = currentChainTier(chain);
+  if(!tier || !tier.isComplete(state)) return;
 
-  state.claimedTasks.push(id);
-  if(task.reward.coins) state.coins += task.reward.coins;
-  if(task.reward.slots){
+  if(tier.reward.coins) state.coins += tier.reward.coins;
+  if(tier.reward.budget) state.budget += tier.reward.budget;
+  if(tier.reward.slots){
     const current = state.trainingSlotsMax || 3;
-    state.trainingSlotsMax = Math.min(SLOT_UPGRADE_MAX, current + task.reward.slots);
+    state.trainingSlotsMax = Math.min(SLOT_UPGRADE_MAX, current + tier.reward.slots);
   }
+  if(!state.taskChainTier) state.taskChainTier = {};
+  state.taskChainTier[chainId] = idx + 1;
+
   save();
   refreshTopbar();
   renderTasksModal();
   updateTasksBadge();
-  showToast(`🎁 Награда получена: ${taskRewardText(task.reward)}!`);
+  updateManagerNavBadge();
+  showToast(`🎁 Награда получена: ${taskRewardText(tier.reward)}!`);
 }
 
-function taskRowHtml(task){
-  const complete = task.isComplete(state);
-  const claimed = isTaskClaimed(task.id);
-  const progressVal = task.progress(state);
-  const pct = Math.min(100, Math.round((progressVal / task.target) * 100));
+function taskRowHtml(chain){
+  const { tier } = currentChainTier(chain);
+
+  if(!tier){
+    return `
+      <div class="task-row claimed">
+        <div class="task-icon">${chain.icon}</div>
+        <div class="task-info">
+          <div class="task-title">Все задания этой цепочки выполнены</div>
+          <div class="task-status done">✅ Пройдено</div>
+        </div>
+      </div>`;
+  }
+
+  const complete = tier.isComplete(state);
+  const progressVal = tier.progress(state);
+  const pct = Math.min(100, Math.round((progressVal / tier.target) * 100));
+  const iconSrc = typeof tier.iconImg === 'function' ? tier.iconImg() : null;
+  const iconHtml = iconSrc ? `<img src="${iconSrc}" class="task-icon-img" alt="">` : chain.icon;
 
   let statusHtml;
-  if(claimed){
-    statusHtml = `<div class="task-status done">✅ Выполнено</div>`;
-  } else if(complete){
-    statusHtml = `<button class="task-claim-btn" data-claim-task="${task.id}">ЗАБРАТЬ НАГРАДУ</button>`;
+  if(complete){
+    statusHtml = `<button class="task-claim-btn" data-claim-task="${chain.id}">ЗАБРАТЬ НАГРАДУ</button>`;
   } else {
     statusHtml = `
       <div class="task-progress-row">
         <div class="task-progress-bar"><div class="task-progress-fill" style="width:${pct}%"></div></div>
-        <div class="task-progress-text">${fmt(progressVal)} / ${fmt(task.target)}</div>
+        <div class="task-progress-text">${fmt(progressVal)} / ${fmt(tier.target)}</div>
       </div>`;
   }
 
   return `
-    <div class="task-row ${claimed ? 'claimed' : complete ? 'complete' : ''}">
-      <div class="task-icon">${task.icon}</div>
+    <div class="task-row ${complete ? 'complete' : ''}">
+      <div class="task-icon">${iconHtml}</div>
       <div class="task-info">
-        <div class="task-title">${task.title}</div>
-        <div class="task-reward">${taskRewardHtml(task.reward)}</div>
+        <div class="task-title">${tier.title}</div>
+        <div class="task-reward">${taskRewardHtml(tier.reward)}</div>
         ${statusHtml}
       </div>
     </div>`;
@@ -538,9 +613,9 @@ function renderTasksModal(){
     <div class="modal-card tasks-modal-card">
       <button class="modal-close" id="tasks-modal-close">✕</button>
       <div class="tp-title">📋 Задания</div>
-      <div class="tp-sub">Выполняйте задания и получайте награды</div>
+      <div class="tp-sub">Выполняйте задания и получайте награды — как только заберёте награду, откроется следующее задание</div>
       <div class="tasks-list">
-        ${TASKS.map(task => taskRowHtml(task)).join('')}
+        ${TASK_CHAINS.map(chain => taskRowHtml(chain)).join('')}
       </div>
     </div>`;
 
@@ -843,7 +918,7 @@ function newGameState(teamName){
     lineups: {},
     leagueRegistrations: {},
     taskStats: { cupPlays: {} },
-    claimedTasks: []
+    taskChainTier: {}
   };
   ensureLineupsInit(s);
   autoFillEmptyLineup(s, s.formation);
@@ -884,7 +959,14 @@ function migrateState(s){
   if(!s.transferMarket) s.transferMarket = { players: [], generatedAt: 0 };
   if(!s.taskStats) s.taskStats = { cupPlays: {} };
   if(!s.taskStats.cupPlays) s.taskStats.cupPlays = {};
-  if(!Array.isArray(s.claimedTasks)) s.claimedTasks = [];
+  if(!s.taskChainTier) s.taskChainTier = {};
+  /* миграция со старой плоской системы заданий (claimedTasks) на цепочки */
+  if(Array.isArray(s.claimedTasks)){
+    if(s.claimedTasks.includes('level5') && !s.taskChainTier.level) s.taskChainTier.level = 1;
+    if(s.claimedTasks.includes('novice_cup_1') && !s.taskChainTier.cups) s.taskChainTier.cups = 1;
+    if(s.claimedTasks.includes('power1000') && !s.taskChainTier.power1000) s.taskChainTier.power1000 = 1;
+    delete s.claimedTasks;
+  }
 
   /* регистрация в лигах по расписанию — теперь отдельно на каждый турнир
      (раньше был один общий набор полей, действовавший только на Большую Лигу) */
@@ -2155,7 +2237,14 @@ function renderManager(){
         <div class="mgr-stat xp"><div class="mgr-stat-value">${state.xp.toLocaleString('ru-RU')}</div><div class="mgr-stat-label">ВСЕГО ОПЫТА</div></div>
       </div>
     </div>
-    <button id="btn-open-tasks" class="btn-primary btn-big" style="margin:16px 0;">📋 ЗАДАНИЯ</button>
+    <button id="btn-open-tasks" class="btn-tasks">
+      <span class="btn-tasks-icon"><img src="${IMG.tasks}" class="btn-tasks-icon-img" alt="Задания"></span>
+      <span class="btn-tasks-text">
+        <span class="btn-tasks-title">Задания</span>
+        <span class="btn-tasks-sub">Выполняйте и получайте награды</span>
+      </span>
+      <span class="btn-tasks-arrow">›</span>
+    </button>
     <h3 class="squad-heading">ЗАЛ СЛАВЫ</h3>
     <div class="mgr-trophy-list">${trophiesHtml}</div>
   `;
