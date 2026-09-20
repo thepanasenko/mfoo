@@ -34,6 +34,11 @@
      1px  1px 0 rgba(0,0,0,.55);
 }
 html,body{ height:100%; }
+body.scroll-locked{
+  overflow:hidden;
+  touch-action:none;
+  overscroll-behavior:none;
+}
 body{
   margin:0;
   background: var(--bg);

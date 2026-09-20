@@ -12,6 +12,7 @@ const IMG = {
   sila:       'images/sila.png',
   lvl:        'images/lvl.png',
   xp:         'images/opit.png',
+  win:        'images/win.png',
   training:   'images/trenirovka.png',
   tasks:      'images/zadanie.png',
   plus:       'images/plus.png',
@@ -486,12 +487,84 @@ const TASK_CHAINS = [
         iconImg: ()=> TROPHY_IMG.jamaica,
         progress:(s)=> Math.min((s.taskStats?.cupPlays?.jamaica) || 0, 1),
         isComplete:(s)=> ((s.taskStats?.cupPlays?.jamaica) || 0) >= 1
+      },
+      {
+        title:'Сыграйте Кубок Франции 1 раз',
+        reward:{ coins:5000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.france,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.france) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.france) || 0) >= 1
+      },
+      {
+        title:'Сыграйте Кубок США 1 раз',
+        reward:{ coins:6000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.usa,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.usa) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.usa) || 0) >= 1
+      },
+      {
+        title:'Сыграйте Кубок Беларуси 1 раз',
+        reward:{ coins:7500 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.belarus,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.belarus) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.belarus) || 0) >= 1
+      }
+    ]
+  },
+  {
+    id:'wins',
+    icon:`<img src="${IMG.win}" class="task-icon-img" alt="Победы">`,
+    tiers:[
+      {
+        title:'Одержите 10 побед',
+        reward:{ coins:500, xp:250 },
+        target:10,
+        progress:(s)=> Math.min(s.stats.wins, 10),
+        isComplete:(s)=> s.stats.wins >= 10
+      },
+      {
+        title:'Одержите 50 побед',
+        reward:{ coins:2500, xp:2500 },
+        target:50,
+        progress:(s)=> Math.min(s.stats.wins, 50),
+        isComplete:(s)=> s.stats.wins >= 50
+      },
+      {
+        title:'Одержите 100 побед',
+        reward:{ coins:5000, xp:5000 },
+        target:100,
+        progress:(s)=> Math.min(s.stats.wins, 100),
+        isComplete:(s)=> s.stats.wins >= 100
+      },
+      {
+        title:'Одержите 250 побед',
+        reward:{ coins:25000, xp:10000 },
+        target:250,
+        progress:(s)=> Math.min(s.stats.wins, 250),
+        isComplete:(s)=> s.stats.wins >= 250
+      },
+      {
+        title:'Одержите 500 побед',
+        reward:{ coins:50000, xp:25000 },
+        target:500,
+        progress:(s)=> Math.min(s.stats.wins, 500),
+        isComplete:(s)=> s.stats.wins >= 500
+      },
+      {
+        title:'Одержите 1000 побед',
+        reward:{ coins:100000, xp:50000 },
+        target:1000,
+        progress:(s)=> Math.min(s.stats.wins, 1000),
+        isComplete:(s)=> s.stats.wins >= 1000
       }
     ]
   },
   {
     id:'power1000',
-    icon:'💪',
+    icon:`<img src="${IMG.sila}" class="task-icon-img" alt="Сила клуба">`,
     tiers:[
       {
         title:'Достигните силы клуба 1100',
@@ -549,6 +622,7 @@ function taskRewardText(reward){
   const parts = [];
   if(reward.coins) parts.push(`+${fmt(reward.coins)} монет`);
   if(reward.budget) parts.push(`+${fmt(reward.budget)} евро`);
+  if(reward.xp) parts.push(`+${fmt(reward.xp)} опыта`);
   if(reward.slots) parts.push(`+${reward.slots} слот для тренировок`);
   return parts.join(' · ');
 }
@@ -557,6 +631,7 @@ function taskRewardHtml(reward){
   const parts = [];
   if(reward.coins) parts.push(`<img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fmt(reward.coins)}`);
   if(reward.budget) parts.push(`<img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${fmt(reward.budget)}`);
+  if(reward.xp) parts.push(`<img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(reward.xp)}`);
   if(reward.slots) parts.push(`<img src="${IMG.training}" class="img-icon" alt="Слот тренировки"> +${reward.slots} слот`);
   return parts.join(' &nbsp;·&nbsp; ');
 }
@@ -569,6 +644,7 @@ function claimTask(chainId){
 
   if(tier.reward.coins) state.coins += tier.reward.coins;
   if(tier.reward.budget) state.budget += tier.reward.budget;
+  if(tier.reward.xp) addXp(tier.reward.xp);
   if(tier.reward.slots){
     const current = state.trainingSlotsMax || 3;
     state.trainingSlotsMax = Math.min(SLOT_UPGRADE_MAX, current + tier.reward.slots);
@@ -641,7 +717,7 @@ function renderTasksModal(){
     <div class="modal-card tasks-modal-card">
       <button class="modal-close" id="tasks-modal-close">✕</button>
       <div class="tp-title">📋 Задания</div>
-      <div class="tp-sub">Выполняйте задания и получайте награды — как только заберёте награду, откроется следующее задание</div>
+      <div class="tp-sub">Выполняйте задания и получайте награды.</div>
       <div class="tasks-list">
         ${TASK_CHAINS.map(chain => taskRowHtml(chain)).join('')}
       </div>
@@ -1044,7 +1120,33 @@ document.addEventListener('DOMContentLoaded', ()=>{
     showRegister();
   }
   bindGlobalEvents();
+  initModalScrollLock();
 });
+
+/* ============================================================
+   БЛОКИРОВКА ПРОКРУТКИ ФОНА ПРИ ОТКРЫТОМ МОДАЛЬНОМ ОКНЕ
+   Работает универсально для всех .modal-overlay — как уже
+   существующих в разметке, так и создаваемых динамически.
+   ============================================================ */
+function isAnyModalOpen(){
+  return Array.from(document.querySelectorAll('.modal-overlay'))
+    .some(el => !el.classList.contains('hidden'));
+}
+
+function syncBodyScrollLock(){
+  document.body.classList.toggle('scroll-locked', isAnyModalOpen());
+}
+
+function initModalScrollLock(){
+  syncBodyScrollLock();
+  const observer = new MutationObserver(syncBodyScrollLock);
+  observer.observe(document.body, {
+    attributes: true,
+    attributeFilter: ['class'],
+    subtree: true,
+    childList: true
+  });
+}
 
 function showRegister(){
   document.getElementById('screen-register').classList.remove('hidden');
