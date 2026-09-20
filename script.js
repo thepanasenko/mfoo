@@ -414,6 +414,168 @@ const TOURNAMENTS = [
 function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
 
 /* ============================================================
+   ЗАДАНИЯ (TASKS)
+   ============================================================ */
+const TASKS = [
+  {
+    id:'level5',
+    title:'Достигните 5-го уровня менеджера',
+    icon:'🌟',
+    reward:{ coins:3000 },
+    target:5,
+    progress:(s)=> Math.min(s.level, 5),
+    isComplete:(s)=> s.level >= 5
+  },
+  {
+    id:'novice_cup_1',
+    title:'Сыграйте Кубок новичков 1 раз',
+    icon:'🏆',
+    reward:{ coins:1000 },
+    target:1,
+    progress:(s)=> Math.min((s.taskStats?.cupPlays?.novice) || 0, 1),
+    isComplete:(s)=> ((s.taskStats?.cupPlays?.novice) || 0) >= 1
+  },
+  {
+    id:'power1000',
+    title:'Достигните силы клуба 1000',
+    icon:'💪',
+    reward:{ slots:1 },
+    target:1000,
+    progress:(s)=> Math.min(calcClubPower(s.players), 1000),
+    isComplete:(s)=> calcClubPower(s.players) >= 1000
+  }
+];
+
+function recordCupPlayed(cupId){
+  if(!state.taskStats) state.taskStats = { cupPlays:{} };
+  if(!state.taskStats.cupPlays) state.taskStats.cupPlays = {};
+  state.taskStats.cupPlays[cupId] = (state.taskStats.cupPlays[cupId] || 0) + 1;
+}
+
+function isTaskClaimed(id){
+  return Array.isArray(state.claimedTasks) && state.claimedTasks.includes(id);
+}
+
+function hasClaimableTasks(){
+  return TASKS.some(task => task.isComplete(state) && !isTaskClaimed(task.id));
+}
+
+function taskRewardText(reward){
+  const parts = [];
+  if(reward.coins) parts.push(`+${fmt(reward.coins)} монет`);
+  if(reward.slots) parts.push(`+${reward.slots} слот для тренировок`);
+  return parts.join(' · ');
+}
+
+function taskRewardHtml(reward){
+  const parts = [];
+  if(reward.coins) parts.push(`<img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fmt(reward.coins)}`);
+  if(reward.slots) parts.push(`<img src="${IMG.training}" class="img-icon" alt="Слот тренировки"> +${reward.slots} слот`);
+  return parts.join(' &nbsp;·&nbsp; ');
+}
+
+function claimTask(id){
+  const task = TASKS.find(x=>x.id===id);
+  if(!task) return;
+  if(isTaskClaimed(id)) return;
+  if(!task.isComplete(state)) return;
+
+  state.claimedTasks.push(id);
+  if(task.reward.coins) state.coins += task.reward.coins;
+  if(task.reward.slots){
+    const current = state.trainingSlotsMax || 3;
+    state.trainingSlotsMax = Math.min(SLOT_UPGRADE_MAX, current + task.reward.slots);
+  }
+  save();
+  refreshTopbar();
+  renderTasksModal();
+  updateTasksBadge();
+  showToast(`🎁 Награда получена: ${taskRewardText(task.reward)}!`);
+}
+
+function taskRowHtml(task){
+  const complete = task.isComplete(state);
+  const claimed = isTaskClaimed(task.id);
+  const progressVal = task.progress(state);
+  const pct = Math.min(100, Math.round((progressVal / task.target) * 100));
+
+  let statusHtml;
+  if(claimed){
+    statusHtml = `<div class="task-status done">✅ Выполнено</div>`;
+  } else if(complete){
+    statusHtml = `<button class="task-claim-btn" data-claim-task="${task.id}">ЗАБРАТЬ НАГРАДУ</button>`;
+  } else {
+    statusHtml = `
+      <div class="task-progress-row">
+        <div class="task-progress-bar"><div class="task-progress-fill" style="width:${pct}%"></div></div>
+        <div class="task-progress-text">${fmt(progressVal)} / ${fmt(task.target)}</div>
+      </div>`;
+  }
+
+  return `
+    <div class="task-row ${claimed ? 'claimed' : complete ? 'complete' : ''}">
+      <div class="task-icon">${task.icon}</div>
+      <div class="task-info">
+        <div class="task-title">${task.title}</div>
+        <div class="task-reward">${taskRewardHtml(task.reward)}</div>
+        ${statusHtml}
+      </div>
+    </div>`;
+}
+
+function renderTasksModal(){
+  let overlay = document.getElementById('tasks-modal-overlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'tasks-modal-overlay';
+    overlay.className = 'modal-overlay';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e=>{ if(e.target===overlay) closeTasksModal(); });
+  }
+  overlay.classList.remove('hidden');
+
+  overlay.innerHTML = `
+    <div class="modal-card tasks-modal-card">
+      <button class="modal-close" id="tasks-modal-close">✕</button>
+      <div class="tp-title">📋 Задания</div>
+      <div class="tp-sub">Выполняйте задания и получайте награды</div>
+      <div class="tasks-list">
+        ${TASKS.map(task => taskRowHtml(task)).join('')}
+      </div>
+    </div>`;
+
+  overlay.querySelector('#tasks-modal-close').addEventListener('click', closeTasksModal);
+  overlay.querySelectorAll('[data-claim-task]').forEach(btn=>{
+    btn.addEventListener('click', ()=> claimTask(btn.dataset.claimTask));
+  });
+}
+
+function openTasksModal(){
+  renderTasksModal();
+}
+
+function closeTasksModal(){
+  const overlay = document.getElementById('tasks-modal-overlay');
+  if(overlay) overlay.remove();
+}
+
+function updateTasksBadge(){
+  const btn = document.getElementById('btn-open-tasks');
+  if(!btn) return;
+  let badge = btn.querySelector('.task-badge');
+  if(hasClaimableTasks()){
+    if(!badge){
+      badge = document.createElement('span');
+      badge.className = 'task-badge';
+      badge.textContent = '!';
+      btn.appendChild(badge);
+    }
+  } else if(badge){
+    badge.remove();
+  }
+}
+
+/* ============================================================
    BIG LEAGUE — SCHEDULING (Europe/Kyiv, дважды в день)
    ============================================================ */
 function getTZOffsetMinutes(date, timeZone){
@@ -679,7 +841,9 @@ function newGameState(teamName){
     transferMarket: { players: [], generatedAt: 0 },
     formation: DEFAULT_FORMATION,
     lineups: {},
-    leagueRegistrations: {}
+    leagueRegistrations: {},
+    taskStats: { cupPlays: {} },
+    claimedTasks: []
   };
   ensureLineupsInit(s);
   autoFillEmptyLineup(s, s.formation);
@@ -718,6 +882,9 @@ function migrateState(s){
   if(s.level === undefined) s.level = 1;
   if(s.xp === undefined) s.xp = 0;
   if(!s.transferMarket) s.transferMarket = { players: [], generatedAt: 0 };
+  if(!s.taskStats) s.taskStats = { cupPlays: {} };
+  if(!s.taskStats.cupPlays) s.taskStats.cupPlays = {};
+  if(!Array.isArray(s.claimedTasks)) s.claimedTasks = [];
 
   /* регистрация в лигах по расписанию — теперь отдельно на каждый турнир
      (раньше был один общий набор полей, действовавший только на Большую Лигу) */
@@ -946,6 +1113,23 @@ function refreshTopbar(){
   document.getElementById('stat-power').textContent = fmt(power);
   document.getElementById('topbar-level').textContent = state.level;
   if(typeof checkLeagueRegistrationEligibility === 'function') checkLeagueRegistrationEligibility();
+  updateManagerNavBadge();
+}
+
+function updateManagerNavBadge(){
+  const btn = document.querySelector('.nav-btn[data-nav="manager"]');
+  if(!btn) return;
+  let badge = btn.querySelector('.task-badge');
+  if(typeof hasClaimableTasks === 'function' && hasClaimableTasks()){
+    if(!badge){
+      badge = document.createElement('span');
+      badge.className = 'task-badge nav-task-badge';
+      badge.textContent = '!';
+      btn.appendChild(badge);
+    }
+  } else if(badge){
+    badge.remove();
+  }
 }
 
 /* ============================================================
@@ -1963,10 +2147,6 @@ function renderManager(){
         `}
       </div>
 
-      <div class="mgr-finance-row">
-        <div class="mgr-finance-chip"><div class="val"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${state.coins.toLocaleString('ru-RU')}</div><div class="lbl">МОНЕТЫ</div></div>
-        <div class="mgr-finance-chip"><div class="val"><img src="${IMG.cash}" class="img-icon" alt="Бюджет"> ${state.budget.toLocaleString('ru-RU')}</div><div class="lbl">БЮДЖЕТ</div></div>
-      </div>
       <div class="mgr-stats-grid">
         <div class="mgr-stat wins"><div class="mgr-stat-value">${s.wins}</div><div class="mgr-stat-label">ПОБЕДЫ</div></div>
         <div class="mgr-stat draws"><div class="mgr-stat-value">${s.draws}</div><div class="mgr-stat-label">НИЧЬИ</div></div>
@@ -1975,9 +2155,13 @@ function renderManager(){
         <div class="mgr-stat xp"><div class="mgr-stat-value">${state.xp.toLocaleString('ru-RU')}</div><div class="mgr-stat-label">ВСЕГО ОПЫТА</div></div>
       </div>
     </div>
+    <button id="btn-open-tasks" class="btn-primary btn-big" style="margin:16px 0;">📋 ЗАДАНИЯ</button>
     <h3 class="squad-heading">ЗАЛ СЛАВЫ</h3>
     <div class="mgr-trophy-list">${trophiesHtml}</div>
   `;
+
+  document.getElementById('btn-open-tasks').addEventListener('click', openTasksModal);
+  updateTasksBadge();
 }
 
 /* ============================================================
@@ -2585,6 +2769,7 @@ function advanceGroupStage(t, cup){
     cup.finished = true;
     cup.won = false;
     cup.stage = 'eliminated';
+    recordCupPlayed(t.id);
     save();
     renderCupScreen();
     return;
@@ -2868,6 +3053,7 @@ function playCurrentRound() {
         tournamentEnded = true;
         cup.finished = true;
         cup.won = false;
+        recordCupPlayed(t.id);
         save();
         showMatchModal(actualMatch, false, () => {
           document.getElementById('match-modal').classList.add('hidden');
@@ -2994,6 +3180,7 @@ function continueAfterMatch(keepGoing){
   if(!keepGoing && !isGroupStage){
     cup.finished = true;
     cup.won = false;
+    recordCupPlayed(t.id);
     save();
     renderCupScreen();
     return;
@@ -3018,6 +3205,7 @@ function finishCup(){
   const playerWonFinal = finalMatch.winner && finalMatch.winner.isPlayer;
   cup.finished = true;
   cup.won = !!playerWonFinal;
+  recordCupPlayed(t.id);
   if(playerWonFinal){
     const cupWinCoins = t.cupWinCoins;
     state.coins += cupWinCoins;

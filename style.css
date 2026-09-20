@@ -459,6 +459,63 @@ input{ font-family: inherit; }
 .mgr-finance-chip .val{ font-family: var(--ff-display); font-size:18px; display:flex; align-items:center; justify-content:center; gap:5px; }
 .mgr-finance-chip .lbl{ font-size:10px; color: var(--text-dim); }
 
+/* ============================================================
+   ЗАДАНИЯ (TASKS)
+   ============================================================ */
+#btn-open-tasks{ position:relative; }
+.task-badge{
+  position:absolute; top:-6px; right:-6px;
+  min-width:20px; height:20px; padding:0 5px;
+  background: var(--red); color:#fff;
+  border-radius:999px; border:2px solid var(--surface);
+  font-size:12px; font-weight:900; line-height:16px; text-align:center;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+.nav-task-badge{
+  /* ближе к иконке, а не к углу всей кнопки */
+  top:2px !important;
+  left:calc(50% + 9px) !important;
+  right:auto !important;
+  min-width:16px; height:16px; font-size:10px; line-height:12px;
+  /* переопределяем схлопывание .nav-btn > span, чтобы бейдж был виден
+     независимо от того, активна ли вкладка «Менеджер» */
+  max-height:none !important;
+  opacity:1 !important;
+  overflow:visible !important;
+  transform:none !important;
+  margin-top:0 !important;
+}
+
+.tasks-modal-card{ max-width:420px; width:100%; }
+.tasks-list{ display:flex; flex-direction:column; gap:10px; max-height:60vh; overflow-y:auto; }
+.task-row{
+  display:flex; align-items:flex-start; gap:10px;
+  background: rgb(0 0 0 / 37%); border:1px solid var(--line); border-radius:12px;
+  padding:12px;
+}
+.task-row.complete{ border-color: var(--gold); box-shadow: 0 0 14px rgba(242,183,5,.12); }
+.task-row.claimed{ opacity:.6; }
+.task-icon{ font-size:24px; line-height:1; margin-top:2px; }
+.task-info{ flex:1; min-width:0; }
+.task-title{ font-weight:800; font-size:13px; color: var(--text); margin-bottom:4px; }
+.task-reward{ display:flex; align-items:center; gap:5px; font-size:12px; font-weight:800; color: var(--gold); margin-bottom:8px; }
+.task-progress-row{ display:flex; align-items:center; gap:8px; }
+.task-progress-bar{ flex:1; height:6px; background: var(--surface); border-radius:4px; overflow:hidden; }
+.task-progress-fill{ height:100%; background: linear-gradient(90deg, var(--green-dark), var(--green)); border-radius:4px; transition: width .3s; }
+.task-progress-text{ font-size:11px; color: var(--text-dim); white-space:nowrap; }
+.task-claim-btn{
+  width:100%; background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+  border:none; font-weight:900; font-size:12px; letter-spacing:.4px;
+  padding:9px 10px; border-radius:8px; cursor:pointer;
+  box-shadow: 0 4px 0 #8a6603;
+  color:#fff;
+  text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
+}
+.task-claim-btn:hover{ filter:brightness(1.06); }
+.task-claim-btn:active{ transform: translateY(3px); box-shadow: 0 1px 0 #8a6603; }
+.task-status.done{ font-size:12px; font-weight:800; color: var(--green); }
+
 .mgr-trophy-list{ display:flex; flex-direction:column; gap:8px; }
 .mgr-trophy-item{
   display:flex; align-items:center; gap:10px;
