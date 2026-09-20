@@ -419,6 +419,16 @@ function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
    ЗАДАНИЯ (TASKS) — цепочки: забрал награду за текущий этап →
    тут же на его месте открылся следующий, посложнее
    ============================================================ */
+const CLASSIC_CUP_IDS = ['novice','jamaica','france','usa','belarus'];
+const CHAMPIONSHIP_IDS = ['europe','america','asia','eurasia'];
+
+function anyCupWon(s){
+  return CLASSIC_CUP_IDS.some(id => ((s.taskStats?.cupWins?.[id]) || 0) > 0);
+}
+function anyChampionshipWon(s){
+  return CHAMPIONSHIP_IDS.some(id => ((s.taskStats?.cupWins?.[id]) || 0) > 0);
+}
+
 const TASK_CHAINS = [
   {
     id:'level',
@@ -595,13 +605,57 @@ const TASK_CHAINS = [
         isComplete:(s)=> calcClubPower(s.players) >= 4400
       }
     ]
+  },
+  {
+    id:'win_titles',
+    icon:'🏆',
+    tiers:[
+      {
+        title:'Выиграйте любой Кубок',
+        reward:{ coins:2500, xp:250 },
+        target:1,
+        iconImg: ()=> IMG.cupNew,
+        progress:(s)=> anyCupWon(s) ? 1 : 0,
+        isComplete:(s)=> anyCupWon(s)
+      },
+      {
+        title:'Выиграйте любой Чемпионат',
+        reward:{ coins:7500, xp:2500 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.europe,
+        progress:(s)=> anyChampionshipWon(s) ? 1 : 0,
+        isComplete:(s)=> anyChampionshipWon(s)
+      },
+      {
+        title:'Выиграйте Большую Лигу',
+        reward:{ coins:25000, xp:15000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.bigleague,
+        progress:(s)=> ((s.taskStats?.cupWins?.bigleague) || 0) >= 1 ? 1 : 0,
+        isComplete:(s)=> ((s.taskStats?.cupWins?.bigleague) || 0) >= 1
+      },
+      {
+        title:'Выиграйте Лигу Чемпионов',
+        reward:{ coins:50000, xp:25000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.championsleague,
+        progress:(s)=> ((s.taskStats?.cupWins?.championsleague) || 0) >= 1 ? 1 : 0,
+        isComplete:(s)=> ((s.taskStats?.cupWins?.championsleague) || 0) >= 1
+      }
+    ]
   }
 ];
 
 function recordCupPlayed(cupId){
-  if(!state.taskStats) state.taskStats = { cupPlays:{} };
+  if(!state.taskStats) state.taskStats = { cupPlays:{}, cupWins:{} };
   if(!state.taskStats.cupPlays) state.taskStats.cupPlays = {};
   state.taskStats.cupPlays[cupId] = (state.taskStats.cupPlays[cupId] || 0) + 1;
+}
+
+function recordCupWon(cupId){
+  if(!state.taskStats) state.taskStats = { cupPlays:{}, cupWins:{} };
+  if(!state.taskStats.cupWins) state.taskStats.cupWins = {};
+  state.taskStats.cupWins[cupId] = (state.taskStats.cupWins[cupId] || 0) + 1;
 }
 
 /* индекс текущего (ещё не забранного) этапа цепочки; null, если цепочка вся пройдена */
@@ -1021,7 +1075,7 @@ function newGameState(teamName){
     formation: DEFAULT_FORMATION,
     lineups: {},
     leagueRegistrations: {},
-    taskStats: { cupPlays: {} },
+    taskStats: { cupPlays: {}, cupWins: {} },
     taskChainTier: {}
   };
   ensureLineupsInit(s);
@@ -1061,8 +1115,9 @@ function migrateState(s){
   if(s.level === undefined) s.level = 1;
   if(s.xp === undefined) s.xp = 0;
   if(!s.transferMarket) s.transferMarket = { players: [], generatedAt: 0 };
-  if(!s.taskStats) s.taskStats = { cupPlays: {} };
+  if(!s.taskStats) s.taskStats = { cupPlays: {}, cupWins: {} };
   if(!s.taskStats.cupPlays) s.taskStats.cupPlays = {};
+  if(!s.taskStats.cupWins) s.taskStats.cupWins = {};
   if(!s.taskChainTier) s.taskChainTier = {};
   /* миграция со старой плоской системы заданий (claimedTasks) на цепочки */
   if(Array.isArray(s.claimedTasks)){
@@ -3434,6 +3489,7 @@ function finishCup(){
       state.budget += budgetReward;
     }
     state.trophies.push({ name:t.title, icon:t.icon, date: Date.now() });
+    recordCupWon(t.id);
     save();
     showTrophyModal(t, cupWinCoins, budgetReward);
   } else {
