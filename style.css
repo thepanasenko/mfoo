@@ -474,8 +474,8 @@ input{ font-family: inherit; }
 }
 .nav-task-badge{
   /* ближе к иконке, а не к углу всей кнопки */
-  top:2px !important;
-  left:calc(50% + 9px) !important;
+  top:5px !important;
+  left:calc(70%) !important;
   right:auto !important;
   min-width:16px; height:16px; font-size:10px; line-height:12px;
   /* переопределяем схлопывание .nav-btn > span, чтобы бейдж был виден
