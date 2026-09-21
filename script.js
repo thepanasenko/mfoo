@@ -911,7 +911,14 @@ function computeGroupTable(cup, teams){
 /* ---------- state ---------- */
 let state = null;
 let currentCupId = null;
-let cupTimer = { intervalId:null, secondsLeft:0, running:false };
+/* у каждого турнира — свой независимый фоновый таймер, не привязанный к тому,
+   какой экран сейчас открыт. Это позволяет турниру доигрываться сам,
+   даже если вы ушли на другую вкладку, а не только на экране этого кубка. */
+let cupTimers = {};
+function getCupTimer(cupId){
+  if(!cupTimers[cupId]) cupTimers[cupId] = { intervalId:null, secondsLeft:0, running:false };
+  return cupTimers[cupId];
+}
 let trainingTimers = {};
 let trainingUpdateInterval = null;
 let transferTimerInterval = null;
@@ -1214,6 +1221,7 @@ function showApp(){
   navigate('manager');
   restoreTrainingTimers();
   startLeagueNotificationPoll();
+  ensureAllCupFlowsRunning();
 }
 
 /* ============================================================
@@ -1334,7 +1342,8 @@ function onRegisterConfirm(){
 function onResetGame(){
   showConfirm('Весь прогресс будет удалён без возможности восстановления.', ()=>{
     localStorage.removeItem(SAVE_KEY);
-    stopCupTimer();
+    Object.keys(cupTimers).forEach(cid => stopCupTimer(cid));
+    cupTimers = {};
     clearAllTrainingTimers();
     state = null;
     document.getElementById('team-name-input').value = '';
@@ -2324,7 +2333,7 @@ function onLeaveCup() {
   if (!t) return;
 
   showConfirm(`Весь прогресс в турнире «${t.title}» будет потерян.`, ()=>{
-    stopCupTimer();
+    stopCupTimer(currentCupId);
     state.cups[currentCupId] = null;
     save();
     navigate('play');
@@ -2569,13 +2578,14 @@ function renderCupScreen(){
     stopLeagueCountdown();
     hideLeagueCancelBtn();
     renderBracket();
-    ensureCupFlowRunning();
+    ensureCupFlowRunning(t.id);
+    updateCountdownDisplay(t.id);
     return;
   }
 
   bracketWrap.classList.add('hidden');
   introEl.classList.remove('hidden');
-  stopCupTimer();
+  stopCupTimer(t.id);
 
   if(t.scheduled){
     renderLeagueIntro(t, { power, mainCount, squadFull, eligible, range });
@@ -2796,8 +2806,8 @@ function startLeagueSession(t, sessionStartDate){
     document.getElementById('cup-intro').classList.add('hidden');
     document.getElementById('cup-bracket-wrap').classList.remove('hidden');
     renderBracket();
-    ensureCupFlowRunning();
   }
+  ensureCupFlowRunning(t.id);
 }
 
 // лёгкий фоновый опрос — уведомляет, если игрок не на экране лиги в момент старта
@@ -2820,8 +2830,10 @@ function checkLeagueNotification(){
     if(elapsed >= 0 && elapsed <= graceMs){
       if(reg.notifiedSessionId !== sid){
         reg.notifiedSessionId = sid;
+        reg.sessionId = null;
         save();
-        showToast(`🏆 «${t.title}» началась! Откройте «Играть» → «${t.title}», чтобы сыграть.`);
+        showToast(`🏆 «${t.title}» началась и играется автоматически!`);
+        startLeagueSession(t, prev);
       }
     } else if(elapsed > graceMs){
       reg.sessionId = null;
@@ -2850,7 +2862,7 @@ function onCupStart(){
   document.getElementById('cup-intro').classList.add('hidden');
   document.getElementById('cup-bracket-wrap').classList.remove('hidden');
   renderBracket();
-  ensureCupFlowRunning();
+  ensureCupFlowRunning(currentCupId);
 }
 
 function renderCupRewardsList(t){
@@ -3039,13 +3051,16 @@ function advanceGroupStage(t, cup){
   cup.groupStanding = table.findIndex(row => row.team.isPlayer) + 1;
   const winner = table[0].team;
 
+  const onScreen = currentCupId === t.id;
+
   if(!winner.isPlayer){
     cup.finished = true;
     cup.won = false;
     cup.stage = 'eliminated';
     recordCupPlayed(t.id);
     save();
-    renderCupScreen();
+    if(onScreen) renderCupScreen();
+    else showToast(`«${t.title}»: не удалось выйти из группы.`);
     return;
   }
 
@@ -3053,8 +3068,8 @@ function advanceGroupStage(t, cup){
   const bonus = rewardRandomPlayer(t.groupWinBonus.power);
   addXp(t.groupWinBonus.xp);
   save();
-  refreshTopbar();
-  showToast(`🎉 Вы вышли из группы (1-е место)! +${t.groupWinBonus.coins.toLocaleString('ru-RU')} монет, +${t.groupWinBonus.power} силы, +${fmt(t.groupWinBonus.xp)} XP (${bonus.player.name})`);
+  if(onScreen) refreshTopbar();
+  showToast(`🎉 «${t.title}»: вы вышли из группы (1-е место)! +${t.groupWinBonus.coins.toLocaleString('ru-RU')} монет, +${t.groupWinBonus.power} силы, +${fmt(t.groupWinBonus.xp)} XP (${bonus.player.name})`);
 
   const range = cup.powerRange || { min: t.min, max: t.max };
   const otherWinners = [];
@@ -3072,8 +3087,8 @@ function advanceGroupStage(t, cup){
   cup.stage = 'knockout';
   save();
 
-  renderBracket();
-  ensureCupFlowRunning();
+  if(onScreen) renderBracket();
+  ensureCupFlowRunning(t.id);
 }
 
 function getMatchRewards(t, match, cup){
@@ -3177,57 +3192,75 @@ function getRoundMatches(matches, round) {
 /* ============================================================
    CUP FLOW / TIMER
    ============================================================ */
-function ensureCupFlowRunning(){
-  if(cupTimer.running) return;
-  const cup = state.cups[currentCupId];
+/* запускает фоновый цикл турнира, если он ещё не запущен. Можно звать для
+   ЛЮБОГО турнира в любой момент — например для всех активных кубков сразу
+   при загрузке игры, чтобы они продолжали доигрываться сами по себе. */
+function ensureCupFlowRunning(cupId){
+  const timer = getCupTimer(cupId);
+  if(timer.running) return;
+  const cup = state.cups[cupId];
   if(!cup || cup.finished) return;
-  scheduleNextMatch();
+  scheduleNextMatch(cupId);
 }
 
-function stopCupTimer(){
-  if(cupTimer.intervalId) {
-    clearInterval(cupTimer.intervalId);
-    cupTimer.intervalId = null;
+function ensureAllCupFlowsRunning(){
+  if(!state || !state.cups) return;
+  Object.keys(state.cups).forEach(cupId=>{
+    const cup = state.cups[cupId];
+    if(cup && !cup.finished) ensureCupFlowRunning(cupId);
+  });
+}
+
+function stopCupTimer(cupId){
+  const timer = getCupTimer(cupId);
+  if(timer.intervalId){
+    clearInterval(timer.intervalId);
+    timer.intervalId = null;
   }
-  cupTimer.running = false;
-  const el = document.getElementById('cup-countdown');
-  if(el) el.textContent = '';
+  timer.running = false;
+  if(currentCupId === cupId){
+    const el = document.getElementById('cup-countdown');
+    if(el) el.textContent = '';
+  }
 }
 
-function scheduleNextMatch(){
-  const cup = state.cups[currentCupId];
+function scheduleNextMatch(cupId){
+  const cup = state.cups[cupId];
   if(!cup || cup.finished) return;
   if(cup.nextIndex >= cup.matches.length){
-    finishCup();
+    finishCup(cupId);
     return;
   }
 
-  if(cupTimer.intervalId) {
-    clearInterval(cupTimer.intervalId);
-    cupTimer.intervalId = null;
+  const timer = getCupTimer(cupId);
+  if(timer.intervalId){
+    clearInterval(timer.intervalId);
+    timer.intervalId = null;
   }
 
-  cupTimer.running = true;
-  cupTimer.secondsLeft = 30;
-  updateCountdownDisplay();
+  timer.running = true;
+  timer.secondsLeft = 30;
+  updateCountdownDisplay(cupId);
 
-  cupTimer.intervalId = setInterval(()=>{
-    cupTimer.secondsLeft--;
-    updateCountdownDisplay();
-    if(cupTimer.secondsLeft <= 0){
-      clearInterval(cupTimer.intervalId);
-      cupTimer.intervalId = null;
-      cupTimer.running = false;
-      playNextMatch();
+  timer.intervalId = setInterval(()=>{
+    timer.secondsLeft--;
+    updateCountdownDisplay(cupId);
+    if(timer.secondsLeft <= 0){
+      clearInterval(timer.intervalId);
+      timer.intervalId = null;
+      timer.running = false;
+      playNextMatch(cupId);
     }
   }, 1000);
 }
 
-function updateCountdownDisplay(){
+function updateCountdownDisplay(cupId){
+  if(currentCupId !== cupId) return; // не наш экран сейчас — не трогаем чужой DOM
   const el = document.getElementById('cup-countdown');
   if(!el) return;
-  if(cupTimer.secondsLeft > 0){
-    el.textContent = `Следующий матч через: ${cupTimer.secondsLeft}`;
+  const timer = getCupTimer(cupId);
+  if(timer.secondsLeft > 0){
+    el.textContent = `Следующий матч через: ${timer.secondsLeft}`;
   } else {
     el.textContent = 'МАТЧ НАЧАЛСЯ!';
   }
@@ -3237,24 +3270,20 @@ function onPlayNow(){
   const cup = state.cups[currentCupId];
   if(!cup || cup.finished) return;
 
-  if(cupTimer.intervalId) {
-    clearInterval(cupTimer.intervalId);
-    cupTimer.intervalId = null;
-  }
-  cupTimer.running = false;
-
+  stopCupTimer(currentCupId);
   playCurrentRound();
 }
 
 function playCurrentRound() {
-  const cup = state.cups[currentCupId];
+  const cupId = currentCupId; // фиксируем турнир на весь каскад — даже если вы уйдёте с экрана посреди него
+  const cup = state.cups[cupId];
   if(!cup || cup.finished) return;
-  const t = tournamentById(currentCupId);
+  const t = tournamentById(cupId);
   syncPlayerCupTeam(cup);
 
   const currentMatch = cup.matches[cup.nextIndex];
   if(!currentMatch) {
-    finishCup();
+    finishCup(cupId);
     return;
   }
 
@@ -3262,24 +3291,26 @@ function playCurrentRound() {
   const roundMatches = cup.matches.filter(m => m.round === currentRound && !m.played);
 
   if(roundMatches.length === 0) {
-    scheduleNextMatch();
+    scheduleNextMatch(cupId);
     return;
   }
 
   let matchIndex = 0;
   let tournamentEnded = false;
 
+  function onScreen(){ return currentCupId === cupId; }
+
   function playNextRoundMatch() {
     if(tournamentEnded) return;
 
     if(matchIndex >= roundMatches.length) {
-      renderBracket();
+      if(onScreen()) renderBracket();
       save();
 
       if(cup.nextIndex >= cup.matches.length) {
-        finishCup();
+        finishCup(cupId);
       } else {
-        scheduleNextMatch();
+        scheduleNextMatch(cupId);
       }
       return;
     }
@@ -3317,7 +3348,7 @@ function playCurrentRound() {
       else state.stats.losses++;
     }
 
-    if(playerInvolved) {
+    if(playerInvolved && onScreen()) {
       renderBracket();
       save();
 
@@ -3340,9 +3371,27 @@ function playCurrentRound() {
         });
       }
     } else {
-      showToast(`${actualMatch.teamA.name} ${actualMatch.scoreA}:${actualMatch.scoreB} ${actualMatch.teamB.name}`);
-      renderBracket();
+      // либо матч без участия игрока, либо мы ушли с экрана этого турнира —
+      // никаких модалок, просто начисляем награду (если нужно) и едем дальше сами
+      if(playerInvolved && playerWon){
+        applyMatchWinRewards(t, actualMatch, cup);
+        if(onScreen()) refreshTopbar();
+      }
+      showToast(`${t.title}: ${actualMatch.teamA.name} ${actualMatch.scoreA}:${actualMatch.scoreB} ${actualMatch.teamB.name}`);
+      if(onScreen()) renderBracket();
       save();
+
+      const isGroupStage = t.type === 'group' && cup.stage === 'groups';
+      if(playerInvolved && !playerWon && !actualMatch.draw && !isGroupStage){
+        tournamentEnded = true;
+        cup.finished = true;
+        cup.won = false;
+        recordCupPlayed(t.id);
+        save();
+        if(onScreen()) renderCupScreen();
+        return;
+      }
+
       matchIndex++;
       setTimeout(playNextRoundMatch, 500);
     }
@@ -3405,8 +3454,22 @@ function syncPlayerCupTeam(cup){
   }
 }
 
-function playNextMatch(){
-  const cup = state.cups[currentCupId];
+/* начисляет награду за победу в матче — общая логика что для экрана,
+   что для фонового доигрывания без экрана */
+function applyMatchWinRewards(t, match, cup){
+  const rewards = getMatchRewards(t, match, cup);
+  const powerIncrease = rewards.power;
+  const r = rewardRandomPlayer(powerIncrease);
+  state.coins += rewards.coins;
+  addXp(rewards.xp);
+  save();
+  return { rewards, r };
+}
+
+function playNextMatch(cupId){
+  const cup = state.cups[cupId];
+  if(!cup) return;
+  const t = tournamentById(cupId);
   syncPlayerCupTeam(cup);
   const i = cup.nextIndex;
   const match = cup.matches[i];
@@ -3416,7 +3479,7 @@ function playNextMatch(){
   const result = simulateMatch(
     match.teamA.power, match.teamB.power,
     match.teamA.formation, match.teamB.formation,
-    drawsAllowed(tournamentById(currentCupId), cup, match.round)
+    drawsAllowed(t, cup, match.round)
   );
   match.scoreA = result.scoreA;
   match.scoreB = result.scoreB;
@@ -3435,40 +3498,57 @@ function playNextMatch(){
     else state.stats.losses++;
   }
 
-  renderBracket();
+  const onScreen = currentCupId === cupId;
+  if(onScreen) renderBracket();
   save();
 
-  if(playerInvolved){
-    showMatchModal(match, playerWon, () => continueAfterMatch(playerWon || match.draw));
-  } else {
-    showToast(`${match.teamA.name} ${match.scoreA}:${match.scoreB} ${match.teamB.name}`);
-    setTimeout(continueAfterMatch, 900, true);
+  if(playerInvolved && onScreen){
+    // мы прямо сейчас смотрим на этот кубок — показываем интерактивную модалку матча
+    showMatchModal(match, playerWon, () => continueAfterMatch(cupId, playerWon || match.draw));
+    return;
   }
+
+  // фон: этот кубок сейчас не на экране (или матч без участия игрока) —
+  // никаких модалок поверх текущего экрана, просто тихо начисляем награду и едем дальше
+  if(playerInvolved && playerWon){
+    applyMatchWinRewards(t, match, cup);
+    if(currentCupId === cupId) refreshTopbar();
+  }
+  showToast(`${t.title}: ${match.teamA.name} ${match.scoreA}:${match.scoreB} ${match.teamB.name}`);
+
+  const isGroupStage = t.type === 'group' && cup.stage === 'groups';
+  const keepGoing = playerWon || match.draw || isGroupStage || !playerInvolved;
+  setTimeout(()=> continueAfterMatch(cupId, keepGoing), 900);
 }
 
-function continueAfterMatch(keepGoing){
-  const t = tournamentById(currentCupId);
-  const cup = state.cups[currentCupId];
+function continueAfterMatch(cupId, keepGoing){
+  const t = tournamentById(cupId);
+  const cup = state.cups[cupId];
+  if(!t || !cup) return;
   const isGroupStage = t.type === 'group' && cup.stage === 'groups';
+  const onScreen = currentCupId === cupId;
 
   if(!keepGoing && !isGroupStage){
     cup.finished = true;
     cup.won = false;
     recordCupPlayed(t.id);
     save();
-    renderCupScreen();
+    if(onScreen) renderCupScreen();
+    else showToast(`❌ «${t.title}»: турнир завершён без победы.`);
     return;
   }
   if(cup.nextIndex >= cup.matches.length){
-    finishCup();
+    finishCup(cupId);
   } else {
-    scheduleNextMatch();
+    scheduleNextMatch(cupId);
   }
 }
 
-function finishCup(){
-  const t = tournamentById(currentCupId);
-  const cup = state.cups[currentCupId];
+function finishCup(cupId){
+  const t = tournamentById(cupId);
+  const cup = state.cups[cupId];
+  if(!t || !cup) return;
+  const onScreen = currentCupId === cupId;
 
   if(t.type === 'group' && cup.stage === 'groups'){
     advanceGroupStage(t, cup);
@@ -3491,10 +3571,16 @@ function finishCup(){
     state.trophies.push({ name:t.title, icon:t.icon, date: Date.now() });
     recordCupWon(t.id);
     save();
-    showTrophyModal(t, cupWinCoins, budgetReward);
+    if(onScreen){
+      showTrophyModal(t, cupWinCoins, budgetReward);
+    } else {
+      refreshTopbar();
+      showToast(`🏆 Вы выиграли «${t.title}»! +${fmt(cupWinCoins)} монет${budgetReward ? `, +${fmt(budgetReward)} евро` : ''}`);
+    }
   } else {
     save();
-    renderCupScreen();
+    if(onScreen) renderCupScreen();
+    else showToast(`«${t.title}»: турнир завершён без победы в финале.`);
   }
 }
 
@@ -3815,13 +3901,14 @@ function openBotModal(team) {
    MATCH RESULT MODAL
    ============================================================ */
 function showMatchModal(match, playerWon, onClose){
+  const cupId = currentCupId; // фиксируем — модалка открыта поверх страницы и может провисеть, пока вы листаете другое
   const you = match.teamA.isPlayer ? match.teamA : match.teamB;
   const opp = match.teamA.isPlayer ? match.teamB : match.teamA;
   const yourScore = match.teamA.isPlayer ? match.scoreA : match.scoreB;
   const oppScore = match.teamA.isPlayer ? match.scoreB : match.scoreA;
 
-  const t = tournamentById(currentCupId);
-  const cup = state.cups[currentCupId];
+  const t = tournamentById(cupId);
+  const cup = state.cups[cupId];
   const isGroupStage = t.type === 'group' && cup.stage === 'groups';
   // during the group stage, "final" status is decided once every group match has
   // been played (handled by finishCup/advanceGroupStage), not per-match by round.
@@ -3888,9 +3975,9 @@ function showMatchModal(match, playerWon, onClose){
   document.getElementById('mm-continue-btn').addEventListener('click', ()=>{
     document.getElementById('match-modal').classList.add('hidden');
     if(!playerWon && !isDraw && !isGroupStage) {
-      renderCupScreen();
+      if(currentCupId === cupId) renderCupScreen();
     } else if(isFinal){
-      finishCup();
+      finishCup(cupId);
     } else {
       onClose();
     }
