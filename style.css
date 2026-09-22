@@ -751,10 +751,13 @@ input{ font-family: inherit; }
 @keyframes pop-in{ from{ transform:scale(.85) translateY(12px); opacity:0;} to{ transform:scale(1) translateY(0); opacity:1;} }
 .modal-close{
   position:absolute; top:10px; right:10px;
-  background: var(--surface-3); border:none; color: var(--text-dim);
-  width:28px; height:28px; border-radius:50%;
+  background:none; border:none; color: var(--text-dim);
+  width:28px; height:28px;
   font-size:13px;
+  display:flex; align-items:center; justify-content:center;
 }
+.modal-close-icon{ width:28px; height:28px; object-fit:contain; }
+.task-check-icon{ width:14px; height:14px; object-fit:contain; vertical-align:-2px; margin-right:2px; }
 .pm-name{ font-family: var(--ff-display); font-size:22px; margin:4px 0 2px; }
 .pm-pos{ color: var(--text-dim); font-size:12px; font-weight:700; margin-bottom:14px; }
 .pm-power-label{ font-size:11px; color: var(--text-dim); letter-spacing:1px; }

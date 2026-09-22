@@ -15,6 +15,8 @@ const IMG = {
   win:        'images/win.png',
   training:   'images/trenirovka.png',
   tasks:      'images/zadanie.png',
+  check:      'images/galocka.png',
+  cross:      'images/krest.png',
   plus:       'images/plus.png',
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
@@ -755,7 +757,7 @@ function taskRowHtml(chain){
         <div class="task-icon">${chain.icon}</div>
         <div class="task-info">
           <div class="task-title">Все задания этой цепочки выполнены</div>
-          <div class="task-status done">✅ Пройдено</div>
+          <div class="task-status done"><img src="${IMG.check}" class="task-check-icon" alt="Пройдено"> Пройдено</div>
         </div>
       </div>`;
   }
@@ -801,7 +803,7 @@ function renderTasksModal(){
 
   overlay.innerHTML = `
     <div class="modal-card tasks-modal-card">
-      <button class="modal-close" id="tasks-modal-close">✕</button>
+      <button class="modal-close" id="tasks-modal-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
       <div class="tp-title">📋 Задания</div>
       <div class="tp-sub">Выполняйте задания и получайте награды.</div>
       <div class="tasks-list">
@@ -1795,7 +1797,7 @@ function openTrainingPicker(){
   overlay.className = 'modal-overlay';
   overlay.innerHTML = `
     <div class="modal-card training-picker-card">
-      <button class="modal-close" id="training-picker-close">✕</button>
+      <button class="modal-close" id="training-picker-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
       <div class="tp-title"><img src="${IMG.training}" class="tp-title-icon" alt="Тренировка"> Кого отправить на тренировку?</div>
       <div class="tp-sub">Только запасные · 30 минут · +8…+25 силы · деньги списываются сразу</div>
       <div class="tp-list">
@@ -3438,7 +3440,6 @@ function playCurrentRound() {
         applyMatchWinRewards(t, actualMatch, cup);
         if(onScreen()) refreshTopbar();
       }
-      showToast(`${t.title}: ${actualMatch.teamA.name} ${actualMatch.scoreA}:${actualMatch.scoreB} ${actualMatch.teamB.name}`);
       if(onScreen()) renderBracket();
       save();
 
@@ -3576,7 +3577,6 @@ function playNextMatch(cupId){
     applyMatchWinRewards(t, match, cup);
     if(currentCupId === cupId) refreshTopbar();
   }
-  showToast(`${t.title}: ${match.teamA.name} ${match.scoreA}:${match.scoreB} ${match.teamB.name}`);
 
   const isGroupStage = t.type === 'group' && cup.stage === 'groups';
   const keepGoing = playerWon || match.draw || isGroupStage || !playerInvolved;
