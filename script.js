@@ -919,6 +919,28 @@ function getCupTimer(cupId){
   if(!cupTimers[cupId]) cupTimers[cupId] = { intervalId:null, secondsLeft:0, running:false };
   return cupTimers[cupId];
 }
+
+/* пока каскад «СЫГРАТЬ СЕЙЧАС» доигрывает текущий этап — кнопка заблокирована
+   и показывает «ОЖИДАНИЕ РЕЗУЛЬТАТОВ», чтобы нельзя было нажать её повторно */
+let cupPlayingNow = {};
+
+function setPlayingNow(cupId, value){
+  cupPlayingNow[cupId] = value;
+  updatePlayNowButton(cupId);
+}
+
+function updatePlayNowButton(cupId){
+  if(currentCupId !== cupId) return;
+  const playBtn = document.getElementById('btn-play-now');
+  if(!playBtn) return;
+  const playing = !!cupPlayingNow[cupId];
+  playBtn.disabled = playing;
+  playBtn.classList.toggle('btn-disabled-soft', playing);
+  playBtn.classList.toggle('cup-action-loading', playing);
+  playBtn.innerHTML = playing
+    ? `<span class="btn-spinner"></span><span>ОЖИДАНИЕ РЕЗУЛЬТАТОВ</span>`
+    : 'СЫГРАТЬ СЕЙЧАС';
+}
 let trainingTimers = {};
 let trainingUpdateInterval = null;
 let transferTimerInterval = null;
@@ -1344,6 +1366,7 @@ function onResetGame(){
     localStorage.removeItem(SAVE_KEY);
     Object.keys(cupTimers).forEach(cid => stopCupTimer(cid));
     cupTimers = {};
+    cupPlayingNow = {};
     clearAllTrainingTimers();
     state = null;
     document.getElementById('team-name-input').value = '';
@@ -2334,6 +2357,7 @@ function onLeaveCup() {
 
   showConfirm(`Весь прогресс в турнире «${t.title}» будет потерян.`, ()=>{
     stopCupTimer(currentCupId);
+    delete cupPlayingNow[currentCupId];
     state.cups[currentCupId] = null;
     save();
     navigate('play');
@@ -2580,6 +2604,7 @@ function renderCupScreen(){
     renderBracket();
     ensureCupFlowRunning(t.id);
     updateCountdownDisplay(t.id);
+    updatePlayNowButton(t.id);
     return;
   }
 
@@ -3269,8 +3294,10 @@ function updateCountdownDisplay(cupId){
 function onPlayNow(){
   const cup = state.cups[currentCupId];
   if(!cup || cup.finished) return;
+  if(cupPlayingNow[currentCupId]) return; // уже играется — игнорируем повторный клик
 
   stopCupTimer(currentCupId);
+  setPlayingNow(currentCupId, true);
   playCurrentRound();
 }
 
@@ -3283,6 +3310,7 @@ function playCurrentRound() {
 
   const currentMatch = cup.matches[cup.nextIndex];
   if(!currentMatch) {
+    setPlayingNow(cupId, false);
     finishCup(cupId);
     return;
   }
@@ -3291,6 +3319,7 @@ function playCurrentRound() {
   const roundMatches = cup.matches.filter(m => m.round === currentRound && !m.played);
 
   if(roundMatches.length === 0) {
+    setPlayingNow(cupId, false);
     scheduleNextMatch(cupId);
     return;
   }
@@ -3306,6 +3335,7 @@ function playCurrentRound() {
     if(matchIndex >= roundMatches.length) {
       if(onScreen()) renderBracket();
       save();
+      setPlayingNow(cupId, false);
 
       if(cup.nextIndex >= cup.matches.length) {
         finishCup(cupId);
@@ -3360,6 +3390,7 @@ function playCurrentRound() {
         cup.won = false;
         recordCupPlayed(t.id);
         save();
+        setPlayingNow(cupId, false);
         showMatchModal(actualMatch, false, () => {
           document.getElementById('match-modal').classList.add('hidden');
           renderCupScreen();
@@ -3388,6 +3419,7 @@ function playCurrentRound() {
         cup.won = false;
         recordCupPlayed(t.id);
         save();
+        setPlayingNow(cupId, false);
         if(onScreen()) renderCupScreen();
         return;
       }

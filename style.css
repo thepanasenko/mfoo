@@ -1093,14 +1093,15 @@ input{ font-family: inherit; }
 #toast-container{
   position:fixed; bottom:110px; left:50%; transform:translateX(-50%);
   z-index:80; display:flex; flex-direction:column; gap:8px; align-items:center;
-  max-width: 90vw;
+  width: min(94vw, 480px);
 }
 .toast{
+  width:100%; box-sizing:border-box;
   background: var(--surface-3); border:1px solid var(--green);
-  color: var(--text); padding:8px 16px; border-radius:20px;
-  font-size:12px; font-weight:700; box-shadow:0 4px 12px rgba(0,0,0,.4);
+  color: var(--text); padding:12px 22px; border-radius:16px;
+  font-size:13px; font-weight:700; box-shadow:0 6px 16px rgba(0,0,0,.45);
   animation: toast-in .35s var(--ease-bounce), toast-out .3s ease 2.2s forwards;
-  display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:center;
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap; justify-content:center; text-align:center;
 }
 @keyframes toast-in{ from{ opacity:0; transform:translateY(14px) scale(.9);} to{ opacity:1; transform:none;} }
 @keyframes toast-out{ to{ opacity:0; transform:translateY(-6px);} }
@@ -1211,6 +1212,34 @@ input{ font-family: inherit; }
 }
 .cup-action-primary:hover{ filter: brightness(1.06); }
 .cup-action-primary:active{ transform: translateY(4px) scale(.98); box-shadow: 0 2px 0 #0c5c2b, 0 4px 8px rgba(0,0,0,.4); }
+.cup-action-primary:disabled,
+.cup-action-primary.btn-disabled-soft{
+  opacity:.55;
+  cursor:not-allowed;
+  filter:none;
+  box-shadow: 0 6px 0 #0c5c2b, 0 8px 16px rgba(0,0,0,.4);
+  transform:none;
+}
+.cup-action-primary.cup-action-loading{
+  opacity:1;
+  cursor:wait;
+  gap:10px;
+  background: linear-gradient(120deg, var(--green-dark), var(--green), var(--green-dark));
+  background-size:220% 220%;
+  animation: btn-loading-shimmer 1.7s ease-in-out infinite;
+}
+@keyframes btn-loading-shimmer{
+  0%{ background-position: 0% 50%; }
+  50%{ background-position: 100% 50%; }
+  100%{ background-position: 0% 50%; }
+}
+.btn-spinner{
+  width:16px; height:16px; flex-shrink:0; border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;
+  animation: btn-spin .7s linear infinite;
+}
+@keyframes btn-spin{ to{ transform: rotate(360deg); } }
 .cup-action-danger{
   background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
   color:#fff;
