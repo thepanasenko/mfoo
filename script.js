@@ -937,9 +937,7 @@ function updatePlayNowButton(cupId){
   playBtn.disabled = playing;
   playBtn.classList.toggle('btn-disabled-soft', playing);
   playBtn.classList.toggle('cup-action-loading', playing);
-  playBtn.innerHTML = playing
-    ? `<span class="btn-spinner"></span><span>ОЖИДАНИЕ РЕЗУЛЬТАТОВ</span>`
-    : 'СЫГРАТЬ СЕЙЧАС';
+  playBtn.textContent = playing ? 'ОЖИДАНИЕ РЕЗУЛЬТАТОВ' : 'СЫГРАТЬ СЕЙЧАС';
 }
 let trainingTimers = {};
 let trainingUpdateInterval = null;
