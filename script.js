@@ -483,7 +483,7 @@ const TASK_CHAINS = [
     icon:'🏆',
     tiers:[
       {
-        title:'Сыграйте Кубок новичков 1 раз',
+        title:'Сыграйте Кубок Новичков',
         reward:{ coins:1000 },
         target:1,
         iconImg: ()=> TROPHY_IMG.novice,
@@ -491,7 +491,7 @@ const TASK_CHAINS = [
         isComplete:(s)=> ((s.taskStats?.cupPlays?.novice) || 0) >= 1
       },
       {
-        title:'Сыграйте Кубок Ямайки 1 раз',
+        title:'Сыграйте Кубок Ямайки',
         reward:{ coins:2000 },
         target:1,
         iconImg: ()=> TROPHY_IMG.jamaica,
@@ -499,7 +499,7 @@ const TASK_CHAINS = [
         isComplete:(s)=> ((s.taskStats?.cupPlays?.jamaica) || 0) >= 1
       },
       {
-        title:'Сыграйте Кубок Франции 1 раз',
+        title:'Сыграйте Кубок Франции',
         reward:{ coins:5000 },
         target:1,
         iconImg: ()=> TROPHY_IMG.france,
@@ -507,7 +507,7 @@ const TASK_CHAINS = [
         isComplete:(s)=> ((s.taskStats?.cupPlays?.france) || 0) >= 1
       },
       {
-        title:'Сыграйте Кубок США 1 раз',
+        title:'Сыграйте Кубок США',
         reward:{ coins:6000 },
         target:1,
         iconImg: ()=> TROPHY_IMG.usa,
@@ -515,12 +515,44 @@ const TASK_CHAINS = [
         isComplete:(s)=> ((s.taskStats?.cupPlays?.usa) || 0) >= 1
       },
       {
-        title:'Сыграйте Кубок Беларуси 1 раз',
+        title:'Сыграйте Кубок Беларуси',
         reward:{ coins:7500 },
         target:1,
         iconImg: ()=> TROPHY_IMG.belarus,
         progress:(s)=> Math.min((s.taskStats?.cupPlays?.belarus) || 0, 1),
         isComplete:(s)=> ((s.taskStats?.cupPlays?.belarus) || 0) >= 1
+      },
+      {
+        title:'Сыграйте Чемпионат Европы',
+        reward:{ coins:10000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.europe,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.europe) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.europe) || 0) >= 1
+      },
+      {
+        title:'Сыграйте Чемпионат Америки',
+        reward:{ coins:15000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.america,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.america) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.america) || 0) >= 1
+      },
+      {
+        title:'Сыграйте Чемпионат Азии',
+        reward:{ coins:20000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.asia,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.asia) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.asia) || 0) >= 1
+      },
+      {
+        title:'Сыграйте Чемпионат Евразии',
+        reward:{ coins:25000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.eurasia,
+        progress:(s)=> Math.min((s.taskStats?.cupPlays?.eurasia) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.cupPlays?.eurasia) || 0) >= 1
       }
     ]
   },
