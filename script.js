@@ -2041,7 +2041,7 @@ function onBuyTransferPlayer(playerId, btnEl){
     setTimeout(()=> btnEl.classList.remove('coin-buy-pop'), 350);
   }
 
-  showToast(`✅ ${p.name} куплен и добавлен в запас!`);
+  showToast(`<img src="${IMG.check}" class="img-icon" alt=""> ${p.name} куплен и добавлен в запас!`);
   closePlayerModal();
   renderTransferMarket();
 }
@@ -2336,7 +2336,7 @@ function finishTraining(playerId){
   refreshTopbar();
   renderTeam();
 
-  showToast(`✅ ${p.name} завершил тренировку! +${powerGain} силы (теперь ${fmt(p.power)})`);
+  showToast(`<img src="${IMG.check}" class="img-icon" alt=""> ${p.name} завершил тренировку! +${powerGain} силы (теперь ${fmt(p.power)})`);
 }
 
 function restoreTrainingTimers(){
@@ -2517,7 +2517,7 @@ function leagueListStatusText(t, opts){
   const mm = String(Math.floor((remaining % 3600000) / 60000)).padStart(2,'0');
   const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
   const registered = leagueReg(t).sessionId === leagueSessionId(next);
-  return `${registered ? '✅ Регистрация ' : ''}Старт через ${hh}:${mm}:${ss}`;
+  return `${registered ? `<img src="${IMG.check}" class="img-icon" alt=""> Регистрация ` : ''}Старт через ${hh}:${mm}:${ss}`;
 }
 
 let leagueListInterval = null;
@@ -2546,7 +2546,7 @@ function startLeagueListTimer(){
       const eligible = power >= range.min && power <= range.max;
       const cup = state.cups[t.id];
       const inProgress = !!(cup && !cup.finished);
-      statusEl.textContent = leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible, range });
+      statusEl.innerHTML = leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible, range });
     });
   }, 1000);
 }
@@ -2781,11 +2781,11 @@ function updateLeagueCountdown(t){
   const rangeLine = `<br><span style="font-size:12px;color:var(--text-dim)">Диапазон силы клуба ${registered ? '(закреплён при регистрации)' : 'для вашей текущей силы'}: ${fmt(range.min)}–${fmt(range.max)}. Ваша сила: ${fmt(power)}.</span>`;
 
   eligEl.innerHTML = (registered
-    ? `✅ Вы зарегистрированы! До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b>`
+    ? `<img src="${IMG.check}" class="img-icon" alt=""> Вы зарегистрированы! До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b>`
     : `До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты каждый день в ${scheduleTimesLabel(t)} по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`
   ) + rangeLine;
 
-  startBtn.textContent = registered ? 'ВЫ ЗАРЕГИСТРИРОВАНЫ ✅' : 'ЗАРЕГИСТРИРОВАТЬСЯ';
+  startBtn.innerHTML = registered ? `ВЫ ЗАРЕГИСТРИРОВАНЫ <img src="${IMG.check}" class="img-icon" alt="">` : 'ЗАРЕГИСТРИРОВАТЬСЯ';
   startBtn.disabled = registered;
   startBtn.classList.toggle('btn-disabled-soft', registered);
 
@@ -2849,7 +2849,7 @@ function onLeagueRegister(){
   reg.notifiedSessionId = null;
   save();
   updateLeagueCountdown(t);
-  showToast(`✅ Вы зарегистрированы на ближайший старт «${t.title}»! Диапазон: ${fmt(range.min)}–${fmt(range.max)}.`);
+  showToast(`<img src="${IMG.check}" class="img-icon" alt=""> Вы зарегистрированы на ближайший старт «${t.title}»! Диапазон: ${fmt(range.min)}–${fmt(range.max)}.`);
 }
 
 function startLeagueSession(t, sessionStartDate){
@@ -3329,6 +3329,8 @@ function onPlayNow(){
   if(cupPlayingNow[currentCupId]) return; // уже играется — игнорируем повторный клик
 
   stopCupTimer(currentCupId);
+  const el = document.getElementById('cup-countdown');
+  if(el) el.textContent = 'МАТЧ НАЧАЛСЯ!';
   setPlayingNow(currentCupId, true);
   playCurrentRound();
 }
