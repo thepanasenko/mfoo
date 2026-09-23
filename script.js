@@ -2918,6 +2918,7 @@ function onCupStart(){
   if(t.type === 'group') initEuroCup(currentCupId); else initCup(currentCupId);
   document.getElementById('cup-intro').classList.add('hidden');
   document.getElementById('cup-bracket-wrap').classList.remove('hidden');
+  setPlayingNow(currentCupId, false);
   renderBracket();
   ensureCupFlowRunning(currentCupId);
 }
@@ -3306,7 +3307,8 @@ function scheduleNextMatch(cupId){
       clearInterval(timer.intervalId);
       timer.intervalId = null;
       timer.running = false;
-      playNextMatch(cupId);
+      setPlayingNow(cupId, true);
+      playRoundForCup(cupId);
     }
   }, 1000);
 }
@@ -3329,14 +3331,14 @@ function onPlayNow(){
   if(cupPlayingNow[currentCupId]) return; // уже играется — игнорируем повторный клик
 
   stopCupTimer(currentCupId);
-  const el = document.getElementById('cup-countdown');
-  if(el) el.textContent = 'МАТЧ НАЧАЛСЯ!';
   setPlayingNow(currentCupId, true);
-  playCurrentRound();
+  playRoundForCup(currentCupId);
 }
 
-function playCurrentRound() {
-  const cupId = currentCupId; // фиксируем турнир на весь каскад — даже если вы уйдёте с экрана посреди него
+/* доигрывает ВЕСЬ текущий этап турнира разом — как по клику «Играть сейчас»,
+   так и по истечении фонового 30-секундного таймера (вызывается с явным
+   cupId, чтобы не зависеть от того, какой экран сейчас открыт) */
+function playRoundForCup(cupId) {
   const cup = state.cups[cupId];
   if(!cup || cup.finished) return;
   const t = tournamentById(cupId);
@@ -3529,83 +3531,6 @@ function applyMatchWinRewards(t, match, cup){
   addXp(rewards.xp);
   save();
   return { rewards, r };
-}
-
-function playNextMatch(cupId){
-  const cup = state.cups[cupId];
-  if(!cup) return;
-  const t = tournamentById(cupId);
-  syncPlayerCupTeam(cup);
-  const i = cup.nextIndex;
-  const match = cup.matches[i];
-  match.teamA = resolveTeam(match.a, cup);
-  match.teamB = resolveTeam(match.b, cup);
-
-  const result = simulateMatch(
-    match.teamA.power, match.teamB.power,
-    match.teamA.formation, match.teamB.formation,
-    drawsAllowed(t, cup, match.round)
-  );
-  match.scoreA = result.scoreA;
-  match.scoreB = result.scoreB;
-  match.draw = !!result.draw;
-  match.winner = result.draw ? null : (result.aWon ? match.teamA : match.teamB);
-  match.played = true;
-  cup.nextIndex++;
-
-  const playerInvolved = match.teamA.isPlayer || match.teamB.isPlayer;
-  const playerWon = playerInvolved && !!match.winner && match.winner.isPlayer;
-
-  if(playerInvolved){
-    state.stats.matchesPlayed++;
-    if(match.draw) state.stats.draws++;
-    else if(playerWon) state.stats.wins++;
-    else state.stats.losses++;
-  }
-
-  const onScreen = currentCupId === cupId;
-  if(onScreen) renderBracket();
-  save();
-
-  if(playerInvolved && onScreen){
-    // мы прямо сейчас смотрим на этот кубок — показываем интерактивную модалку матча
-    showMatchModal(match, playerWon, () => continueAfterMatch(cupId, playerWon || match.draw));
-    return;
-  }
-
-  // фон: этот кубок сейчас не на экране (или матч без участия игрока) —
-  // никаких модалок поверх текущего экрана, просто тихо начисляем награду и едем дальше
-  if(playerInvolved && playerWon){
-    applyMatchWinRewards(t, match, cup);
-    if(currentCupId === cupId) refreshTopbar();
-  }
-
-  const isGroupStage = t.type === 'group' && cup.stage === 'groups';
-  const keepGoing = playerWon || match.draw || isGroupStage || !playerInvolved;
-  setTimeout(()=> continueAfterMatch(cupId, keepGoing), 900);
-}
-
-function continueAfterMatch(cupId, keepGoing){
-  const t = tournamentById(cupId);
-  const cup = state.cups[cupId];
-  if(!t || !cup) return;
-  const isGroupStage = t.type === 'group' && cup.stage === 'groups';
-  const onScreen = currentCupId === cupId;
-
-  if(!keepGoing && !isGroupStage){
-    cup.finished = true;
-    cup.won = false;
-    recordCupPlayed(t.id);
-    save();
-    if(onScreen) renderCupScreen();
-    else showToast(`❌ «${t.title}»: турнир завершён без победы.`);
-    return;
-  }
-  if(cup.nextIndex >= cup.matches.length){
-    finishCup(cupId);
-  } else {
-    scheduleNextMatch(cupId);
-  }
 }
 
 function finishCup(cupId){
@@ -4038,6 +3963,7 @@ function showMatchModal(match, playerWon, onClose){
   document.getElementById('match-modal').classList.remove('hidden');
   document.getElementById('mm-continue-btn').addEventListener('click', ()=>{
     document.getElementById('match-modal').classList.add('hidden');
+    setPlayingNow(cupId, false);
     if(!playerWon && !isDraw && !isGroupStage) {
       if(currentCupId === cupId) renderCupScreen();
     } else if(isFinal){
