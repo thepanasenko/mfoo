@@ -1082,6 +1082,15 @@ function generateSquad(){
   const usedNames = new Set();
   function randomName(){ return randomPlayerName(usedNames); }
 
+  // перетасованный набор аватарок без повторов — пока хватает уникальных номеров,
+  // у каждого игрока клуба будет своя иконка; если игроков больше, чем аватарок,
+  // остаток добирается случайно (с этого момента повторы уже неизбежны)
+  const avatarPool = shuffle(Array.from({length:AVATAR_COUNT}, (_,i)=> i+1));
+  let avatarIdx = 0;
+  function nextAvatar(){
+    return avatarIdx < avatarPool.length ? avatarPool[avatarIdx++] : randomAvatarNum();
+  }
+
   const mainSpec = ['ВР','ЗАЩ','ЗАЩ','ЗАЩ','ЗАЩ','ПЗ','ПЗ','ПЗ','ПЗ','НАП','НАП'];
   const benchSpec = ['ВР','ЗАЩ','ПЗ','НАП'];
 
@@ -1093,7 +1102,8 @@ function generateSquad(){
       status: 'main',
       slot: null,
       training: false,
-      trainingEndTime: null
+      trainingEndTime: null,
+      avatar: nextAvatar()
     });
   });
   benchSpec.forEach(code=>{
@@ -1103,7 +1113,8 @@ function generateSquad(){
       status: 'bench',
       slot: null,
       training: false,
-      trainingEndTime: null
+      trainingEndTime: null,
+      avatar: nextAvatar()
     });
   });
   return players;
@@ -1114,14 +1125,37 @@ function calcClubPower(players){
 }
 
 /* ============================================================
+   ЦВЕТ ФОРМЫ И АВАТАРКИ ИГРОКОВ
+   ============================================================ */
+const KIT_COLORS = [
+  { code:'blue',  name:'Синий',   available:true  },
+  { code:'red',   name:'Красный', available:false },
+  { code:'black', name:'Чёрный',  available:false }
+];
+const AVATAR_COUNT = 20;
+
+function randomAvatarNum(){ return rnd(1, AVATAR_COUNT); }
+
+function playerAvatarSrc(p){
+  const color = (state && state.kitColor) || 'blue';
+  const num = (p && p.avatar) || 1;
+  return `images/players/${color}${num}.png`;
+}
+
+function playerAvatarHtml(p, extraClass){
+  return `<img src="${playerAvatarSrc(p)}" class="player-avatar-img ${extraClass||''}" alt="${p.name}">`;
+}
+
+/* ============================================================
    PERSISTENCE
    ============================================================ */
-function newGameState(teamName){
+function newGameState(teamName, kitColor){
   const players = generateSquad();
   const cups = {};
   TOURNAMENTS.forEach(t=> cups[t.id] = null);
   const s = {
     teamName,
+    kitColor: kitColor || 'blue',
     players,
     coins: 7500,
     budget: 0,
@@ -1155,6 +1189,13 @@ function load(){
 }
 
 function migrateState(s){
+  if(!s.kitColor) s.kitColor = 'blue';
+  if(Array.isArray(s.players)){
+    s.players.forEach(p=>{ if(!p.avatar) p.avatar = randomAvatarNum(); });
+  }
+  if(s.transferMarket && Array.isArray(s.transferMarket.players)){
+    s.transferMarket.players.forEach(p=>{ if(!p.avatar) p.avatar = randomAvatarNum(); });
+  }
   if(!Array.isArray(s.trophies)) s.trophies = [];
   if(!s.stats) s.stats = { wins:0, draws:0, losses:0, matchesPlayed:0 };
   if(!s.cups){
@@ -1264,9 +1305,35 @@ function initModalScrollLock(){
   });
 }
 
+let selectedKitColor = 'blue';
+
+function renderKitColorPicker(){
+  const el = document.getElementById('kit-color-picker');
+  if(!el) return;
+  el.innerHTML = KIT_COLORS.map(k => `
+    <button class="kit-color-btn ${k.code===selectedKitColor ? 'active' : ''} ${!k.available ? 'locked' : ''}"
+            data-kit="${k.code}" ${!k.available ? 'disabled' : ''}>
+      <span class="kit-swatch kit-${k.code}"></span>
+      <span class="kit-color-name">${k.name}</span>
+      ${!k.available ? '<span class="kit-lock">🔒</span>' : ''}
+    </button>
+  `).join('');
+
+  el.querySelectorAll('.kit-color-btn:not(.locked)').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      selectedKitColor = btn.dataset.kit;
+      renderKitColorPicker();
+    });
+  });
+  el.querySelectorAll('.kit-color-btn.locked').forEach(btn=>{
+    btn.addEventListener('click', ()=> showToast('Этот цвет формы скоро станет доступен'));
+  });
+}
+
 function showRegister(){
   document.getElementById('screen-register').classList.remove('hidden');
   document.getElementById('app').classList.add('hidden');
+  renderKitColorPicker();
 }
 function showApp(){
   document.getElementById('screen-register').classList.add('hidden');
@@ -1388,7 +1455,7 @@ function onRegisterConfirm(){
   const input = document.getElementById('team-name-input');
   let name = input.value.trim();
   if(!name){ input.focus(); input.style.borderColor = 'var(--red)'; return; }
-  state = newGameState(name);
+  state = newGameState(name, selectedKitColor);
   save();
   showApp();
 }
@@ -1479,7 +1546,6 @@ function switchTeamTab(tab){
 }
 
 function playerListRowHtml(p){
-  const pos = posByCode(p.pos);
   let statusText;
   if(p.training){
     let timeLeft = '';
@@ -1496,7 +1562,7 @@ function playerListRowHtml(p){
 
   return `
     <div class="tournament-card player-row ${p.training ? 'training' : ''}" data-id="${p.id}">
-      <span class="player-pos player-row-icon ${pos.css}">${pos.code}</span>
+      ${playerAvatarHtml(p)}
       <div class="tournament-info">
         <div class="tournament-name">${p.name}</div>
         <div class="tournament-status">${statusText}</div>
@@ -1896,7 +1962,8 @@ function generateTransferPlayer(usedNames){
     name: randomPlayerName(usedNames),
     pos: posCode,
     power,
-    price: transferPlayerPrice(power)
+    price: transferPlayerPrice(power),
+    avatar: randomAvatarNum()
   };
 }
 
@@ -1921,11 +1988,10 @@ function ensureTransferMarket(){
 let transferActiveFilter = 'all';
 
 function transferPlayerRowHtml(p){
-  const pos = posByCode(p.pos);
   const affordable = state.coins >= p.price;
   return `
   <div class="tournament-card transfer-row" data-id="${p.id}">
-    <span class="player-pos player-row-icon ${pos.css}">${pos.code}</span>
+    ${playerAvatarHtml(p)}
     <div class="tournament-info">
       <div class="tournament-name">${p.name}</div>
       <div class="tournament-status">${posLabel(p.pos)} · Сила ${fmt(p.power)}</div>
@@ -2030,7 +2096,8 @@ function onBuyTransferPlayer(playerId, btnEl){
     status: 'bench',
     slot: null,
     training: false,
-    trainingEndTime: null
+    trainingEndTime: null,
+    avatar: p.avatar || randomAvatarNum()
   });
   market.players.splice(idx, 1);
   save();
