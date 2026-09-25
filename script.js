@@ -1147,6 +1147,15 @@ function playerAvatarHtml(p, extraClass){
   return `<img src="${playerAvatarSrc(p)}" class="player-avatar-img ${extraClass||''}" alt="${p.name}">`;
 }
 
+/* аватарка клуба/менеджера (не путать с аватаркой игрока) — своя у вас и у каждого
+   бота-соперника, номера 0..3, файлы images/avatar/0.png … images/avatar/3.png */
+const MANAGER_AVATAR_COUNT = 4;
+function managerAvatarSrc(num){
+  const n = Number.isInteger(num) ? num : 0;
+  return `images/avatar/${n}.png`;
+}
+const BOT_AVATAR_NUM = 0; // у всех ботов-соперников одна и та же аватарка
+
 /* ============================================================
    PERSISTENCE
    ============================================================ */
@@ -1157,6 +1166,7 @@ function newGameState(teamName, kitColor){
   const s = {
     teamName,
     kitColor: kitColor || 'blue',
+    managerAvatar: 0,
     players,
     coins: 7500,
     budget: 0,
@@ -1191,6 +1201,7 @@ function load(){
 
 function migrateState(s){
   if(!s.kitColor) s.kitColor = 'blue';
+  if(s.managerAvatar === undefined || s.managerAvatar === null) s.managerAvatar = 0;
   if(Array.isArray(s.players)){
     s.players.forEach(p=>{ if(!p.avatar) p.avatar = randomAvatarNum(); });
   }
@@ -2511,6 +2522,9 @@ function renderManager(){
   document.getElementById('manager-body').innerHTML = `
     <div class="mgr-card">
       <div class="mgr-club-row">
+        <button id="btn-manager-avatar" class="mgr-avatar-btn">
+          <img src="${managerAvatarSrc(state.managerAvatar)}" class="mgr-avatar-img" alt="Аватар клуба">
+        </button>
         <span class="mgr-club-name">${state.teamName}</span>
         <span class="mgr-power-pill">СИЛА ${fmt(power)}</span>
       </div>
@@ -2569,6 +2583,44 @@ function renderManager(){
 
   document.getElementById('btn-open-tasks').addEventListener('click', openTasksModal);
   updateTasksBadge();
+
+  const avatarBtn = document.getElementById('btn-manager-avatar');
+  if(avatarBtn) avatarBtn.addEventListener('click', openManagerAvatarPicker);
+}
+
+/* окно выбора аватарки клуба/менеджера (0..3) */
+function openManagerAvatarPicker(){
+  const old = document.getElementById('avatar-picker-overlay');
+  if(old) old.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'avatar-picker-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-card avatar-picker-card">
+      <button class="modal-close" id="avatar-picker-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
+      <div class="tp-title">Выберите аватар</div>
+      <div class="avatar-picker-grid">
+        ${Array.from({length: MANAGER_AVATAR_COUNT}, (_, n) => `
+          <button class="avatar-picker-option ${n === state.managerAvatar ? 'active' : ''}" data-avatar-num="${n}">
+            <img src="${managerAvatarSrc(n)}" class="avatar-picker-img" alt="Аватар ${n}">
+          </button>
+        `).join('')}
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const close = ()=> overlay.remove();
+  overlay.querySelector('#avatar-picker-close').addEventListener('click', close);
+  overlay.addEventListener('click', e=>{ if(e.target === overlay) close(); });
+  overlay.querySelectorAll('.avatar-picker-option').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.managerAvatar = Number(btn.dataset.avatarNum);
+      save();
+      close();
+      renderManager();
+    });
+  });
 }
 
 /* ============================================================
@@ -3069,7 +3121,7 @@ function initEuroCup(cupId){
   const t = tournamentById(cupId);
   const power = calcClubPower(state.players);
   const range = t.scheduled ? (leagueReg(t).range || bigLeagueRangeForPower(power)) : { min: t.min, max: t.max };
-  const playerTeam = { id:'you', name: state.teamName, power, isPlayer:true, formation: state.formation };
+  const playerTeam = { id:'you', name: state.teamName, power, isPlayer:true, formation: state.formation, clubAvatar: state.managerAvatar };
 
   const names = shuffle([...t.teamNames]);
   const groupOpponents = [];
@@ -3079,7 +3131,8 @@ function initEuroCup(cupId){
       name: names[i % names.length],
       power: rnd(range.min, range.max),
       isPlayer: false,
-      formation: pick(FORMATION_IDS)
+      formation: pick(FORMATION_IDS),
+      clubAvatar: BOT_AVATAR_NUM
     });
   }
 
@@ -3152,7 +3205,7 @@ function simulateGroupWinner(t, range){
   const names = shuffle([...t.teamNames]);
   const teams = [];
   for(let i=0; i<t.teamsPerGroup; i++){
-    teams.push({ id: uid(), name: names[i % names.length], power: rnd(range.min, range.max), isPlayer:false, formation: pick(FORMATION_IDS) });
+    teams.push({ id: uid(), name: names[i % names.length], power: rnd(range.min, range.max), isPlayer:false, formation: pick(FORMATION_IDS), clubAvatar: BOT_AVATAR_NUM });
   }
   const rounds = roundRobinRounds(teams.length);
   const stats = {};
@@ -3231,7 +3284,7 @@ function getMatchRewards(t, match, cup){
 function initCup(cupId){
   const t = tournamentById(cupId);
   const power = calcClubPower(state.players);
-  const playerTeam = { id:'you', name: state.teamName, power, isPlayer:true, formation: state.formation };
+  const playerTeam = { id:'you', name: state.teamName, power, isPlayer:true, formation: state.formation, clubAvatar: state.managerAvatar };
 
   const botTeams = [];
   const names = shuffle([...t.teamNames]);
@@ -3245,7 +3298,8 @@ function initCup(cupId){
       name: name,
       power: botPower,
       isPlayer: false,
-      formation: pick(FORMATION_IDS)
+      formation: pick(FORMATION_IDS),
+      clubAvatar: BOT_AVATAR_NUM
     });
   }
 
@@ -3755,10 +3809,11 @@ function findPlayerUpcomingMatch(cup){
 
 function vsAvatarSideHtml(team, isOpponent){
   const clubName = team ? team.name : '?';
+  const avatarSrc = managerAvatarSrc(team ? team.clubAvatar : 0);
   const clickable = isOpponent && team && !team.isPlayer;
   return `
     <div class="vs-side ${clickable ? 'vs-side-opp' : ''}" ${clickable ? `data-teamid="${team.id}"` : ''}>
-      <div class="vs-avatar-frame"><img src="images/im.png" class="vs-avatar" alt="${clubName}"></div>
+      <div class="vs-avatar-frame"><img src="${avatarSrc}" class="vs-avatar" alt="${clubName}"></div>
       <div class="vs-club-name">${clubName}</div>
     </div>`;
 }
@@ -3984,7 +4039,7 @@ function openBotModal(team) {
 
     document.getElementById('player-modal-body').innerHTML = `
       <div style="text-align:center; margin-top: 8px;">
-        <div style="font-size: 42px; margin-bottom: 10px;">🤖</div>
+        <img src="${managerAvatarSrc(team.clubAvatar)}" style="width:72px; height:72px; object-fit:contain; margin-bottom: 10px;" alt="${team.name}">
         <div style="font-family: var(--ff-display); font-size: 22px; color: var(--text);">${team.name}</div>
         <div style="color: var(--text-dim); font-size: 14px; margin-top: 4px;">🤖 Команда бота</div>
 
