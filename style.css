@@ -829,11 +829,48 @@ input{ font-family: inherit; }
 .cup-eligibility{ margin-bottom:16px; font-size:14px; color: var(--text-dim); line-height:1.5; }
 .cup-eligibility.bad{ color: var(--red); font-weight:700; }
 
+.next-match-preview{
+  background: rgb(0 0 0 / 37%);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+.vs-preview{
+  display:flex; align-items:center; justify-content:center;
+  gap:16px; margin-bottom:14px;
+}
+.vs-side{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  flex:1; min-width:0;
+}
+.vs-side-opp{ cursor:pointer; }
+.vs-avatar-frame{
+  width:65px; height:65px;
+  border:2px solid var(--line);
+  background: var(--surface-3);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.vs-side-opp .vs-avatar-frame{ transition: border-color .15s ease, transform .15s ease; }
+.vs-side-opp:active .vs-avatar-frame{ transform: scale(.94); border-color: var(--green); }
+.vs-avatar{ width:100%; height:100%; object-fit:cover; }
+.vs-club-name{
+  font-size:12px; font-weight:700; color: var(--text);
+  text-align:center; max-width:100px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.vs-badge{
+  font-family: var(--ff-display); font-size:24px; color: var(--text-mute);
+  flex-shrink:0; letter-spacing:1px;
+}
+
 .cup-countdown{
   text-align:center; font-family: var(--ff-display);
   font-size:15px; color: var(--gold); margin-bottom:10px;
 }
-#btn-play-now{ display:block; margin:0 auto 20px; }
+#btn-play-now{ display:block; margin:0 auto; }
 
 .bracket{ display:flex; flex-direction:column; gap:22px; }
 .bracket-stage-progress{

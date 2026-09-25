@@ -1082,17 +1082,18 @@ function generateSquad(){
   const usedNames = new Set();
   function randomName(){ return randomPlayerName(usedNames); }
 
-  // перетасованный набор аватарок без повторов — пока хватает уникальных номеров,
-  // у каждого игрока клуба будет своя иконка; если игроков больше, чем аватарок,
-  // остаток добирается случайно (с этого момента повторы уже неизбежны)
-  const avatarPool = shuffle(Array.from({length:AVATAR_COUNT}, (_,i)=> i+1));
-  let avatarIdx = 0;
-  function nextAvatar(){
-    return avatarIdx < avatarPool.length ? avatarPool[avatarIdx++] : randomAvatarNum();
-  }
-
   const mainSpec = ['ВР','ЗАЩ','ЗАЩ','ЗАЩ','ЗАЩ','ПЗ','ПЗ','ПЗ','ПЗ','НАП','НАП'];
   const benchSpec = ['ВР','ЗАЩ','ПЗ','НАП'];
+  const totalCount = mainSpec.length + benchSpec.length;
+
+  // раздаём уникальные аватарки всему стартовому составу (без повторов)
+  const avatarPool = shuffle(Array.from({length: AVATAR_COUNT}, (_, i) => i + 1));
+  let avatarIdx = 0;
+  function nextAvatar(){
+    const num = avatarPool[avatarIdx % avatarPool.length];
+    avatarIdx++;
+    return num;
+  }
 
   const players = [];
   mainSpec.forEach(code=>{
@@ -3738,10 +3739,72 @@ function matchesPageHtml(key, matches, cup){
   return `<div class="bracket-matches">${matchesHtml}</div>${pagerHtml}`;
 }
 
+function findPlayerUpcomingMatch(cup){
+  const round = cupCurrentRound(cup);
+  const roundMatches = cup.matches.filter(m => m.round === round);
+  for(const m of roundMatches){
+    if(m.played) continue;
+    const teamA = resolveTeam(m.a, cup);
+    const teamB = resolveTeam(m.b, cup);
+    if((teamA && teamA.isPlayer) || (teamB && teamB.isPlayer)){
+      return { teamA, teamB };
+    }
+  }
+  return null;
+}
+
+function vsAvatarSideHtml(team, isOpponent){
+  const clubName = team ? team.name : '?';
+  const clickable = isOpponent && team && !team.isPlayer;
+  return `
+    <div class="vs-side ${clickable ? 'vs-side-opp' : ''}" ${clickable ? `data-teamid="${team.id}"` : ''}>
+      <div class="vs-avatar-frame"><img src="images/im.png" class="vs-avatar" alt="${clubName}"></div>
+      <div class="vs-club-name">${clubName}</div>
+    </div>`;
+}
+
+function renderVsPreview(cup){
+  const el = document.getElementById('vs-preview-body');
+  if(!el) return;
+
+  if(cup.finished){
+    el.innerHTML = '';
+    return;
+  }
+
+  const found = findPlayerUpcomingMatch(cup);
+  if(!found || !found.teamA || !found.teamB){
+    el.innerHTML = '';
+    return;
+  }
+
+  const you = found.teamA.isPlayer ? found.teamA : found.teamB;
+  const opp = found.teamA.isPlayer ? found.teamB : found.teamA;
+
+  el.innerHTML = `
+    <div class="vs-preview">
+      ${vsAvatarSideHtml(you, false)}
+      <div class="vs-badge">VS</div>
+      ${vsAvatarSideHtml(opp, true)}
+    </div>`;
+
+  el.querySelectorAll('.vs-side-opp').forEach(sideEl=>{
+    sideEl.addEventListener('click', ()=>{
+      const teamId = sideEl.dataset.teamid;
+      const cup2 = state.cups[currentCupId];
+      if(!cup2) return;
+      const team = cup2.teams.find(t => t.id === teamId);
+      if(team && !team.isPlayer) openBotModal(team);
+    });
+  });
+}
+
 function renderBracket(){
   const cup = state.cups[currentCupId];
   if(!cup) return;
   const t = tournamentById(currentCupId);
+
+  renderVsPreview(cup);
 
   const isGroupType = t.type === 'group';
   const teamCount = cup.teams.length;
@@ -3853,10 +3916,12 @@ function renderBracket(){
   });
 
   const showControls = !cup.finished;
+  const previewWrap = document.getElementById('next-match-preview');
   const countdownEl = document.getElementById('cup-countdown');
   const playBtn = document.getElementById('btn-play-now');
   const leaveBtn = document.getElementById('btn-leave-cup');
 
+  if(previewWrap) previewWrap.style.display = showControls ? '' : 'none';
   if(countdownEl) countdownEl.style.display = showControls ? '' : 'none';
   if(playBtn) playBtn.style.display = showControls ? '' : 'none';
   if(leaveBtn) leaveBtn.style.display = showControls ? '' : 'none';
