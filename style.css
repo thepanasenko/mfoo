@@ -483,7 +483,7 @@ input{ font-family: inherit; }
 }
 .avatar-picker-option:active{ transform: scale(.96); }
 .avatar-picker-option.active{ border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); }
-.avatar-picker-img{ width:64px; height:64px; object-fit:contain; }
+.avatar-picker-img{ width:64px; height:64px; border-radius: 8px; object-fit:contain; }
 .mgr-stats-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
 @media (min-width:480px){ .mgr-stats-grid{ grid-template-columns:repeat(3,1fr); } }
 .mgr-stat{
