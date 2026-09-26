@@ -742,6 +742,7 @@ input{ font-family: inherit; }
 }
 .player-avatar-img{
   width:44px; height:44px; flex-shrink:0;
+  border-radius: 6px;
   object-fit:contain;
   background: rgb(0 0 0 / 37%);
   align-self:center;
@@ -867,7 +868,6 @@ input{ font-family: inherit; }
 .vs-side-opp{ cursor:pointer; }
 .vs-avatar-frame{
   width:65px; height:65px;
-  background: var(--surface-3);
   display:flex; align-items:center; justify-content:center;
   overflow:hidden;
 }
