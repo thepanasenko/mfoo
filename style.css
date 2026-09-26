@@ -867,7 +867,7 @@ input{ font-family: inherit; }
 }
 .vs-side-opp{ cursor:pointer; }
 .vs-avatar-frame{
-  width:65px; height:65px;
+  width:80px; height:80px;
   display:flex; align-items:center; justify-content:center;
   overflow:hidden;
 }
