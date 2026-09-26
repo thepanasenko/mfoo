@@ -1149,12 +1149,13 @@ function playerAvatarHtml(p, extraClass){
 
 /* аватарка клуба/менеджера (не путать с аватаркой игрока) — своя у вас и у каждого
    бота-соперника, номера 0..3, файлы images/avatar/0.png … images/avatar/3.png */
-const MANAGER_AVATAR_COUNT = 4;
 function managerAvatarSrc(num){
   const n = Number.isInteger(num) ? num : 0;
   return `images/avatar/${n}.png`;
 }
-const BOT_AVATAR_NUM = 0; // у всех ботов-соперников одна и та же аватарка
+const BOT_AVATAR_NUM = 0; // у всех ботов-соперников одна и та же аватарка — 0.png
+/* аватарки, которые может выбрать сам менеджер — 0-я зарезервирована за ботами */
+const PLAYER_AVATAR_NUMS = [1, 2, 3, 4, 5, 6];
 
 /* ============================================================
    PERSISTENCE
@@ -1166,7 +1167,7 @@ function newGameState(teamName, kitColor){
   const s = {
     teamName,
     kitColor: kitColor || 'blue',
-    managerAvatar: 0,
+    managerAvatar: 1,
     players,
     coins: 7500,
     budget: 0,
@@ -1201,7 +1202,7 @@ function load(){
 
 function migrateState(s){
   if(!s.kitColor) s.kitColor = 'blue';
-  if(s.managerAvatar === undefined || s.managerAvatar === null) s.managerAvatar = 0;
+  if(!PLAYER_AVATAR_NUMS.includes(s.managerAvatar)) s.managerAvatar = 1;
   if(Array.isArray(s.players)){
     s.players.forEach(p=>{ if(!p.avatar) p.avatar = randomAvatarNum(); });
   }
@@ -2601,7 +2602,7 @@ function openManagerAvatarPicker(){
       <button class="modal-close" id="avatar-picker-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
       <div class="tp-title">Выберите аватар</div>
       <div class="avatar-picker-grid">
-        ${Array.from({length: MANAGER_AVATAR_COUNT}, (_, n) => `
+        ${PLAYER_AVATAR_NUMS.map(n => `
           <button class="avatar-picker-option ${n === state.managerAvatar ? 'active' : ''}" data-avatar-num="${n}">
             <img src="${managerAvatarSrc(n)}" class="avatar-picker-img" alt="Аватар ${n}">
           </button>
@@ -4039,7 +4040,7 @@ function openBotModal(team) {
 
     document.getElementById('player-modal-body').innerHTML = `
       <div style="text-align:center; margin-top: 8px;">
-        <img src="${managerAvatarSrc(team.clubAvatar)}" style="width:72px; height:72px; object-fit:contain; margin-bottom: 10px;" alt="${team.name}">
+        <img src="${managerAvatarSrc(team.clubAvatar)}" style="width:72px; height:72px; object-fit:contain; margin-bottom: 10px; border-radius:8px;" alt="${team.name}">
         <div style="font-family: var(--ff-display); font-size: 22px; color: var(--text);">${team.name}</div>
         <div style="color: var(--text-dim); font-size: 14px; margin-top: 4px;">🤖 Команда бота</div>
 
