@@ -471,20 +471,20 @@ input{ font-family: inherit; }
   flex-shrink:0; width:46px; height:46px; padding:0;
   background:none; border:none; cursor:pointer;
 }
-.mgr-avatar-img{ width:46px; height:46px; object-fit:contain; display:block; border-radius:8px; }
+.mgr-avatar-img{ width:46px; height:46px; object-fit:contain; display:block; }
 
 /* окно выбора аватарки */
 .avatar-picker-card{ max-width:340px; width:100%; }
 .avatar-picker-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; }
 .avatar-picker-option{
-  background:none; border:1px solid var(--line); border-radius:8px;
+  background:none; border:none;
   padding:4px; display:flex; align-items:center; justify-content:center; cursor:pointer;
-  transition: border-color .15s ease, transform .15s ease;
+  transition: transform .15s ease, box-shadow .15s ease;
 }
 .avatar-picker-option:active{ transform: scale(.96); }
-.avatar-picker-option.active{ border-color: var(--green); box-shadow: 0 0 0 2px var(--green-glow); }
+.avatar-picker-option.active{ box-shadow: 0 0 0 2px var(--green-glow); }
 .avatar-picker-option.locked{ opacity:.45; cursor:not-allowed; position:relative; }
-.avatar-picker-img{ width:100%; height:auto; aspect-ratio:1; object-fit:contain; border-radius:8px; }
+.avatar-picker-img{ width:100%; height:auto; aspect-ratio:1; object-fit:contain; }
 .avatar-lock{ position:absolute; top:4px; right:4px; font-size:12px; }
 .mgr-stats-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:14px; }
 @media (min-width:480px){ .mgr-stats-grid{ grid-template-columns:repeat(3,1fr); } }
@@ -742,10 +742,8 @@ input{ font-family: inherit; }
 }
 .player-avatar-img{
   width:44px; height:44px; flex-shrink:0;
-  border-radius:6px;
-  object-fit:cover;
+  object-fit:contain;
   background: rgb(0 0 0 / 37%);
-    border: 1px solid var(--line);
   align-self:center;
 }
 .player-row.training{ border-color: rgba(242,183,5,.4); background: rgba(242,183,5,.06); }
@@ -809,7 +807,7 @@ input{ font-family: inherit; }
   font-size:13px;
   display:flex; align-items:center; justify-content:center;
 }
-.modal-close-icon{ width:28px; height:28px; object-fit:contain; }
+.modal-close-icon{ width:24px; height:24px; object-fit:contain; }
 .task-check-icon{ width:14px; height:14px; object-fit:contain; vertical-align:-2px; margin-right:2px; }
 .pm-name{ font-family: var(--ff-display); font-size:22px; margin:4px 0 2px; }
 .pm-pos{ color: var(--text-dim); font-size:12px; font-weight:700; margin-bottom:14px; }
@@ -869,15 +867,13 @@ input{ font-family: inherit; }
 .vs-side-opp{ cursor:pointer; }
 .vs-avatar-frame{
   width:65px; height:65px;
-  border:2px solid var(--line);
-  border-radius:8px;
   background: var(--surface-3);
   display:flex; align-items:center; justify-content:center;
   overflow:hidden;
 }
-.vs-side-opp .vs-avatar-frame{ transition: border-color .15s ease, transform .15s ease; }
-.vs-side-opp:active .vs-avatar-frame{ transform: scale(.94); border-color: var(--green); }
-.vs-avatar{ width:100%; height:100%; object-fit:cover; }
+.vs-side-opp .vs-avatar-frame{ transition: transform .15s ease; }
+.vs-side-opp:active .vs-avatar-frame{ transform: scale(.94); }
+.vs-avatar{ width:100%; height:100%; object-fit:contain; }
 .vs-club-name{
   font-size:12px; font-weight:700; color: var(--text);
   text-align:center; max-width:100px;

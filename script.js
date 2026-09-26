@@ -206,7 +206,7 @@ const TOURNAMENTS = [
     icon:'🏆',
     min:0, max:200,
     teamCount:4,
-    teamNames:['FC Kingston','Red Lions','Blue Stars','Jamaica FC'],
+    teamNames:['FCKingston','RedLions','BlueStars','JamaicaFC'],
     // teamCount 4 -> 2 раунда: Полуфинал, Финал
     rounds:[
       { coins:100, power:20, xp:25 },   // Полуфинал
@@ -220,7 +220,7 @@ const TOURNAMENTS = [
     icon:'🥥',
     min:201, max:400,
     teamCount:8,
-    teamNames:['Portmore FC','Trenchtown Lions','Spanish Town Utd','Montego Bay Stars','Ocho Rios FC','Negril Warriors','St. Ann Rangers','Kingston City'],
+    teamNames:['PortmoreFC','TrenchtownLions','SpanishTownUtd','MontegoBayStars','OchoRiosFC','NegrilWarriors','St.AnnRangers','KingstonCity'],
     // teamCount 8 -> 3 раунда: Четвертьфинал, Полуфинал, Финал
     rounds:[
       { coins:200, power:15, xp:50 },   // Четвертьфинал
@@ -235,7 +235,7 @@ const TOURNAMENTS = [
     icon:'🥐',
     min:401, max:600,
     teamCount:16,
-    teamNames:['Paris Étoile','Lyon Renard','Marseille Marée','Nice Soleil','Bordeaux Vigne','Toulouse Violette','Nantes Corsaire','Lille Nordique','Strasbourg Cigogne','Rennes Bretonne','Montpellier Garrigue','Reims Sacre','Le Havre Phare','Dijon Moutarde','Angers Loire','Grenoble Alpine'],
+    teamNames:['ParisÉtoile','LyonRenard','MarseilleMarée','NiceSoleil','BordeauxVigne','ToulouseViolette','NantesCorsaire','LilleNordique','StrasbourgCigogne','RennesBretonne','MontpellierGarrigue','ReimsSacre','LeHavrePhare','DijonMoutarde','AngersLoire','GrenobleAlpine'],
     // teamCount 16 -> 4 раунда: 1/8, 1/4, 1/2, Финал
     rounds:[
       { coins:300, power:10, xp:75 },    // 1/8 финала
@@ -251,7 +251,7 @@ const TOURNAMENTS = [
     icon:'🦅',
     min:601, max:800,
     teamCount:16,
-    teamNames:['New York Liberty FC','LA Golden Wave','Chicago Windstorm','Houston Lonestar','Miami Sunrise','Dallas Eagles','Seattle Rainguard','Denver Peak','Boston Patriots FC','Atlanta Phoenix','Austin Riverside','Phoenix Sunhawk','Detroit Ironworks','Portland Timberline','San Diego Coast','Nashville Rebels'],
+    teamNames:['NewYorkLibertyFC','LAGoldenWave','ChicagoWindstorm','HoustonLonestar','MiamiSunrise','DallasEagles','SeattleRainguard','DenverPeak','BostonPatriotsFC','AtlantaPhoenix','AustinRiverside','PhoenixSunhawk','DetroitIronworks','PortlandTimberline','SanDiegoCoast','NashvilleRebels'],
     rounds:[
       { coins:500, power:3, xp:100 },     // 1/8 финала
       { coins:750, power:5, xp:150 },     // Четвертьфинал
@@ -266,7 +266,7 @@ const TOURNAMENTS = [
     icon:'🐃',
     min:801, max:1100,
     teamCount:16,
-    teamNames:['Minsk Zubr','Brest Krepost','Grodno Neman','Vitebsk Dvina','Gomel Sozh','Mogilev Dnepr','Baranovichi Sokol','Pinsk Boloto','Orsha Volna','Bobruisk Bober','Soligorsk Shakhter','Zhlobin Kovka','Polotsk Drakon','Lida Zubronok','Slutsk Poyas','Mozyr Poles'],
+    teamNames:['MinskZubr','BrestKrepost','GrodnoNeman','VitebskDvina','GomelSozh','MogilevDnepr','BaranovichiSokol','PinskBoloto','OrshaVolna','BobruiskBober','SoligorskShakhter','ZhlobinKovka','PolotskDrakon','LidaZubronok','SlutskPoyas','MozyrPoles'],
     rounds:[
       { coins:750, power:1, xp:200 },     // 1/8 финала
       { coins:1250, power:3, xp:250 },    // Четвертьфинал
@@ -283,7 +283,7 @@ const TOURNAMENTS = [
     min:1101, max:2200,
     groupsCount:8,
     teamsPerGroup:10,
-    teamNames:['Berlin Adler','Madrid Toro','Rome Lupetto','Amsterdam Wiel','Vienna Habsburg','Lisbon Farol','Warsaw Orzel','Athens Olymp','Zurich Alpen','Prague Lev','Stockholm Vind','Copenhagen Skov','Dublin Trefoil','Oslo Fjord','Brussels Waffle','Budapest Dunai','Bucharest Vulpe','Sofia Roza','Helsinki Suomi','Zagreb Vatra','Belgrade Orao','Edinburgh Thistle','Cardiff Ddraig','Krakow Smok','Naples Vesuvio','Turin Mole','Valencia Naranja','Seville Flamenco','Porto Douro','Hamburg Hafen'],
+    teamNames:['BerlinAdler','MadridToro','RomeLupetto','AmsterdamWiel','ViennaHabsburg','LisbonFarol','WarsawOrzel','AthensOlymp','ZurichAlpen','PragueLev','StockholmVind','CopenhagenSkov','DublinTrefoil','OsloFjord','BrusselsWaffle','BudapestDunai','BucharestVulpe','SofiaRoza','HelsinkiSuomi','ZagrebVatra','BelgradeOrao','EdinburghThistle','CardiffDdraig','KrakowSmok','NaplesVesuvio','TurinMole','ValenciaNaranja','SevilleFlamenco','PortoDouro','HamburgHafen'],
     // за победу в туре группы
     groupStageReward: { coins:750, power:1, xp:100 },
     // бонус за 1-е место в группе (выход в плей-офф)
@@ -304,7 +304,7 @@ const TOURNAMENTS = [
     min:2201, max:3300,
     groupsCount:16,
     teamsPerGroup:10,
-    teamNames:['New York Empire','LA Golden Wave','Chicago Windstorm','Toronto Maple FC','Mexico City Aztec','Sao Paulo Onça','Rio Carioca','Buenos Aires Pampa','Santiago Andes','Bogota Condor','Lima Inca','Montreal Nord','Miami Sunrise','Houston Lonestar','Vancouver Rain','Boston Patriots FC','Lima Andina','Quito Volcan','Caracas Llanero','Montevideo Charrua','Asuncion Guarani','La Paz Altura','Havana Habanero','San Juan Coqui','Panama Istmo','San Jose Tico','Kingston Reggae','Guadalajara Jalisco','Monterrey Acero','Brasilia Cerrado','Salvador Bahia','Cordoba Mediterranea'],
+    teamNames:['NewYorkEmpire','LAGoldenWave','ChicagoWindstorm','TorontoMapleFC','MexicoCityAztec','SaoPauloOnça','RioCarioca','BuenosAiresPampa','SantiagoAndes','BogotaCondor','LimaInca','MontrealNord','MiamiSunrise','HoustonLonestar','VancouverRain','BostonPatriotsFC','LimaAndina','QuitoVolcan','CaracasLlanero','MontevideoCharrua','AsuncionGuarani','LaPazAltura','HavanaHabanero','SanJuanCoqui','PanamaIstmo','SanJoseTico','KingstonReggae','GuadalajaraJalisco','MonterreyAcero','BrasiliaCerrado','SalvadorBahia','CordobaMediterranea'],
     groupStageReward: { coins:1000, power:1, xp:150 },
     groupWinBonus: { coins:1500, power:3, xp:350 },
     // плей-офф на вылет (16 команд): 1/8, Четвертьфинал, Полуфинал, Финал
@@ -324,7 +324,7 @@ const TOURNAMENTS = [
     min:3301, max:4400,
     groupsCount:32,
     teamsPerGroup:10,
-    teamNames:['Tokyo Rising Sun','Seoul Dragon','Beijing Panda','Shanghai Jade','Bangkok Siam','Jakarta Garuda','Manila Sampaguita','Riyadh Falcon','Doha Pearl','Dubai Skyline','Tehran Simorgh','Baghdad Lion','Delhi Peacock','Mumbai Tiger','Karachi Star','Lahore Minar','Dhaka Bengal','Hanoi Lotus','Ho Chi Minh Rong','Kuala Lumpur Harimau','Singapore Merlion','Taipei Bamboo','Hong Kong Jade','Osaka Castle','Yokohama Bay','Busan Wave','Pyongyang Chollima','Ulaanbaatar Steppe','Almaty Snow','Tashkent Silk','Astana Steppe','Baku Flame','Yerevan Ararat','Tbilisi Mountain','Amman Petra','Beirut Cedar','Jerusalem Olive','Colombo Lion','Kathmandu Peak','Islamabad Margalla'],
+    teamNames:['TokyoRisingSun','SeoulDragon','BeijingPanda','ShanghaiJade','BangkokSiam','JakartaGaruda','ManilaSampaguita','RiyadhFalcon','DohaPearl','DubaiSkyline','TehranSimorgh','BaghdadLion','DelhiPeacock','MumbaiTiger','KarachiStar','LahoreMinar','DhakaBengal','HanoiLotus','HoChiMinhRong','KualaLumpurHarimau','SingaporeMerlion','TaipeiBamboo','HongKongJade','OsakaCastle','YokohamaBay','BusanWave','PyongyangChollima','UlaanbaatarSteppe','AlmatySnow','TashkentSilk','AstanaSteppe','BakuFlame','YerevanArarat','TbilisiMountain','AmmanPetra','BeirutCedar','JerusalemOlive','ColomboLion','KathmanduPeak','IslamabadMargalla'],
     groupStageReward: { coins:1200, power:1, xp:200 },
     groupWinBonus: { coins:1750, power:3, xp:500 },
     // плей-офф на вылет (32 команды): 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
@@ -345,7 +345,7 @@ const TOURNAMENTS = [
     min:4401, max:5500,
     groupsCount:64,
     teamsPerGroup:10,
-    teamNames:['Moscow Bear','Istanbul Bosphorus','Ankara Anatolia','Novosibirsk Taiga','Yekaterinburg Ural','Vladivostok Pacific','Kyiv Dnipro','Minsk Zubr Elite','Warsaw Eagle Elite','Bucharest Carpathia','Athens Acropolis','Cairo Sphinx','Alexandria Nile','Casablanca Atlas','Tunis Carthage','Algiers Kasbah','Tripoli Oasis','Nicosia Cyprus','Valletta Malta','Reykjavik Geyser','Helsinki North','Riga Amber','Vilnius Hill','Tallinn Spire','Chisinau Vine','Sarajevo Bridge','Skopje Vardar','Podgorica Coast','Ljubljana Alps','Bratislava Castle','Vienna Ring','Zurich Peak','Geneva Lake','Brussels Grand','Luxembourg Fort','Monaco Riviera','Andorra Peak','San Marino Tower','Vatican Dome','Lisbon Coast','Madrid Central','Barcelona Sea','Milan Duomo','Naples Bay','Palermo Sun','Bern Alpine','Munich Beer','Frankfurt Bank','Hamburg Port','Copenhagen Spire','Stockholm Isle','Oslo Fjord Elite','Gothenburg Harbor','Krakow Dragon','Gdansk Amber','Wroclaw Bridge','Sofia Vitosha','Belgrade River','Zagreb Cathedral','Budapest Bath','Thessaloniki Bay','Rotterdam Port','Amsterdam Canal','Dublin Clover'],
+    teamNames:['MoscowBear','IstanbulBosphorus','AnkaraAnatolia','NovosibirskTaiga','YekaterinburgUral','VladivostokPacific','KyivDnipro','MinskZubrElite','WarsawEagleElite','BucharestCarpathia','AthensAcropolis','CairoSphinx','AlexandriaNile','CasablancaAtlas','TunisCarthage','AlgiersKasbah','TripoliOasis','NicosiaCyprus','VallettaMalta','ReykjavikGeyser','HelsinkiNorth','RigaAmber','VilniusHill','TallinnSpire','ChisinauVine','SarajevoBridge','SkopjeVardar','PodgoricaCoast','LjubljanaAlps','BratislavaCastle','ViennaRing','ZurichPeak','GenevaLake','BrusselsGrand','LuxembourgFort','MonacoRiviera','AndorraPeak','SanMarinoTower','VaticanDome','LisbonCoast','MadridCentral','BarcelonaSea','MilanDuomo','NaplesBay','PalermoSun','BernAlpine','MunichBeer','FrankfurtBank','HamburgPort','CopenhagenSpire','StockholmIsle','OsloFjordElite','GothenburgHarbor','KrakowDragon','GdanskAmber','WroclawBridge','SofiaVitosha','BelgradeRiver','ZagrebCathedral','BudapestBath','ThessalonikiBay','RotterdamPort','AmsterdamCanal','DublinClover'],
     groupStageReward: { coins:1500, power:1, xp:250 },
     groupWinBonus: { coins:2000, power:3, xp:600 },
     // плей-офф на вылет (64 команды): 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
@@ -369,7 +369,7 @@ const TOURNAMENTS = [
     min:100, max:5500,
     groupsCount:128,
     teamsPerGroup:10,
-    teamNames:['Titan FC','Legion United','Crown Athletic','Empire City','Dominion FC','Sovereign United','Vanguard Elite','Apex Rovers','Pinnacle City','Summit United','Zenith Athletic','Meridian FC','Horizon United','Odyssey City','Genesis FC','Infinity United','Eclipse Athletic','Aurora City FC','Prestige United','Majestic Rovers','Regal Athletic','Supreme City','Elite Vanguard','Champion Forge','Victory United','Triumph City','Glory Athletic','Honor FC','Legacy United','Dynasty City','Fortune Rovers','Diamond United','Platinum City','Golden Vanguard','Silver Athletic','Bronze United FC','Ruby Rovers','Sapphire City','Emerald United','Opal Athletic','Crystal FC','Stellar United','Cosmic City FC','Nova Athletic','Comet Rovers','Meteor United','Galaxy City FC','Orbit Athletic','Quantum United','Phantom Rovers'],
+    teamNames:['TitanFC','LegionUnited','CrownAthletic','EmpireCity','DominionFC','SovereignUnited','VanguardElite','ApexRovers','PinnacleCity','SummitUnited','ZenithAthletic','MeridianFC','HorizonUnited','OdysseyCity','GenesisFC','InfinityUnited','EclipseAthletic','AuroraCityFC','PrestigeUnited','MajesticRovers','RegalAthletic','SupremeCity','EliteVanguard','ChampionForge','VictoryUnited','TriumphCity','GloryAthletic','HonorFC','LegacyUnited','DynastyCity','FortuneRovers','DiamondUnited','PlatinumCity','GoldenVanguard','SilverAthletic','BronzeUnitedFC','RubyRovers','SapphireCity','EmeraldUnited','OpalAthletic','CrystalFC','StellarUnited','CosmicCityFC','NovaAthletic','CometRovers','MeteorUnited','GalaxyCityFC','OrbitAthletic','QuantumUnited','PhantomRovers'],
     groupStageReward: { coins:2000, power:1, xp:300 },
     groupWinBonus: { coins:3000, power:3, xp:750 },
     // плей-офф на вылет (128 команд): 1/64, 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
@@ -396,7 +396,7 @@ const TOURNAMENTS = [
     min:100, max:5500,
     groupsCount:256,
     teamsPerGroup:10,
-    teamNames:['Titan FC','Legion United','Crown Athletic','Empire City','Dominion FC','Sovereign United','Vanguard Elite','Apex Rovers','Pinnacle City','Summit United','Zenith Athletic','Meridian FC','Horizon United','Odyssey City','Genesis FC','Infinity United','Eclipse Athletic','Aurora City FC','Prestige United','Majestic Rovers','Regal Athletic','Supreme City','Elite Vanguard','Champion Forge','Victory United','Triumph City','Glory Athletic','Honor FC','Legacy United','Dynasty City','Fortune Rovers','Diamond United','Platinum City','Golden Vanguard','Silver Athletic','Bronze United FC','Ruby Rovers','Sapphire City','Emerald United','Opal Athletic','Crystal FC','Stellar United','Cosmic City FC','Nova Athletic','Comet Rovers','Meteor United','Galaxy City FC','Orbit Athletic','Quantum United','Phantom Rovers'],
+    teamNames:['TitanFC','LegionUnited','CrownAthletic','EmpireCity','DominionFC','SovereignUnited','VanguardElite','ApexRovers','PinnacleCity','SummitUnited','ZenithAthletic','MeridianFC','HorizonUnited','OdysseyCity','GenesisFC','InfinityUnited','EclipseAthletic','AuroraCityFC','PrestigeUnited','MajesticRovers','RegalAthletic','SupremeCity','EliteVanguard','ChampionForge','VictoryUnited','TriumphCity','GloryAthletic','HonorFC','LegacyUnited','DynastyCity','FortuneRovers','DiamondUnited','PlatinumCity','GoldenVanguard','SilverAthletic','BronzeUnitedFC','RubyRovers','SapphireCity','EmeraldUnited','OpalAthletic','CrystalFC','StellarUnited','CosmicCityFC','NovaAthletic','CometRovers','MeteorUnited','GalaxyCityFC','OrbitAthletic','QuantumUnited','PhantomRovers'],
     groupStageReward: { coins:3000, power:2, xp:450 },
     groupWinBonus: { coins:5000, power:5, xp:1200 },
     // плей-офф на вылет (256 команд): 1/128, 1/64, 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
@@ -1492,6 +1492,12 @@ function onRegisterConfirm(){
   const input = document.getElementById('team-name-input');
   let name = input.value.trim();
   if(!name){ input.focus(); input.style.borderColor = 'var(--red)'; return; }
+  if(name.length < 4 || name.length > 12){
+    input.focus();
+    input.style.borderColor = 'var(--red)';
+    showToast('❌ Название команды должно быть от 4 до 12 символов');
+    return;
+  }
   state = newGameState(name, selectedKitColor);
   save();
   showApp();
@@ -4068,7 +4074,7 @@ function openBotModal(team) {
 
     document.getElementById('player-modal-body').innerHTML = `
       <div style="text-align:center; margin-top: 8px;">
-        <img src="${managerAvatarSrc(team.clubAvatar)}" style="width:72px; height:72px; object-fit:contain; margin-bottom: 10px; border-radius:8px;" alt="${team.name}">
+        <img src="${managerAvatarSrc(team.clubAvatar)}" style="width:72px; height:72px; object-fit:contain; margin-bottom: 10px;" alt="${team.name}">
         <div style="font-family: var(--ff-display); font-size: 22px; color: var(--text);">${team.name}</div>
         <div style="color: var(--text-dim); font-size: 14px; margin-top: 4px;">🤖 Команда бота</div>
 
