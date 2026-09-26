@@ -486,7 +486,7 @@ const TASK_CHAINS = [
     tiers:[
       {
         title:'Сыграйте Кубок Новичков',
-        reward:{ coins:1000 },
+        reward:{ coins:1000, avatar:3 },
         target:1,
         iconImg: ()=> TROPHY_IMG.novice,
         progress:(s)=> Math.min((s.taskStats?.cupPlays?.novice) || 0, 1),
@@ -712,6 +712,7 @@ function taskRewardText(reward){
   if(reward.budget) parts.push(`+${fmt(reward.budget)} евро`);
   if(reward.xp) parts.push(`+${fmt(reward.xp)} опыта`);
   if(reward.slots) parts.push(`+${reward.slots} слот для тренировок`);
+  if(reward.avatar !== undefined) parts.push('новая аватарка');
   return parts.join(' · ');
 }
 
@@ -721,6 +722,7 @@ function taskRewardHtml(reward){
   if(reward.budget) parts.push(`<img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${fmt(reward.budget)}`);
   if(reward.xp) parts.push(`<img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(reward.xp)}`);
   if(reward.slots) parts.push(`<img src="${IMG.training}" class="img-icon" alt="Слот тренировки"> +${reward.slots} слот`);
+  if(reward.avatar !== undefined) parts.push(`<img src="${managerAvatarSrc(reward.avatar)}" class="img-icon" alt="Аватар"> аватарка`);
   return parts.join(' &nbsp;·&nbsp; ');
 }
 
@@ -737,6 +739,7 @@ function claimTask(chainId){
     const current = state.trainingSlotsMax || 3;
     state.trainingSlotsMax = Math.min(SLOT_UPGRADE_MAX, current + tier.reward.slots);
   }
+  if(tier.reward.avatar !== undefined) unlockAvatar(tier.reward.avatar);
   if(!state.taskChainTier) state.taskChainTier = {};
   state.taskChainTier[chainId] = idx + 1;
 
@@ -1156,6 +1159,25 @@ function managerAvatarSrc(num){
 const BOT_AVATAR_NUM = 0; // у всех ботов-соперников одна и та же аватарка — 0.png
 /* аватарки, которые может выбрать сам менеджер — 0-я зарезервирована за ботами */
 const PLAYER_AVATAR_NUMS = [1, 2, 3, 4, 5, 6];
+/* эти номера изначально недоступны — открываются наградами за задания */
+const LOCKED_AVATAR_NUMS = [3];
+
+function isAvatarUnlocked(n){
+  if(!LOCKED_AVATAR_NUMS.includes(n)) return true;
+  return !!(state.unlockedAvatars && state.unlockedAvatars.includes(n));
+}
+
+/* открытые аватарки — в исходном порядке, недоступные — в конце списка */
+function orderedPlayerAvatarNums(){
+  const unlocked = PLAYER_AVATAR_NUMS.filter(isAvatarUnlocked);
+  const locked = PLAYER_AVATAR_NUMS.filter(n => !isAvatarUnlocked(n));
+  return [...unlocked, ...locked];
+}
+
+function unlockAvatar(n){
+  if(!state.unlockedAvatars) state.unlockedAvatars = [];
+  if(!state.unlockedAvatars.includes(n)) state.unlockedAvatars.push(n);
+}
 
 /* ============================================================
    PERSISTENCE
@@ -1168,6 +1190,7 @@ function newGameState(teamName, kitColor){
     teamName,
     kitColor: kitColor || 'blue',
     managerAvatar: 1,
+    unlockedAvatars: [],
     players,
     coins: 7500,
     budget: 0,
@@ -1202,7 +1225,8 @@ function load(){
 
 function migrateState(s){
   if(!s.kitColor) s.kitColor = 'blue';
-  if(!PLAYER_AVATAR_NUMS.includes(s.managerAvatar)) s.managerAvatar = 1;
+  if(!Array.isArray(s.unlockedAvatars)) s.unlockedAvatars = [];
+  if(!PLAYER_AVATAR_NUMS.includes(s.managerAvatar) || (LOCKED_AVATAR_NUMS.includes(s.managerAvatar) && !s.unlockedAvatars.includes(s.managerAvatar))) s.managerAvatar = 1;
   if(Array.isArray(s.players)){
     s.players.forEach(p=>{ if(!p.avatar) p.avatar = randomAvatarNum(); });
   }
@@ -2602,11 +2626,15 @@ function openManagerAvatarPicker(){
       <button class="modal-close" id="avatar-picker-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
       <div class="tp-title">Выберите аватар</div>
       <div class="avatar-picker-grid">
-        ${PLAYER_AVATAR_NUMS.map(n => `
-          <button class="avatar-picker-option ${n === state.managerAvatar ? 'active' : ''}" data-avatar-num="${n}">
+        ${orderedPlayerAvatarNums().map(n => {
+          const unlocked = isAvatarUnlocked(n);
+          return `
+          <button class="avatar-picker-option ${n === state.managerAvatar ? 'active' : ''} ${unlocked ? '' : 'locked'}"
+                  data-avatar-num="${n}" ${unlocked ? '' : 'disabled'}>
             <img src="${managerAvatarSrc(n)}" class="avatar-picker-img" alt="Аватар ${n}">
-          </button>
-        `).join('')}
+            ${unlocked ? '' : '<span class="avatar-lock">🔒</span>'}
+          </button>`;
+        }).join('')}
       </div>
     </div>`;
   document.body.appendChild(overlay);
@@ -2614,7 +2642,7 @@ function openManagerAvatarPicker(){
   const close = ()=> overlay.remove();
   overlay.querySelector('#avatar-picker-close').addEventListener('click', close);
   overlay.addEventListener('click', e=>{ if(e.target === overlay) close(); });
-  overlay.querySelectorAll('.avatar-picker-option').forEach(btn=>{
+  overlay.querySelectorAll('.avatar-picker-option:not(.locked)').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       state.managerAvatar = Number(btn.dataset.avatarNum);
       save();
