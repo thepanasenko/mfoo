@@ -518,7 +518,7 @@ const TASK_CHAINS = [
     tiers:[
       {
         title:'Сыграйте Кубок Новичков',
-        reward:{ coins:1000, avatar:3 },
+        reward:{ coins:1000, avatar:2 },
         target:1,
         iconImg: ()=> TROPHY_IMG.novice,
         progress:(s)=> Math.min((s.taskStats?.cupPlays?.novice) || 0, 1),
@@ -707,6 +707,19 @@ const TASK_CHAINS = [
         iconImg: ()=> TROPHY_IMG.championsleague,
         progress:(s)=> ((s.taskStats?.cupWins?.championsleague) || 0) >= 1 ? 1 : 0,
         isComplete:(s)=> ((s.taskStats?.cupWins?.championsleague) || 0) >= 1
+      }
+    ]
+  },
+  {
+    id:'formations',
+    icon:'📋',
+    tiers:[
+      {
+        title:'Сыграйте матч на всех 3 схемах',
+        reward:{ coins:5000, avatar:3 },
+        target:3,
+        progress:(s)=> Math.min((s.taskStats?.formationsPlayed?.length) || 0, 3),
+        isComplete:(s)=> ((s.taskStats?.formationsPlayed?.length) || 0) >= 3
       }
     ]
   }
@@ -1201,7 +1214,7 @@ const BOT_AVATAR_NUM = 0; // у всех ботов-соперников одн�
 /* аватарки, которые может выбрать сам менеджер — 0-я зарезервирована за ботами */
 const PLAYER_AVATAR_NUMS = [1, 2, 3, 4, 5, 6];
 /* эти номера изначально недоступны — открываются наградами за задания */
-const LOCKED_AVATAR_NUMS = [3];
+const LOCKED_AVATAR_NUMS = [2, 3, 4, 5, 6];
 
 function isAvatarUnlocked(n){
   if(!LOCKED_AVATAR_NUMS.includes(n)) return true;
@@ -1246,7 +1259,7 @@ function newGameState(teamName, kitColor){
     formation: DEFAULT_FORMATION,
     lineups: {},
     leagueRegistrations: {},
-    taskStats: { cupPlays: {}, cupWins: {} },
+    taskStats: { cupPlays: {}, cupWins: {}, formationsPlayed: [] },
     taskChainTier: {}
   };
   ensureLineupsInit(s);
@@ -1298,6 +1311,7 @@ function migrateState(s){
   if(!s.taskStats) s.taskStats = { cupPlays: {}, cupWins: {} };
   if(!s.taskStats.cupPlays) s.taskStats.cupPlays = {};
   if(!s.taskStats.cupWins) s.taskStats.cupWins = {};
+  if(!Array.isArray(s.taskStats.formationsPlayed)) s.taskStats.formationsPlayed = [];
   if(!s.taskChainTier) s.taskChainTier = {};
   /* миграция со старой плоской системы заданий (claimedTasks) на цепочки */
   if(Array.isArray(s.claimedTasks)){
@@ -3628,6 +3642,15 @@ function playCurrentRound(cupId) {
       if(actualMatch.draw) state.stats.draws++;
       else if(playerWon) state.stats.wins++;
       else state.stats.losses++;
+
+      const playerTeam = actualMatch.teamA.isPlayer ? actualMatch.teamA : actualMatch.teamB;
+      if(playerTeam && playerTeam.formation){
+        if(!state.taskStats) state.taskStats = { cupPlays:{}, cupWins:{} };
+        if(!Array.isArray(state.taskStats.formationsPlayed)) state.taskStats.formationsPlayed = [];
+        if(!state.taskStats.formationsPlayed.includes(playerTeam.formation)){
+          state.taskStats.formationsPlayed.push(playerTeam.formation);
+        }
+      }
     }
 
     if(playerInvolved && onScreen()) {
