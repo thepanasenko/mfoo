@@ -21,6 +21,7 @@ const IMG = {
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
   cliga:      'images/cup/cliga.png',
+  worldcup:   'images/cup/cm.png',
   cupYam:     'images/cup/cupyam.png',
   cupFran:    'images/cup/cupfran.png',
   cupUsa:     'images/cup/cupusa.png',
@@ -41,6 +42,7 @@ const TROPHY_IMG = {
   novice:  IMG.cupNew,
   bigleague: IMG.bliga,
   championsleague: IMG.cliga,
+  worldcup: IMG.worldcup,
   jamaica: IMG.cupYam,
   france:  IMG.cupFran,
   usa:     IMG.cupUsa,
@@ -413,6 +415,36 @@ const TOURNAMENTS = [
     cupWinCoins: 180000,
     // отдельный бонус чемпиону в бюджет (не в монеты)
     leagueChampionBudget: 750000
+  },
+  {
+    id:'worldcup',
+    title:'ЧЕМПИОНАТ МИРА',
+    icon:'🏆',
+    type:'group',
+    scheduled:true,
+    // раз в неделю — каждое воскресенье в 13:00 по Киеву
+    schedule:{ timezone:'Europe/Kyiv', times:[ {h:13,m:0} ], daysOfWeek:[0] },
+    min:100, max:5500,
+    groupsCount:512,
+    teamsPerGroup:10,
+    teamNames:['TitanFC','LegionUnited','CrownAthletic','EmpireCity','DominionFC','SovereignUnited','VanguardElite','ApexRovers','PinnacleCity','SummitUnited','ZenithAthletic','MeridianFC','HorizonUnited','OdysseyCity','GenesisFC','InfinityUnited','EclipseAthletic','AuroraCityFC','PrestigeUnited','MajesticRovers','RegalAthletic','SupremeCity','EliteVanguard','ChampionForge','VictoryUnited','TriumphCity','GloryAthletic','HonorFC','LegacyUnited','DynastyCity','FortuneRovers','DiamondUnited','PlatinumCity','GoldenVanguard','SilverAthletic','BronzeUnitedFC','RubyRovers','SapphireCity','EmeraldUnited','OpalAthletic','CrystalFC','StellarUnited','CosmicCityFC','NovaAthletic','CometRovers','MeteorUnited','GalaxyCityFC','OrbitAthletic','QuantumUnited','PhantomRovers'],
+    groupStageReward: { coins:5000, power:3, xp:3500 },
+    groupWinBonus: { coins:8000, power:8, xp:10000 },
+    // плей-офф на вылет (512 команд): 1/256, 1/128, 1/64, 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:10000, power:12, xp:7500 },  // 1/256 финала
+      { coins:14000, power:16, xp:10000 }, // 1/128 финала
+      { coins:19000, power:20, xp:13000 }, // 1/64 финала
+      { coins:25000, power:24, xp:16500 }, // 1/32 финала
+      { coins:32000, power:28, xp:21000 }, // 1/16 финала
+      { coins:40000, power:32, xp:26000 }, // 1/8 финала
+      { coins:50000, power:38, xp:32500 }, // Четвертьфинал
+      { coins:65000, power:44, xp:40000 }, // Полуфинал
+      { coins:90000, power:50, xp:55000 }  // Финал
+    ],
+    cupWinCoins: 300000,
+    // отдельный бонус чемпиону в бюджет (не в монеты)
+    leagueChampionBudget: 1500000
   }
 ];
 function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
@@ -882,8 +914,17 @@ function getLeagueSessions(t, from = new Date()){
     return wallMs - offset2*60000;
   }
 
+  // для еженедельного расписания (daysOfWeek) нужно заглянуть на неделю в обе стороны,
+  // для ежедневного — как и раньше, хватает соседних дней
+  const daysOfWeek = t.schedule.daysOfWeek;
+  const dayRange = daysOfWeek ? 8 : 1;
+
   const wallCandidates = [];
-  for(let dayOffset=-1; dayOffset<=1; dayOffset++){
+  for(let dayOffset=-dayRange; dayOffset<=dayRange; dayOffset++){
+    if(daysOfWeek){
+      const dow = new Date(Date.UTC(y, mo, d+dayOffset)).getUTCDay();
+      if(!daysOfWeek.includes(dow)) continue;
+    }
     t.schedule.times.forEach(({h,m})=>{
       wallCandidates.push(Date.UTC(y, mo, d+dayOffset, h, m, 0));
     });
@@ -2551,16 +2592,16 @@ function renderManager(){
   const xpToNext = isMaxLevel ? 0 : getXpForLevel(level + 1) - state.xp;
 
   document.getElementById('manager-body').innerHTML = `
-    <div class="mgr-card">
-      <div class="mgr-club-row">
-        <button id="btn-manager-avatar" class="mgr-avatar-btn">
-          <img src="${managerAvatarSrc(state.managerAvatar)}" class="mgr-avatar-img" alt="Аватар клуба">
-        </button>
-        <span class="mgr-club-name">${state.teamName}</span>
-        <span class="mgr-power-pill">СИЛА ${fmt(power)}</span>
-      </div>
+    <div class="mgr-profile-card">
+      <button id="btn-manager-avatar" class="mgr-avatar-btn">
+        <img src="${managerAvatarSrc(state.managerAvatar)}" class="mgr-avatar-img" alt="Аватар клуба">
+      </button>
+      <span class="mgr-club-name">${state.teamName}</span>
+      <span class="mgr-power-pill">СИЛА ${fmt(power)}</span>
+    </div>
 
-      <div style="margin: 12px 0; background: rgb(0 0 0 / 37%); border: 1px solid var(--line); padding: 12px; border-radius: 10px;">
+    <div class="mgr-card">
+      <div style="background: rgb(0 0 0 / 37%); border: 1px solid var(--line); padding: 12px; border-radius: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-size: 11px; color: var(--text-dim); letter-spacing: 1px;">УРОВЕНЬ</div>
@@ -2900,6 +2941,19 @@ function scheduleTimesLabel(t){
   return t.schedule.times.map(x => `${String(x.h).padStart(2,'0')}:${String(x.m).padStart(2,'0')}`).join(' и ');
 }
 
+const WEEKDAY_EVERY_LABEL = [
+  'каждое воскресенье', 'каждый понедельник', 'каждый вторник', 'каждую среду',
+  'каждый четверг', 'каждую пятницу', 'каждую субботу'
+];
+
+function scheduleCadenceLabel(t){
+  const timesLabel = scheduleTimesLabel(t);
+  if(t.schedule.daysOfWeek && t.schedule.daysOfWeek.length === 1){
+    return `${WEEKDAY_EVERY_LABEL[t.schedule.daysOfWeek[0]]} в ${timesLabel}`;
+  }
+  return `каждый день в ${timesLabel}`;
+}
+
 function updateLeagueCountdown(t){
   const cup = state.cups[t.id];
   if(cup && !cup.finished) return; // сессия уже идёт — обычный экран кубка
@@ -2937,7 +2991,7 @@ function updateLeagueCountdown(t){
 
   eligEl.innerHTML = (registered
     ? `<img src="${IMG.check}" class="img-icon" alt=""> Вы зарегистрированы! До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b>`
-    : `До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты каждый день в ${scheduleTimesLabel(t)} по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`
+    : `До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты ${scheduleCadenceLabel(t)} по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`
   ) + rangeLine;
 
   startBtn.innerHTML = registered ? `ВЫ ЗАРЕГИСТРИРОВАНЫ <img src="${IMG.check}" class="img-icon" alt="">` : 'ЗАРЕГИСТРИРОВАТЬСЯ';
@@ -3749,7 +3803,7 @@ function rewardRandomPlayer(powerIncrease){
    ============================================================ */
 function buildRoundTitles(teamCount){
   const totalRounds = Math.round(Math.log2(teamCount));
-  const namesFromFinal = ['ФИНАЛ', 'ПОЛУФИНАЛ', 'ЧЕТВЕРТЬФИНАЛ', '1/8 ФИНАЛА', '1/16 ФИНАЛА', '1/32 ФИНАЛА', '1/64 ФИНАЛА', '1/128 ФИНАЛА'];
+  const namesFromFinal = ['ФИНАЛ', 'ПОЛУФИНАЛ', 'ЧЕТВЕРТЬФИНАЛ', '1/8 ФИНАЛА', '1/16 ФИНАЛА', '1/32 ФИНАЛА', '1/64 ФИНАЛА', '1/128 ФИНАЛА', '1/256 ФИНАЛА'];
   const titles = {};
   for(let round = 1; round <= totalRounds; round++){
     const fromEnd = totalRounds - round;

@@ -458,6 +458,15 @@ input{ font-family: inherit; }
   box-shadow: 0 8px 24px rgba(0,0,0,.3);
   transition: transform .2s var(--ease-bounce), box-shadow .2s var(--ease-smooth);
 }
+.mgr-profile-card{
+  background: rgb(0 0 0 / 37%);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding:14px 16px;
+  margin-bottom:14px;
+  display:flex; align-items:center; gap:10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
 .mgr-club-row{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
 .mgr-power-pill{ box-shadow: 0 0 12px rgba(34,197,94,.15); flex-shrink:0; }
 .mgr-club-name{ font-family: var(--ff-display); font-size:20px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
