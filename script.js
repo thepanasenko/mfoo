@@ -282,13 +282,14 @@ const TOURNAMENTS = [
     title:'ЧЕМПИОНАТ ЕВРОПЫ',
     icon:'⭐',
     type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
     min:1101, max:2200,
     groupsCount:8,
     teamsPerGroup:10,
     teamNames:['BerlinAdler','MadridToro','RomeLupetto','AmsterdamWie','ViennaHabsbu','LisbonFarol','WarsawOrzel','AthensOlymp','ZurichAlpen','PragueLev','StockholmVin','CopenhagenSk','DublinTrefoi','OsloFjord','BrusselsWaff','BudapestDuna','BucharestVul','SofiaRoza','HelsinkiSuom','ZagrebVatra','BelgradeOrao','EdinburghThi','CardiffDdrai','KrakowSmok','NaplesVesuvi','TurinMole','ValenciaNara','SevilleFlame','PortoDouro','HamburgHafen'],
     // за победу в туре группы
     groupStageReward: { coins:750, power:1, xp:100 },
-    // бонус за 1-е место в группе (выход в плей-офф)
+    // (groupWinBonus / koRounds ниже не используются в новом формате — оставлены для старых сохранений)
     groupWinBonus: { coins:1250, power:3, xp:250 },
     // плей-офф на вылет (8 команд): Четвертьфинал, Полуфинал, Финал
     koRounds:[
@@ -296,6 +297,8 @@ const TOURNAMENTS = [
       { coins:3000, power:8, xp:800 },    // Полуфинал
       { coins:5000, power:10, xp:1500 }   // Финал
     ],
+    // 1-е место в таблице = награда как за финал (+ кубок ниже)
+    firstPlaceReward: { coins:5000, power:10, xp:1500 },
     cupWinCoins: 30000
   },
   {
@@ -303,6 +306,7 @@ const TOURNAMENTS = [
     title:'ЧЕМПИОНАТ АМЕРИКИ',
     icon:'🗽',
     type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
     min:2201, max:3300,
     groupsCount:16,
     teamsPerGroup:10,
@@ -316,6 +320,8 @@ const TOURNAMENTS = [
       { coins:7500, power:10, xp:1000 },  // Полуфинал
       { coins:10000, power:15, xp:1500 }  // Финал
     ],
+    // 1-е место в таблице = награда как за финал (+ кубок ниже)
+    firstPlaceReward: { coins:10000, power:15, xp:1500 },
     cupWinCoins: 40000
   },
   {
@@ -323,6 +329,7 @@ const TOURNAMENTS = [
     title:'ЧЕМПИОНАТ АЗИИ',
     icon:'🏯',
     type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
     min:3301, max:4400,
     groupsCount:32,
     teamsPerGroup:10,
@@ -337,6 +344,8 @@ const TOURNAMENTS = [
       { coins:10000, power:15, xp:1500 }, // Полуфинал
       { coins:15000, power:20, xp:2500 }  // Финал
     ],
+    // 1-е место в таблице = награда как за финал (+ кубок ниже)
+    firstPlaceReward: { coins:15000, power:20, xp:2500 },
     cupWinCoins: 50000
   },
   {
@@ -344,6 +353,7 @@ const TOURNAMENTS = [
     title:'ЧЕМПИОНАТ ЕВРАЗИИ',
     icon:'🌍',
     type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
     min:4401, max:5500,
     groupsCount:64,
     teamsPerGroup:10,
@@ -359,6 +369,8 @@ const TOURNAMENTS = [
       { coins:12500, power:15, xp:2000 }, // Полуфинал
       { coins:20000, power:25, xp:3000 }  // Финал
     ],
+    // 1-е место в таблице = награда как за финал (+ кубок ниже)
+    firstPlaceReward: { coins:20000, power:25, xp:3000 },
     cupWinCoins: 60000
   },
   {
@@ -3153,6 +3165,36 @@ function renderCupRewardsList(t){
   const el = document.getElementById('cup-rewards');
   if(!el) return;
 
+  if(t.type === 'group' && t.tableOnly){
+    const fp = t.firstPlaceReward;
+    const rows = [];
+    rows.push(`
+      <div class="cup-reward-row">
+        <span class="cup-reward-stage">ЗА ПОБЕДУ В ТУРЕ</span>
+        <span class="cup-reward-values">
+          <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.groupStageReward.coins.toLocaleString('ru-RU')}</span>
+          <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${t.groupStageReward.power}</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(t.groupStageReward.xp)} XP</span>
+        </span>
+      </div>`);
+    rows.push(`
+      <div class="cup-reward-row final">
+        <span class="cup-reward-stage">🏆 1-Е МЕСТО В ТАБЛИЦЕ</span>
+        <span class="cup-reward-values">
+          <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fp.coins.toLocaleString('ru-RU')}</span>
+          <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${fp.power}</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(fp.xp)} XP</span>
+          <span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>
+          ${t.leagueChampionBudget ? `<span class="cup-reward-chip trophy"><img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${t.leagueChampionBudget.toLocaleString('ru-RU')}</span>` : ''}
+        </span>
+      </div>`);
+    el.innerHTML = `
+      <div class="cup-rewards-title">ПРИЗОВЫЕ ЗА ЭТАПЫ</div>
+      <div class="cup-rewards-list">${rows.join('')}</div>
+    `;
+    return;
+  }
+
   if(t.type === 'group'){
     const rows = [];
     rows.push(`
@@ -3269,7 +3311,8 @@ function initEuroCup(cupId){
     won:false,
     groupRoundsCount: groupRounds.length,
     currentRound:1,
-    powerRange: range
+    powerRange: range,
+    tableOnly: !!t.tableOnly
   };
   save();
 }
@@ -3337,6 +3380,45 @@ function advanceGroupStage(t, cup){
   const winner = table[0].team;
 
   const onScreen = currentCupId === t.id;
+
+  /* формат «только таблица»: без плей-офф, 1-е место = победа в чемпионате */
+  if(cup.tableOnly){
+    const place = cup.groupStanding;
+    cup.finished = true;
+    cup.won = !!winner.isPlayer;
+    cup.stage = winner.isPlayer ? 'won' : 'eliminated';
+    recordCupPlayed(t.id);
+
+    if(!winner.isPlayer){
+      save();
+      if(onScreen) renderCupScreen();
+      showToast(`«${t.title}»: ${place}-е место в таблице. Для победы нужно занять 1-е.`);
+      return;
+    }
+
+    const fp = t.firstPlaceReward;
+    const cupWinCoins = t.cupWinCoins;
+    const totalCoins = fp.coins + cupWinCoins;
+    state.coins += totalCoins;
+    let budgetReward = 0;
+    if(t.leagueChampionBudget){
+      budgetReward = t.leagueChampionBudget;
+      state.budget += budgetReward;
+    }
+    const bonus = rewardRandomPlayer(fp.power);
+    addXp(fp.xp);
+    state.trophies.push({ name:t.title, icon:t.icon, date: Date.now() });
+    recordCupWon(t.id);
+    save();
+    if(onScreen){
+      refreshTopbar();
+      showTrophyModal(t, totalCoins, budgetReward);
+    } else {
+      refreshTopbar();
+    }
+    showToast(`🏆 «${t.title}»: 1-е место! +${fmt(fp.coins)} монет, +${fp.power} силы, +${fmt(fp.xp)} XP (${bonus.player.name}), кубок +${fmt(cupWinCoins)} монет`);
+    return;
+  }
 
   if(!winner.isPlayer){
     cup.finished = true;
@@ -3861,7 +3943,7 @@ function renderGroupTableHtml(cup){
     </div>`).join('');
   return `
     <div class="group-table-wrap">
-      <div class="group-table-title">ТАБЛИЦА ГРУППЫ · выходит только 1-е место</div>
+      <div class="group-table-title">${cup.tableOnly ? 'ТАБЛИЦА ЧЕМПИОНАТА · победа за 1-е место' : 'ТАБЛИЦА ГРУППЫ · выходит только 1-е место'}</div>
       <div class="group-table-head">
         <span>#</span><span>Команда</span><span>И</span><span>В</span><span>Н</span><span>П</span><span>Мячи</span><span>О</span>
       </div>
@@ -3985,7 +4067,7 @@ function renderBracket(){
   if(!rounds.length) rounds.push(1);
 
   const totalStages = isGroupType
-    ? cup.groupRoundsCount + t.koRounds.length
+    ? (cup.tableOnly ? cup.groupRoundsCount : cup.groupRoundsCount + t.koRounds.length)
     : Math.round(Math.log2(teamCount));
 
   const titleFor = (round) => isGroupType
