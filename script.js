@@ -2658,7 +2658,7 @@ function renderManager(){
     </div>
 
     <div class="mgr-card">
-      <div style="background: rgb(0 0 0 / 37%); border: 1px solid var(--line); padding: 12px; border-radius: 10px;">
+      <div style="background: rgb(0 0 0 / 50%); border: 2px solid #082b1a; padding: 12px; border-radius: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-size: 11px; color: var(--text-dim); letter-spacing: 1px;">УРОВЕНЬ</div>
