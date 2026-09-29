@@ -451,7 +451,7 @@ input{ font-family: inherit; }
 /* manager / stats screen */
 .mgr-card{
   background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
     border-radius: 14px;
   padding:18px;
   margin-bottom:14px;
@@ -460,7 +460,7 @@ input{ font-family: inherit; }
 }
 .mgr-profile-card{
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
+  border: 2px solid #082b1a;
   border-radius: 14px;
   padding:14px 16px;
   margin-bottom:14px;
@@ -517,7 +517,7 @@ input{ font-family: inherit; }
 .mgr-stat.total .mgr-stat-value{ color: var(--text); }
 .mgr-stat.xp .mgr-stat-value{ color:#7fd3ff; }
 .mgr-finance-row{ display:flex; gap:10px; margin-top:14px; }
-.mgr-finance-chip{ flex:1; background: rgb(0 0 0 / 50%); border: 1px solid #082b1a; padding:10px; text-align:center; border-radius:10px; transition: transform .18s var(--ease-bounce); }
+.mgr-finance-chip{ flex:1; background: rgb(0 0 0 / 50%); border: 2px solid #082b1a; padding:10px; text-align:center; border-radius:10px; transition: transform .18s var(--ease-bounce); }
 .mgr-finance-chip:hover{ transform: translateY(-2px); }
 .mgr-finance-chip .val{ font-family: var(--ff-display); font-size:18px; display:flex; align-items:center; justify-content:center; gap:5px; }
 .mgr-finance-chip .lbl{ font-size:10px; color: var(--text-dim); }
@@ -835,7 +835,8 @@ input{ font-family: inherit; }
 .tournament-list{ display:flex; flex-direction:column; gap:12px; }
 .tournament-card {
     background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
+    box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
     border-radius: 12px;
     padding: 16px;
     display: flex;
