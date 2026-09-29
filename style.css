@@ -682,7 +682,7 @@ input{ font-family: inherit; }
   opacity:1;
   transform: translateY(0);
   margin-top:4px;
-  color: var(--green);
+  color: #e39500;
   text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55), 0 0 8px rgba(34,197,94,.35);
 }
 
@@ -706,7 +706,7 @@ input{ font-family: inherit; }
 }
 /* тап-отклик */
 .nav-btn:active .nav-icon-img{ transform: scale(.85); }
-.nav-btn.active{ color: var(--green); border-top-color: var(--green); }
+.nav-btn.active{ color: #e39500; border-top-color: #e39500; }
 
 /* совместимость со старым классом .nav-icon (эмодзи) */
 .nav-btn .nav-icon{ display:inline-block; transition: transform .3s var(--ease-bounce); }
@@ -729,6 +729,7 @@ input{ font-family: inherit; }
 .team-tabs{
   display:flex; gap:8px; margin-bottom:18px;
   background: rgb(0 0 0 / 50%); border: 1px solid #082b1a;
+  box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
   border-radius:12px; padding:4px;
 }
 .team-tab-btn{
@@ -857,7 +858,8 @@ input{ font-family: inherit; }
 .cup-header{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .cup-header .view-title{ margin:0; }
 .cup-intro{ text-align:center; background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+  box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
+    border: 2px solid #082b1a;
     border-radius: 14px; padding:28px 18px; }
 .cup-trophy{ font-size:44px; margin-bottom:10px; }
 .cup-eligibility{ margin-bottom:16px; font-size:14px; color: var(--text-dim); line-height:1.5; }
@@ -1436,10 +1438,10 @@ input{ font-family: inherit; }
 }
 .formation-btn:active{ transform: scale(.95); }
 .formation-btn.active{
-  color: var(--green);
-  border-color: var(--green);
+  color: #e39500;
+  border-color: #e39500;
   background: rgba(34,197,94,.12);
-  box-shadow: 0 0 0 1px var(--green-glow);
+  box-shadow: 0 0 0 1px #e39500;
 }
 
 .pitch-wrap{
