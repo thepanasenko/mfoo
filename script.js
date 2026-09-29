@@ -297,8 +297,15 @@ const TOURNAMENTS = [
       { coins:3000, power:8, xp:800 },    // Полуфинал
       { coins:5000, power:10, xp:1500 }   // Финал
     ],
-    // 1-е место в таблице = награда как за финал (+ кубок ниже)
-    firstPlaceReward: { coins:5000, power:10, xp:1500 },
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:5000, power:10, xp:1500 }, // 1-е место
+      { coins:4000, power:8,  xp:1100 }, // 2-е место
+      { coins:3000, power:6,  xp:800  }, // 3-е место
+      { coins:2200, power:4,  xp:500  }, // 4-е место
+      { coins:1500, power:3,  xp:350  }, // 5-е место
+      { coins:1000, power:2,  xp:200  }  // 6-е место
+    ],
     cupWinCoins: 30000
   },
   {
@@ -320,8 +327,15 @@ const TOURNAMENTS = [
       { coins:7500, power:10, xp:1000 },  // Полуфинал
       { coins:10000, power:15, xp:1500 }  // Финал
     ],
-    // 1-е место в таблице = награда как за финал (+ кубок ниже)
-    firstPlaceReward: { coins:10000, power:15, xp:1500 },
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:10000, power:15, xp:1500 }, // 1-е место
+      { coins:8000,  power:12, xp:1200 }, // 2-е место
+      { coins:6000,  power:9,  xp:950  }, // 3-е место
+      { coins:4500,  power:7,  xp:700  }, // 4-е место
+      { coins:3000,  power:5,  xp:500  }, // 5-е место
+      { coins:2000,  power:3,  xp:300  }  // 6-е место
+    ],
     cupWinCoins: 40000
   },
   {
@@ -344,8 +358,15 @@ const TOURNAMENTS = [
       { coins:10000, power:15, xp:1500 }, // Полуфинал
       { coins:15000, power:20, xp:2500 }  // Финал
     ],
-    // 1-е место в таблице = награда как за финал (+ кубок ниже)
-    firstPlaceReward: { coins:15000, power:20, xp:2500 },
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:15000, power:20, xp:2500 }, // 1-е место
+      { coins:12000, power:16, xp:2000 }, // 2-е место
+      { coins:9000,  power:12, xp:1500 }, // 3-е место
+      { coins:6500,  power:9,  xp:1100 }, // 4-е место
+      { coins:4500,  power:6,  xp:700  }, // 5-е место
+      { coins:3000,  power:4,  xp:400  }  // 6-е место
+    ],
     cupWinCoins: 50000
   },
   {
@@ -369,8 +390,15 @@ const TOURNAMENTS = [
       { coins:12500, power:15, xp:2000 }, // Полуфинал
       { coins:20000, power:25, xp:3000 }  // Финал
     ],
-    // 1-е место в таблице = награда как за финал (+ кубок ниже)
-    firstPlaceReward: { coins:20000, power:25, xp:3000 },
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:20000, power:25, xp:3000 }, // 1-е место
+      { coins:16000, power:20, xp:2400 }, // 2-е место
+      { coins:12500, power:15, xp:1800 }, // 3-е место
+      { coins:9000,  power:11, xp:1300 }, // 4-е место
+      { coins:6000,  power:8,  xp:900  }, // 5-е место
+      { coins:4000,  power:5,  xp:500  }  // 6-е место
+    ],
     cupWinCoins: 60000
   },
   {
@@ -3166,7 +3194,8 @@ function renderCupRewardsList(t){
   if(!el) return;
 
   if(t.type === 'group' && t.tableOnly){
-    const fp = t.firstPlaceReward;
+    const placeRewards = t.placeRewards || (t.firstPlaceReward ? [t.firstPlaceReward] : []);
+    const placeLabels = ['🥇 1-Е МЕСТО', '🥈 2-Е МЕСТО', '🥉 3-Е МЕСТО', '4-Е МЕСТО', '5-Е МЕСТО', '6-Е МЕСТО'];
     const rows = [];
     rows.push(`
       <div class="cup-reward-row">
@@ -3177,17 +3206,20 @@ function renderCupRewardsList(t){
           <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(t.groupStageReward.xp)} XP</span>
         </span>
       </div>`);
-    rows.push(`
-      <div class="cup-reward-row final">
-        <span class="cup-reward-stage">🏆 1-Е МЕСТО В ТАБЛИЦЕ</span>
+    placeRewards.forEach((pr, i)=>{
+      const isChampion = i === 0;
+      rows.push(`
+      <div class="cup-reward-row ${isChampion ? 'final' : ''}">
+        <span class="cup-reward-stage">${placeLabels[i] || `${i+1}-Е МЕСТО`}</span>
         <span class="cup-reward-values">
-          <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fp.coins.toLocaleString('ru-RU')}</span>
-          <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${fp.power}</span>
-          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(fp.xp)} XP</span>
-          <span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>
-          ${t.leagueChampionBudget ? `<span class="cup-reward-chip trophy"><img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${t.leagueChampionBudget.toLocaleString('ru-RU')}</span>` : ''}
+          <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fmt(pr.coins)}</span>
+          <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${pr.power}</span>
+          <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(pr.xp)} XP</span>
+          ${isChampion ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${fmt(t.cupWinCoins)}</span>` : ''}
+          ${isChampion && t.leagueChampionBudget ? `<span class="cup-reward-chip trophy"><img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${fmt(t.leagueChampionBudget)}</span>` : ''}
         </span>
       </div>`);
+    });
     el.innerHTML = `
       <div class="cup-rewards-title">ПРИЗОВЫЕ ЗА ЭТАПЫ</div>
       <div class="cup-rewards-list">${rows.join('')}</div>
@@ -3381,42 +3413,52 @@ function advanceGroupStage(t, cup){
 
   const onScreen = currentCupId === t.id;
 
-  /* формат «только таблица»: без плей-офф, 1-е место = победа в чемпионате */
+  /* формат «только таблица»: без плей-офф, призовые за топ-6 мест, 1-е место = ещё и победа в чемпионате */
   if(cup.tableOnly){
     const place = cup.groupStanding;
+    const placeRewards = t.placeRewards || (t.firstPlaceReward ? [t.firstPlaceReward] : []);
+    const placeReward = place >= 1 && place <= placeRewards.length ? placeRewards[place - 1] : null;
+
     cup.finished = true;
-    cup.won = !!winner.isPlayer;
-    cup.stage = winner.isPlayer ? 'won' : 'eliminated';
     recordCupPlayed(t.id);
 
-    if(!winner.isPlayer){
+    if(!placeReward){
+      cup.won = false;
+      cup.stage = 'eliminated';
       save();
       if(onScreen) renderCupScreen();
-      showToast(`«${t.title}»: ${place}-е место в таблице. Для победы нужно занять 1-е.`);
+      showToast(`«${t.title}»: ${place}-е место в таблице. Призовые — только топ-${placeRewards.length}.`);
       return;
     }
 
-    const fp = t.firstPlaceReward;
-    const cupWinCoins = t.cupWinCoins;
-    const totalCoins = fp.coins + cupWinCoins;
+    const isChampion = place === 1;
+    cup.won = isChampion;
+    cup.stage = isChampion ? 'won' : 'eliminated';
+
+    const cupWinCoins = isChampion ? t.cupWinCoins : 0;
+    const totalCoins = placeReward.coins + cupWinCoins;
     state.coins += totalCoins;
     let budgetReward = 0;
-    if(t.leagueChampionBudget){
+    if(isChampion && t.leagueChampionBudget){
       budgetReward = t.leagueChampionBudget;
       state.budget += budgetReward;
     }
-    const bonus = rewardRandomPlayer(fp.power);
-    addXp(fp.xp);
-    state.trophies.push({ name:t.title, icon:t.icon, date: Date.now() });
-    recordCupWon(t.id);
+    const bonus = rewardRandomPlayer(placeReward.power);
+    addXp(placeReward.xp);
+    if(isChampion){
+      state.trophies.push({ name:t.title, icon:t.icon, date: Date.now() });
+      recordCupWon(t.id);
+    }
     save();
     if(onScreen){
       refreshTopbar();
-      showTrophyModal(t, totalCoins, budgetReward);
+      if(isChampion) showTrophyModal(t, totalCoins, budgetReward);
+      else renderCupScreen();
     } else {
       refreshTopbar();
     }
-    showToast(`🏆 «${t.title}»: 1-е место! +${fmt(fp.coins)} монет, +${fp.power} силы, +${fmt(fp.xp)} XP (${bonus.player.name}), кубок +${fmt(cupWinCoins)} монет`);
+    const cupLine = isChampion ? `, кубок +${fmt(cupWinCoins)} монет` : '';
+    showToast(`${isChampion ? '🏆' : '🎖️'} «${t.title}»: ${place}-е место! +${fmt(placeReward.coins)} монет, +${placeReward.power} силы, +${fmt(placeReward.xp)} XP (${bonus.player.name})${cupLine}`);
     return;
   }
 
