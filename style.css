@@ -450,16 +450,26 @@ input{ font-family: inherit; }
 
 /* manager / stats screen */
 .mgr-card{
-  background: rgb(0 0 0 / 50%);
-    border: 2px solid #082b1a;
-    border-radius: 14px;
+  background: #082B1A;
+  background-image: url('images/fonboll.png');
+  background-repeat: repeat;
+  background-size: 50%; /* при необходимости скорректируйте размер */
+  background-blend-mode: luminosity;
+  background-color: #082B1A;
+  border: 2px solid #082b1a;
+  border-radius: 14px;
   padding:18px;
   margin-bottom:14px;
   box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
   transition: transform .2s var(--ease-bounce), box-shadow .2s var(--ease-smooth);
 }
 .mgr-profile-card{
-  background: rgb(0 0 0 / 50%);
+  background: #082B1A;
+  background-image: url('images/fonboll.png');
+  background-repeat: repeat;
+  background-size: 30%; /* при необходимости скорректируйте размер */
+  background-blend-mode: luminosity;
+  background-color: #082B1A;
   border: 2px solid #082b1a;
   border-radius: 14px;
   padding:14px 16px;
