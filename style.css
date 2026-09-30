@@ -738,7 +738,7 @@ input{ font-family: inherit; }
 /* переключатель вкладок вкладки «Моя команда» */
 .team-tabs{
   display:flex; gap:8px; margin-bottom:18px;
-  background: rgb(0 0 0 / 50%); border: 1px solid #082b1a;
+  background: #082B1A; border: 1px solid #082b1a;
   box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
   border-radius:12px; padding:4px;
 }
@@ -845,10 +845,15 @@ input{ font-family: inherit; }
    ============================================================ */
 .tournament-list{ display:flex; flex-direction:column; gap:12px; }
 .tournament-card {
-    background: rgb(0 0 0 / 50%);
+    background: #082B1A;
+    background-image: url(images/fonshah.png);
+    background-repeat: repeat;
+    background-size: 50%;
+    background-blend-mode: luminosity;
+    background-color: #082B1A;
     border: 2px solid #082b1a;
     box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px;
     display: flex;
     align-items: center;
@@ -867,10 +872,16 @@ input{ font-family: inherit; }
 /* cup */
 .cup-header{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .cup-header .view-title{ margin:0; }
-.cup-intro{ text-align:center; background: rgb(0 0 0 / 50%);
-  box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
+.cup-intro{ text-align:center; background: #082B1A;
+    background-image: url(images/fonshah.png);
+    background-repeat: repeat;
+    background-size: 60%;
+    background-blend-mode: luminosity;
+    background-color: #082B1A;
     border: 2px solid #082b1a;
-    border-radius: 14px; padding:28px 18px; }
+    border-radius: 18px;
+  box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
+    padding:28px 18px; }
 .cup-trophy{ font-size:44px; margin-bottom:10px; }
 .cup-eligibility{ margin-bottom:16px; font-size:14px; color: var(--text-dim); line-height:1.5; }
 .cup-eligibility.bad{ color: var(--red); font-weight:700; }
