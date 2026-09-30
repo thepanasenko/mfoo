@@ -457,7 +457,7 @@ input{ font-family: inherit; }
   background-blend-mode: luminosity;
   background-color: #082B1A;
   border: 2px solid #082b1a;
-  border-radius: 14px;
+  border-radius: 18px;
   padding:18px;
   margin-bottom:14px;
   box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
@@ -471,7 +471,7 @@ input{ font-family: inherit; }
   background-blend-mode: luminosity;
   background-color: #082B1A;
   border: 2px solid #082b1a;
-  border-radius: 14px;
+  border-radius: 18px;
   padding:14px 16px;
   margin-bottom:14px;
   display:flex; align-items:center; gap:10px;
