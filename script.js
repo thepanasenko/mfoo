@@ -1227,7 +1227,7 @@ function calcClubPower(players){
    ============================================================ */
 const KIT_COLORS = [
   { code:'blue',  name:'Синий',   available:true  },
-  { code:'red',   name:'Красный', available:false },
+  { code:'red',   name:'Красный', available:true  },
   { code:'black', name:'Чёрный',  available:false }
 ];
 const AVATAR_COUNT = 20;
