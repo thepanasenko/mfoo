@@ -247,9 +247,9 @@ input{ font-family: inherit; }
 .btn-reset{
   margin-top:22px;
   margin-bottom:6px;
-  background: rgba(239,68,68,.10);
-  border:1px solid rgba(239,68,68,.45);
-  color: #ff9d9d;
+  background: rgba(239,68,68,.15);
+  border:1px solid var(--red);
+  color:#fff;
   padding:12px 14px;
   border-radius:8px;
   font-size:12px;
@@ -540,7 +540,7 @@ input{ font-family: inherit; }
 /* красивая кнопка «Задания» на экране менеджера */
 .btn-tasks{
   display:flex; align-items:center; gap:12px; width:100%;
-  background: linear-gradient(135deg, rgba(242,183,5,.14), rgba(0,0,0,.30));
+  background: rgb(219 205 0 / 15%);
   border:1px solid rgba(242,183,5,.4);
   border-radius:14px; padding:14px 16px; margin:16px 0;
   cursor:pointer; text-align:left;
