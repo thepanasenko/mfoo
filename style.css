@@ -767,7 +767,8 @@ input{ font-family: inherit; }
 .player-avatar-img{
   width:44px; height:44px; flex-shrink:0;
   border-radius: 6px;
-  object-fit:contain;
+  object-fit:cover;
+  object-position: center bottom;
   background: rgb(0 0 0 / 37%);
   align-self:center;
 }
