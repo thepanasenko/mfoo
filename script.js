@@ -959,7 +959,7 @@ function useInventoryItem(key){
   state.inventory.items[key] = count - 1;
   state.inventory.activeBoost = { key, percent: item.percent };
   save();
-  renderInventoryModal();
+  renderInventoryView();
   showToast(`⚡ «${item.name}» применена: +${item.percent}% силы на следующий матч!`);
 }
 
@@ -969,7 +969,7 @@ function cancelActiveBoost(){
   state.inventory.items[boost.key] = (state.inventory.items[boost.key] || 0) + 1;
   state.inventory.activeBoost = null;
   save();
-  renderInventoryModal();
+  renderInventoryView();
   showToast('Буст отменён, предмет возвращён в инвентарь');
 }
 
@@ -1003,43 +1003,22 @@ function inventoryRowHtml(item){
     </div>`;
 }
 
-function renderInventoryModal(){
-  let overlay = document.getElementById('inventory-modal-overlay');
-  if(!overlay){
-    overlay = document.createElement('div');
-    overlay.id = 'inventory-modal-overlay';
-    overlay.className = 'modal-overlay';
-    document.body.appendChild(overlay);
-    overlay.addEventListener('click', e=>{ if(e.target===overlay) closeInventoryModal(); });
-  }
-  overlay.classList.remove('hidden');
+function renderInventoryView(){
+  const list = document.getElementById('inventory-list');
+  if(!list || !state) return;
 
-  overlay.innerHTML = `
-    <div class="modal-card tasks-modal-card">
-      <button class="modal-close" id="inventory-modal-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
-      <div class="tp-title">🎒 Инвентарь</div>
-      <div class="tp-sub">Используйте «Мотивацию», чтобы временно усилить клуб перед важным матчем.</div>
-      <div class="tasks-list">
-        ${INVENTORY_CATALOG.map(item => inventoryRowHtml(item)).join('')}
-      </div>
-    </div>`;
+  list.innerHTML = INVENTORY_CATALOG.map(item => inventoryRowHtml(item)).join('');
 
-  overlay.querySelector('#inventory-modal-close').addEventListener('click', closeInventoryModal);
-  overlay.querySelectorAll('[data-use-item]').forEach(btn=>{
+  list.querySelectorAll('[data-use-item]').forEach(btn=>{
     btn.addEventListener('click', ()=> useInventoryItem(btn.dataset.useItem));
   });
-  overlay.querySelectorAll('[data-cancel-boost]').forEach(btn=>{
+  list.querySelectorAll('[data-cancel-boost]').forEach(btn=>{
     btn.addEventListener('click', cancelActiveBoost);
   });
 }
 
 function openInventoryModal(){
-  renderInventoryModal();
-}
-
-function closeInventoryModal(){
-  const overlay = document.getElementById('inventory-modal-overlay');
-  if(overlay) overlay.remove();
+  navigate('inventory');
 }
 
 /* ============================================================
@@ -1624,6 +1603,7 @@ function bindGlobalEvents(){
   });
 
   document.getElementById('btn-cup-back').addEventListener('click', ()=> navigate('play'));
+  document.getElementById('btn-inventory-back').addEventListener('click', ()=> navigate('manager'));
   document.getElementById('btn-cup-start').addEventListener('click', onCupStart);
   document.getElementById('btn-play-now').addEventListener('click', onPlayNow);
   document.getElementById('btn-leave-cup').addEventListener('click', onLeaveCup);
@@ -1741,11 +1721,11 @@ function navigate(name, cupId){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
 
-  const map = { manager:'view-manager', play:'view-play', team:'view-team', transfer:'view-transfer', bank:'view-bank', cup:'view-cup' };
+  const map = { manager:'view-manager', play:'view-play', team:'view-team', transfer:'view-transfer', bank:'view-bank', cup:'view-cup', inventory:'view-inventory' };
   const viewEl = document.getElementById(map[name]);
   if(viewEl) viewEl.classList.add('active');
 
-  const navKey = (name === 'cup') ? 'play' : name;
+  const navKey = (name === 'cup') ? 'play' : (name === 'inventory') ? 'manager' : name;
   if(navKey){
     const btn = document.querySelector(`.nav-btn[data-nav="${navKey}"]`);
     if(btn) btn.classList.add('active');
@@ -1760,6 +1740,7 @@ function navigate(name, cupId){
   }
   if(name === 'manager') renderManager();
   if(name === 'bank') renderBankShop();
+  if(name === 'inventory') renderInventoryView();
 }
 
 /* ============================================================

@@ -586,6 +586,9 @@ input{ font-family: inherit; }
 
 .tasks-modal-card{ max-width:420px; width:100%; }
 .tasks-list{ display:flex; flex-direction:column; gap:10px; max-height:60vh; overflow-y:auto; }
+/* инвентарь — отдельный экран, внутренний скролл не нужен */
+#inventory-list{ max-height:none; overflow:visible; }
+.inventory-sub{ font-size:12px; color: var(--text-dim); line-height:1.45; margin-bottom:14px; }
 .task-row{
   display:flex; align-items:flex-start; gap:10px;
   background: rgb(0 0 0 / 50%); border: 1px solid #082b1a; border-radius:12px;
