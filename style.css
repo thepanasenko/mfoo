@@ -613,6 +613,50 @@ input{ font-family: inherit; }
 .task-claim-btn:active{ transform: translateY(3px); box-shadow: 0 1px 0 #8a6603; }
 .task-status.done{ font-size:12px; font-weight:800; color: var(--green); }
 
+/* кнопка «Инвентарь» — та же форма, что и «Задания», но в сине-голубом оттенке */
+.btn-inventory{
+  margin-top:0;
+  background: rgb(63 169 255 / 15%);
+  border-color: #3fa9ff;
+}
+.btn-inventory:hover{ border-color:#3fa9ff; }
+.btn-inventory .btn-tasks-arrow{ color:#3fa9ff; }
+
+/* строки предметов инвентаря (переиспользуют каркас .task-row) */
+.inv-row{
+  display:flex; align-items:flex-start; gap:10px;
+  background: rgb(0 0 0 / 50%); border: 1px solid #082b1a; border-radius:12px;
+  padding:12px;
+}
+.inv-row.active{ border-color:#3fa9ff; box-shadow: 0 0 14px rgba(63,169,255,.18); }
+.inv-icon{ flex-shrink:0; }
+.inv-icon-img{ width:26px; height:26px; object-fit:contain; margin-top:2px; }
+.inv-info{ flex:1; min-width:0; }
+.inv-title{ font-weight:800; font-size:13px; color: var(--text); margin-bottom:4px; }
+.inv-sub{ font-size:11px; color: var(--text-dim); margin-bottom:8px; }
+.inv-count{ flex-shrink:0; font-weight:800; font-size:13px; color: var(--text-dim); align-self:center; }
+.inv-use-btn{
+  width:100%; background: linear-gradient(180deg, #3fa9ff 0%, #0b63c9 100%);
+  border:none; font-weight:900; font-size:12px; letter-spacing:.4px;
+  padding:9px 10px; border-radius:8px; cursor:pointer;
+  box-shadow: 0 4px 0 #083a73;
+  color:#fff;
+  text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
+}
+.inv-use-btn:hover{ filter:brightness(1.06); }
+.inv-use-btn:active{ transform: translateY(3px); box-shadow: 0 1px 0 #083a73; }
+.inv-use-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.inv-active-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.inv-active-label{ font-size:12px; font-weight:800; color:#3fa9ff; }
+.inv-cancel-btn{
+  background:none; border:1px solid var(--red); color: var(--red);
+  font-weight:800; font-size:11px; letter-spacing:.3px;
+  padding:6px 10px; border-radius:8px; cursor:pointer;
+}
+.inv-cancel-btn:hover{ background: rgba(239,68,68,.12); }
+.inv-cancel-btn:active{ transform: scale(.96); }
+.inv-empty-label{ font-size:12px; color: var(--text-dim); font-style:italic; }
+
 .mgr-trophy-list{ display:flex; flex-direction:column; gap:8px; }
 .mgr-trophy-item{
   display:flex; align-items:center; gap:10px;
@@ -1629,3 +1673,22 @@ input{ font-family: inherit; }
 }
 .confirm-btn.confirm-yes{ background: var(--green); border-color: var(--green); color:#fff; text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55); }
 .confirm-btn.confirm-yes.danger{ background: var(--red); border-color: var(--red); color:#fff; }
+
+/* магазин «Мотивации» в банке */
+.bank-shop-list{ display:flex; flex-direction:column; gap:10px; }
+.bank-shop-row{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background: rgb(0 0 0 / 50%); border:1px solid #082b1a; border-radius:12px; padding:10px 12px;
+}
+.bank-shop-info{ min-width:0; }
+.bank-shop-name{ font-weight:800; font-size:13px; color: var(--text); }
+.bank-shop-sub{ font-size:11px; color: var(--text-dim); margin-top:2px; }
+.bank-shop-buy{
+  flex-shrink:0; display:flex; align-items:center; gap:5px;
+  background: linear-gradient(180deg, #3fa9ff 0%, #0b63c9 100%);
+  border:none; border-radius:8px; padding:9px 12px; cursor:pointer;
+  font-weight:900; font-size:12px; color:#fff; box-shadow:0 4px 0 #083a73;
+  text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
+}
+.bank-shop-buy:active{ transform: translateY(3px); box-shadow:0 1px 0 #083a73; }
+.bank-shop-buy.poor{ opacity:.5; }

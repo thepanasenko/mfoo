@@ -15,6 +15,7 @@ const IMG = {
   win:        'images/win.png',
   training:   'images/trenirovka.png',
   tasks:      'images/zadanie.png',
+  inventory:  'images/inventar.png',
   check:      'images/galocka.png',
   cross:      'images/krest.png',
   plus:       'images/plus.png',
@@ -52,6 +53,17 @@ const TROPHY_IMG = {
   asia:    IMG.chempAzii,
   eurasia: IMG.chempEuroazii
 };
+/* ============================================================
+   ИНВЕНТАРЬ — усиления «Мотивация» (+% силы на один следующий матч)
+   ============================================================ */
+const INVENTORY_CATALOG = [
+  { key:'motivation25',  name:'Мотивация 25',  percent:25,  price:{ currency:'coins',  amount:25000  } },
+  { key:'motivation50',  name:'Мотивация 50',  percent:50,  price:{ currency:'budget', amount:50000  } },
+  { key:'motivation75',  name:'Мотивация 75',  percent:75,  price:{ currency:'budget', amount:150000 } },
+  { key:'motivation100', name:'Мотивация 100', percent:100, price:{ currency:'budget', amount:250000 } }
+];
+function inventoryItemByKey(key){ return INVENTORY_CATALOG.find(i=>i.key===key); }
+
 function trophyIconHtml(tournament){
   const src = tournament && TROPHY_IMG[tournament.id];
   if(src) return `<img src="${src}" class="mgr-trophy-icon-img" alt="${tournament.title}">`;
@@ -931,6 +943,106 @@ function updateTasksBadge(){
 }
 
 /* ============================================================
+   ИНВЕНТАРЬ — окно
+   ============================================================ */
+function useInventoryItem(key){
+  const item = inventoryItemByKey(key);
+  if(!item) return;
+  if(!state.inventory) state.inventory = { items:{}, activeBoost:null };
+  const count = state.inventory.items[key] || 0;
+  if(count <= 0) return;
+  if(state.inventory.activeBoost){
+    showToast('⚠️ Сначала отмените активный буст — можно применить только один за раз');
+    return;
+  }
+
+  state.inventory.items[key] = count - 1;
+  state.inventory.activeBoost = { key, percent: item.percent };
+  save();
+  renderInventoryModal();
+  showToast(`⚡ «${item.name}» применена: +${item.percent}% силы на следующий матч!`);
+}
+
+function cancelActiveBoost(){
+  if(!state.inventory || !state.inventory.activeBoost) return;
+  const boost = state.inventory.activeBoost;
+  state.inventory.items[boost.key] = (state.inventory.items[boost.key] || 0) + 1;
+  state.inventory.activeBoost = null;
+  save();
+  renderInventoryModal();
+  showToast('Буст отменён, предмет возвращён в инвентарь');
+}
+
+function inventoryRowHtml(item){
+  const count = (state.inventory && state.inventory.items[item.key]) || 0;
+  const boost = state.inventory && state.inventory.activeBoost;
+  const isActive = boost && boost.key === item.key;
+
+  let statusHtml;
+  if(isActive){
+    statusHtml = `
+      <div class="inv-active-row">
+        <span class="inv-active-label">⚡ Активна на след. матч</span>
+        <button class="inv-cancel-btn" data-cancel-boost="1">ОТМЕНИТЬ</button>
+      </div>`;
+  } else if(count > 0){
+    statusHtml = `<button class="inv-use-btn" data-use-item="${item.key}" ${boost ? 'disabled' : ''}>ПРИМЕНИТЬ</button>`;
+  } else {
+    statusHtml = `<div class="inv-empty-label">Нет в наличии</div>`;
+  }
+
+  return `
+    <div class="inv-row ${isActive ? 'active' : ''}">
+      <div class="inv-icon"><img src="${IMG.inventory}" class="inv-icon-img" alt="${item.name}"></div>
+      <div class="inv-info">
+        <div class="inv-title">${item.name}</div>
+        <div class="inv-sub">+${item.percent}% силы клуба · только на следующий матч</div>
+        ${statusHtml}
+      </div>
+      <div class="inv-count">×${count}</div>
+    </div>`;
+}
+
+function renderInventoryModal(){
+  let overlay = document.getElementById('inventory-modal-overlay');
+  if(!overlay){
+    overlay = document.createElement('div');
+    overlay.id = 'inventory-modal-overlay';
+    overlay.className = 'modal-overlay';
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e=>{ if(e.target===overlay) closeInventoryModal(); });
+  }
+  overlay.classList.remove('hidden');
+
+  overlay.innerHTML = `
+    <div class="modal-card tasks-modal-card">
+      <button class="modal-close" id="inventory-modal-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
+      <div class="tp-title">🎒 Инвентарь</div>
+      <div class="tp-sub">Используйте «Мотивацию», чтобы временно усилить клуб перед важным матчем.</div>
+      <div class="tasks-list">
+        ${INVENTORY_CATALOG.map(item => inventoryRowHtml(item)).join('')}
+      </div>
+    </div>`;
+
+  overlay.querySelector('#inventory-modal-close').addEventListener('click', closeInventoryModal);
+  overlay.querySelectorAll('[data-use-item]').forEach(btn=>{
+    btn.addEventListener('click', ()=> useInventoryItem(btn.dataset.useItem));
+  });
+  overlay.querySelectorAll('[data-cancel-boost]').forEach(btn=>{
+    btn.addEventListener('click', cancelActiveBoost);
+  });
+}
+
+function openInventoryModal(){
+  renderInventoryModal();
+}
+
+function closeInventoryModal(){
+  const overlay = document.getElementById('inventory-modal-overlay');
+  if(overlay) overlay.remove();
+}
+
+/* ============================================================
    BIG LEAGUE — SCHEDULING (Europe/Kyiv, дважды в день)
    ============================================================ */
 function getTZOffsetMinutes(date, timeZone){
@@ -1300,7 +1412,11 @@ function newGameState(teamName, kitColor){
     lineups: {},
     leagueRegistrations: {},
     taskStats: { cupPlays: {}, cupWins: {}, formationsPlayed: [] },
-    taskChainTier: {}
+    taskChainTier: {},
+    inventory: {
+      items: { motivation25:1, motivation50:1, motivation75:1, motivation100:1 },
+      activeBoost: null
+    }
   };
   ensureLineupsInit(s);
   autoFillEmptyLineup(s, s.formation);
@@ -1353,6 +1469,12 @@ function migrateState(s){
   if(!s.taskStats.cupWins) s.taskStats.cupWins = {};
   if(!Array.isArray(s.taskStats.formationsPlayed)) s.taskStats.formationsPlayed = [];
   if(!s.taskChainTier) s.taskChainTier = {};
+  if(!s.inventory) s.inventory = { items:{}, activeBoost:null };
+  if(!s.inventory.items) s.inventory.items = {};
+  INVENTORY_CATALOG.forEach(it=>{
+    if(s.inventory.items[it.key] === undefined) s.inventory.items[it.key] = 0;
+  });
+  if(s.inventory.activeBoost === undefined) s.inventory.activeBoost = null;
   /* миграция со старой плоской системы заданий (claimedTasks) на цепочки */
   if(Array.isArray(s.claimedTasks)){
     if(s.claimedTasks.includes('level5') && !s.taskChainTier.level) s.taskChainTier.level = 1;
@@ -1637,6 +1759,71 @@ function navigate(name, cupId){
     renderCupScreen();
   }
   if(name === 'manager') renderManager();
+  if(name === 'bank') renderBankShop();
+}
+
+/* ============================================================
+   БАНК — магазин «Мотивации»
+   ============================================================ */
+function bankPriceHtml(price){
+  const icon = price.currency === 'coins' ? IMG.coin : IMG.cash;
+  return `<img src="${icon}" class="img-icon" alt=""> ${fmt(price.amount)}`;
+}
+
+function renderBankShop(){
+  const view = document.getElementById('view-bank');
+  if(!view || !state) return;
+  let box = document.getElementById('bank-shop');
+  if(!box){
+    box = document.createElement('div');
+    box.id = 'bank-shop';
+    box.className = 'bank-card';
+    view.appendChild(box);
+  }
+  box.innerHTML = `
+    <div class="bank-card-head">
+      <img src="${IMG.inventory}" class="bank-card-img" alt="Инвентарь">
+      <div>
+        <div class="bank-card-title">Мотивация</div>
+        <div class="bank-card-sub">+% силы клуба на следующий матч</div>
+      </div>
+    </div>
+    <div class="bank-shop-list">
+      ${INVENTORY_CATALOG.map(item=>{
+        const have = (state.inventory && state.inventory.items[item.key]) || 0;
+        const money = item.price.currency === 'coins' ? state.coins : state.budget;
+        const can = money >= item.price.amount;
+        return `
+          <div class="bank-shop-row">
+            <div class="bank-shop-info">
+              <div class="bank-shop-name">${item.name}</div>
+              <div class="bank-shop-sub">+${item.percent}% силы · в наличии: ${have}</div>
+            </div>
+            <button class="bank-shop-buy ${can ? '' : 'poor'}" data-buy-item="${item.key}">${bankPriceHtml(item.price)}</button>
+          </div>`;
+      }).join('')}
+    </div>`;
+  box.querySelectorAll('[data-buy-item]').forEach(btn=>{
+    btn.addEventListener('click', ()=> buyInventoryItem(btn.dataset.buyItem));
+  });
+}
+
+function buyInventoryItem(key){
+  const item = inventoryItemByKey(key);
+  if(!item) return;
+  const cur = item.price.currency;
+  const money = cur === 'coins' ? state.coins : state.budget;
+  if(money < item.price.amount){
+    showToast(`❌ Недостаточно ${cur === 'coins' ? 'монет' : 'евро'} для «${item.name}»`);
+    return;
+  }
+  if(cur === 'coins') state.coins -= item.price.amount; else state.budget -= item.price.amount;
+  if(!state.inventory) state.inventory = { items:{}, activeBoost:null };
+  state.inventory.items[key] = (state.inventory.items[key] || 0) + 1;
+  save();
+  refreshTopbar();
+  renderBankShop();
+  showToast(`<img src="${IMG.check}" class="img-icon" alt=""> «${item.name}» куплена`);
 }
 
 /* ============================================================
@@ -1650,6 +1837,7 @@ function refreshTopbar(){
   document.getElementById('topbar-level').textContent = state.level;
   if(typeof checkLeagueRegistrationEligibility === 'function') checkLeagueRegistrationEligibility();
   updateManagerNavBadge();
+  if(document.getElementById('bank-shop')) renderBankShop();
 }
 
 function updateManagerNavBadge(){
@@ -2706,11 +2894,20 @@ function renderManager(){
       </span>
       <span class="btn-tasks-arrow">›</span>
     </button>
+    <button id="btn-open-inventory" class="btn-tasks btn-inventory">
+      <span class="btn-tasks-icon"><img src="${IMG.inventory}" class="btn-tasks-icon-img" alt="Инвентарь"></span>
+      <span class="btn-tasks-text">
+        <span class="btn-tasks-title">Инвентарь</span>
+        <span class="btn-tasks-sub">Усиления клуба перед матчем</span>
+      </span>
+      <span class="btn-tasks-arrow">›</span>
+    </button>
     <h3 class="squad-heading">ЗАЛ СЛАВЫ</h3>
     <div class="mgr-trophy-list">${trophiesHtml}</div>
   `;
 
   document.getElementById('btn-open-tasks').addEventListener('click', openTasksModal);
+  document.getElementById('btn-open-inventory').addEventListener('click', openInventoryModal);
   updateTasksBadge();
 
   const avatarBtn = document.getElementById('btn-manager-avatar');
@@ -3746,8 +3943,20 @@ function playCurrentRound(cupId) {
     if(!actualMatch.teamA) actualMatch.teamA = resolveTeam(actualMatch.a, cup);
     if(!actualMatch.teamB) actualMatch.teamB = resolveTeam(actualMatch.b, cup);
 
+    // инвентарь: буст «Мотивация» действует ровно на один ближайший матч игрока
+    let powerA = actualMatch.teamA.power, powerB = actualMatch.teamB.power;
+    const activeBoost = state.inventory && state.inventory.activeBoost;
+    if(activeBoost){
+      const mult = 1 + activeBoost.percent / 100;
+      if(actualMatch.teamA.isPlayer) powerA = Math.round(powerA * mult);
+      else if(actualMatch.teamB.isPlayer) powerB = Math.round(powerB * mult);
+      if(actualMatch.teamA.isPlayer || actualMatch.teamB.isPlayer){
+        state.inventory.activeBoost = null; // потрачен на этот матч
+      }
+    }
+
     const result = simulateMatch(
-      actualMatch.teamA.power, actualMatch.teamB.power,
+      powerA, powerB,
       actualMatch.teamA.formation, actualMatch.teamB.formation,
       drawsAllowed(t, cup, actualMatch.round)
     );
