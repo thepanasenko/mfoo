@@ -1017,8 +1017,24 @@ function renderInventoryView(){
   });
 }
 
+/* куда вернуть по кнопке «Назад» из инвентаря: на Менеджер (по умолчанию)
+   или в турнир, из которого его открыли по клику на свою иконку */
+let inventoryReturn = { name:'manager', cupId:null };
+
 function openInventoryModal(){
+  inventoryReturn = { name:'manager', cupId:null };
   navigate('inventory');
+}
+
+function openInventoryFromCup(){
+  inventoryReturn = { name:'cup', cupId: currentCupId };
+  navigate('inventory');
+}
+
+function closeInventoryView(){
+  const target = inventoryReturn || { name:'manager', cupId:null };
+  inventoryReturn = { name:'manager', cupId:null };
+  navigate(target.name, target.cupId);
 }
 
 /* ============================================================
@@ -1603,7 +1619,7 @@ function bindGlobalEvents(){
   });
 
   document.getElementById('btn-cup-back').addEventListener('click', ()=> navigate('play'));
-  document.getElementById('btn-inventory-back').addEventListener('click', ()=> navigate('manager'));
+  document.getElementById('btn-inventory-back').addEventListener('click', closeInventoryView);
   document.getElementById('btn-cup-start').addEventListener('click', onCupStart);
   document.getElementById('btn-play-now').addEventListener('click', onPlayNow);
   document.getElementById('btn-leave-cup').addEventListener('click', onLeaveCup);
@@ -1725,7 +1741,7 @@ function navigate(name, cupId){
   const viewEl = document.getElementById(map[name]);
   if(viewEl) viewEl.classList.add('active');
 
-  const navKey = (name === 'cup') ? 'play' : (name === 'inventory') ? 'manager' : name;
+  const navKey = (name === 'cup') ? 'play' : (name === 'inventory') ? (inventoryReturn.name === 'cup' ? 'play' : 'manager') : name;
   if(navKey){
     const btn = document.querySelector(`.nav-btn[data-nav="${navKey}"]`);
     if(btn) btn.classList.add('active');
@@ -4240,8 +4256,9 @@ function vsAvatarSideHtml(team, isOpponent){
   const clubName = team ? team.name : '?';
   const avatarSrc = managerAvatarSrc(team ? team.clubAvatar : 0);
   const clickable = isOpponent && team && !team.isPlayer;
+  const isMe = !isOpponent && team && team.isPlayer;
   return `
-    <div class="vs-side ${clickable ? 'vs-side-opp' : ''}" ${clickable ? `data-teamid="${team.id}"` : ''}>
+    <div class="vs-side ${clickable ? 'vs-side-opp' : ''} ${isMe ? 'vs-side-me' : ''}" ${clickable ? `data-teamid="${team.id}"` : ''}>
       <div class="vs-avatar-frame"><img src="${avatarSrc}" class="vs-avatar" alt="${clubName}"></div>
       <div class="vs-club-name">${clubName}</div>
     </div>`;
@@ -4271,6 +4288,10 @@ function renderVsPreview(cup){
       <div class="vs-badge">VS</div>
       ${vsAvatarSideHtml(opp, true)}
     </div>`;
+
+  el.querySelectorAll('.vs-side-me').forEach(sideEl=>{
+    sideEl.addEventListener('click', openInventoryFromCup);
+  });
 
   el.querySelectorAll('.vs-side-opp').forEach(sideEl=>{
     sideEl.addEventListener('click', ()=>{
