@@ -446,7 +446,7 @@ input{ font-family: inherit; }
 .mgr-card{
   background: rgb(0 0 0 / 50%); border: 1px solid #082b1a; border-radius: 14px;
   border: 2px solid #082b1a;
-  border-radius: 18px;
+  border-radius: 20px;
   padding:18px;
   margin-bottom:14px;
   box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
@@ -523,7 +523,7 @@ input{ font-family: inherit; }
 .btn-tasks{
   display:flex; align-items:center; gap:12px; width:100%;
   background: rgb(219 205 0 / 15%);
-  border:1px solid var(--gold);
+  border:2px solid var(--gold);
   border-radius:14px; padding:14px 16px; margin:16px 0;
   cursor:pointer; text-align:left;
   box-shadow: 0 6px 16px rgba(0,0,0,.28);
@@ -642,9 +642,9 @@ input{ font-family: inherit; }
 .mgr-trophy-item{
   display:flex; align-items:center; gap:10px;
   background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
   padding:10px 12px;
-  border-radius:10px;
+  border-radius:12px;
   transition: transform .18s var(--ease-bounce), border-color .15s ease;
 }
 .mgr-trophy-icon{ font-size:20px; }
@@ -890,14 +890,9 @@ input{ font-family: inherit; }
 /* cup */
 .cup-header{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .cup-header .view-title{ margin:0; }
-.cup-intro{ text-align:center; background: #082B1A;
-    background-image: url(images/fonshah.png);
-    background-repeat: repeat;
-    background-size: 60%;
-    background-blend-mode: luminosity;
-    background-color: #082B1A;
+.cup-intro{ text-align:center; background: rgb(0 0 0 / 50%);
     border: 2px solid #082b1a;
-    border-radius: 18px;
+    border-radius: 20px;
   box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
     padding:28px 18px; }
 .cup-trophy{ font-size:44px; margin-bottom:10px; }
@@ -906,8 +901,9 @@ input{ font-family: inherit; }
 
 .next-match-preview{
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
-  border-radius: 14px;
+    border: 2px solid #082b1a;
+    border-radius: 20px;
+    box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
   padding: 16px;
   margin-bottom: 18px;
 }
@@ -976,14 +972,16 @@ input{ font-family: inherit; }
 .bracket-round.current .stage-nav-info .bracket-round-title{ color: var(--gold); }
 .bracket-match{
   background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
+    box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.5);
     border-radius: 14px;
   padding:10px 12px;
   display:flex; align-items:center; justify-content:space-between;
   font-size:13px;
 }
 .bracket-match.pending{ background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
+    box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.5);
     border-radius: 14px; }
 .bracket-match.playing{ border-color: var(--gold); animation: pulse-gold 1s infinite; }
 @keyframes pulse-gold{ 0%,100%{ box-shadow:0 0 0 0 rgba(242,183,5,.4);} 50%{ box-shadow:0 0 0 5px rgba(242,183,5,0);} }
@@ -1082,7 +1080,7 @@ input{ font-family: inherit; }
 .bank-card{
   background: rgb(0 0 0 / 50%);
   border: 2px solid #082b1a;
-  border-radius:14px;
+  border-radius:20px;
   padding:18px;
   margin-bottom:16px;
   box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
@@ -1105,7 +1103,7 @@ input{ font-family: inherit; }
   position:relative;
   background: rgb(0 0 0 / 50%);
   border: 2px solid #082b1a;
-  border-radius:12px;
+  border-radius:14px;
   padding:12px 4px 10px; min-width:0;
   display:flex; flex-direction:column; align-items:center; gap:6px;
   color: var(--text);
@@ -1405,13 +1403,13 @@ input{ font-family: inherit; }
   justify-content:flex-start;
   gap:8px;
   background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
   border-radius:10px;
   padding:10px 12px;
 }
 .cup-reward-row.final{
   background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
 }
 .cup-reward-stage{
   font-size:12.5px;
@@ -1639,7 +1637,7 @@ input{ font-family: inherit; }
 .bank-shop-list{ display:flex; flex-direction:column; gap:10px; }
 .bank-shop-row{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
-  background: rgb(0 0 0 / 50%); border:2px solid #082b1a; border-radius:12px; padding:10px 12px;
+  background: rgb(0 0 0 / 50%); border:2px solid #082b1a; border-radius:14px; padding:10px 12px;
 }
 .bank-shop-info{ min-width:0; }
 .bank-shop-name{ font-weight:800; font-size:13px; color: var(--text); }
