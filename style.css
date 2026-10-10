@@ -234,12 +234,13 @@ input{ font-family: inherit; }
 .btn-big{ width:100%; padding:16px; font-size:15px; }
 .btn-back{
   background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
   color: var(--text-dim);
   padding:8px 14px;
   border-radius:10px;
   font-weight:700;
   font-size:13px;
+  box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.5);
   transition: transform .15s var(--ease-bounce), border-color .15s ease, color .15s ease;
 }
 .btn-back:hover{ border-color: var(--green); color: var(--text); }
@@ -618,8 +619,9 @@ input{ font-family: inherit; }
 /* строки предметов инвентаря (переиспользуют каркас .task-row) */
 .inv-row{
   display:flex; align-items:flex-start; gap:10px;
-  background: rgb(0 0 0 / 50%); border: 1px solid #082b1a; border-radius:12px;
+  background: rgb(0 0 0 / 50%); border: 2px solid #082b1a; border-radius:12px; 
   padding:12px;
+  box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
 }
 .inv-row.active{ border-color:#3fa9ff; box-shadow: 0 0 14px rgba(63,169,255,.18); }
 .inv-icon{ flex-shrink:0; }
@@ -1096,12 +1098,11 @@ input{ font-family: inherit; }
    ============================================================ */
 .bank-card{
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
-  border: 1px solid #082b1a;
+  border: 2px solid #082b1a;
   border-radius:14px;
   padding:18px;
   margin-bottom:16px;
-  box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
 }
 .bank-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .bank-card-icon{
@@ -1121,7 +1122,7 @@ input{ font-family: inherit; }
 .coin-buy-btn{
   position:relative;
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
+  border: 2px solid #082b1a;
   border-radius:12px;
   padding:16px 10px 14px;
   display:flex; flex-direction:column; align-items:center; gap:6px;
@@ -1668,7 +1669,7 @@ input{ font-family: inherit; }
 .bank-shop-list{ display:flex; flex-direction:column; gap:10px; }
 .bank-shop-row{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
-  background: rgb(0 0 0 / 50%); border:1px solid #082b1a; border-radius:12px; padding:10px 12px;
+  background: rgb(0 0 0 / 50%); border:2px solid #082b1a; border-radius:12px; padding:10px 12px;
 }
 .bank-shop-info{ min-width:0; }
 .bank-shop-name{ font-weight:800; font-size:13px; color: var(--text); }
