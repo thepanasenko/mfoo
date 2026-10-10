@@ -450,12 +450,7 @@ input{ font-family: inherit; }
 
 /* manager / stats screen */
 .mgr-card{
-  background: #082B1A;
-  background-image: url('images/fonboll.png');
-  background-repeat: repeat;
-  background-size: 50%; /* при необходимости скорректируйте размер */
-  background-blend-mode: luminosity;
-  background-color: #082B1A;
+  background: rgb(0 0 0 / 50%); border: 1px solid #082b1a; border-radius: 14px;
   border: 2px solid #082b1a;
   border-radius: 18px;
   padding:18px;
@@ -464,12 +459,7 @@ input{ font-family: inherit; }
   transition: transform .2s var(--ease-bounce), box-shadow .2s var(--ease-smooth);
 }
 .mgr-profile-card{
-  background: #082B1A;
-  background-image: url('images/fonboll.png');
-  background-repeat: repeat;
-  background-size: 40%; /* при необходимости скорректируйте размер */
-  background-blend-mode: luminosity;
-  background-color: #082B1A;
+  background: rgb(0 0 0 / 50%);
   border: 2px solid #082b1a;
   border-radius: 18px;
   padding:14px 16px;
@@ -633,7 +623,7 @@ input{ font-family: inherit; }
 }
 .inv-row.active{ border-color:#3fa9ff; box-shadow: 0 0 14px rgba(63,169,255,.18); }
 .inv-icon{ flex-shrink:0; }
-.inv-icon-img{ width:26px; height:26px; object-fit:contain; margin-top:2px; }
+.inv-icon-img{ width:48px; height:48px; object-fit:contain; display:block; }
 .inv-info{ flex:1; min-width:0; }
 .inv-title{ font-weight:800; font-size:13px; color: var(--text); margin-bottom:4px; }
 .inv-sub{ font-size:11px; color: var(--text-dim); margin-bottom:8px; }
@@ -893,12 +883,7 @@ input{ font-family: inherit; }
    ============================================================ */
 .tournament-list{ display:flex; flex-direction:column; gap:12px; }
 .tournament-card {
-    background: #082B1A;
-    background-image: url(images/fonshah.png);
-    background-repeat: repeat;
-    background-size: 50%;
-    background-blend-mode: luminosity;
-    background-color: #082B1A;
+    background: rgb(0 0 0 / 50%); border: 1px solid #082b1a;
     border: 2px solid #082b1a;
     box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
     border-radius: 14px;
@@ -1112,9 +1097,11 @@ input{ font-family: inherit; }
 .bank-card{
   background: rgb(0 0 0 / 50%);
   border: 1px solid #082b1a;
+  border: 1px solid #082b1a;
   border-radius:14px;
   padding:18px;
   margin-bottom:16px;
+  box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
 }
 .bank-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:16px; }
 .bank-card-icon{

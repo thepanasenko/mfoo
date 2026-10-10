@@ -16,6 +16,7 @@ const IMG = {
   training:   'images/trenirovka.png',
   tasks:      'images/zadanie.png',
   inventory:  'images/inventar.png',
+  boost:      'images/bust1.png',
   check:      'images/galocka.png',
   cross:      'images/krest.png',
   plus:       'images/plus.png',
@@ -993,7 +994,7 @@ function inventoryRowHtml(item){
 
   return `
     <div class="inv-row ${isActive ? 'active' : ''}">
-      <div class="inv-icon"><img src="${IMG.inventory}" class="inv-icon-img" alt="${item.name}"></div>
+      <div class="inv-icon"><img src="${IMG.boost}" class="inv-icon-img" alt="${item.name}"></div>
       <div class="inv-info">
         <div class="inv-title">${item.name}</div>
         <div class="inv-sub">+${item.percent}% силы клуба · только на следующий матч</div>
