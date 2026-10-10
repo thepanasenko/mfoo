@@ -983,7 +983,7 @@ function inventoryRowHtml(item){
   if(isActive){
     statusHtml = `
       <div class="inv-active-row">
-        <span class="inv-active-label">⚡ Активна на след. матч</span>
+        <span class="inv-active-label">⚡ Активна</span>
         <button class="inv-cancel-btn" data-cancel-boost="1">ОТМЕНИТЬ</button>
       </div>`;
   } else if(count > 0){
@@ -994,13 +994,11 @@ function inventoryRowHtml(item){
 
   return `
     <div class="inv-row ${isActive ? 'active' : ''}">
-      <div class="inv-icon"><img src="${IMG.boost}" class="inv-icon-img" alt="${item.name}"></div>
-      <div class="inv-info">
-        <div class="inv-title">${item.name}</div>
-        <div class="inv-sub">+${item.percent}% силы клуба · только на следующий матч</div>
-        ${statusHtml}
-      </div>
       <div class="inv-count">×${count}</div>
+      <img src="${IMG.boost}" class="inv-icon-img" alt="${item.name}">
+      <div class="inv-title">${item.name}</div>
+      <div class="inv-sub">+${item.percent}% силы клуба</div>
+      ${statusHtml}
     </div>`;
 }
 
@@ -1793,10 +1791,10 @@ function renderBankShop(){
         const can = money >= item.price.amount;
         return `
           <div class="bank-shop-row">
-            <div class="bank-shop-info">
-              <div class="bank-shop-name">${item.name}</div>
-              <div class="bank-shop-sub">+${item.percent}% силы · в наличии: ${have}</div>
-            </div>
+            <div class="bank-shop-have">×${have}</div>
+            <img src="${IMG.boost}" class="bank-shop-img" alt="${item.name}">
+            <div class="bank-shop-name">${item.name}</div>
+            <div class="bank-shop-sub">+${item.percent}% силы</div>
             <button class="bank-shop-buy ${can ? '' : 'poor'}" data-buy-item="${item.key}">${bankPriceHtml(item.price)}</button>
           </div>`;
       }).join('')}
@@ -4680,6 +4678,7 @@ function showToast(text){
     container.id = 'toast-container';
     document.body.appendChild(container);
   }
+  container.innerHTML = '';
   const t = document.createElement('div');
   t.className = 'toast';
   t.innerHTML = text;

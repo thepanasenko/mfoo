@@ -105,7 +105,6 @@ input{ font-family: inherit; }
   margin: 0 auto;
   transition: transform .3s var(--ease-bounce);
 }
-.coin-buy-btn:hover .coin-buy-img{ transform: scale(1.15) rotate(-6deg); }
 .tournament-icon-img{
   width: 34px;
   height: 34px;
@@ -221,7 +220,6 @@ input{ font-family: inherit; }
   justify-content:center;
   gap:6px;
 }
-.btn-primary:hover{ filter: brightness(1.06); }
 .btn-primary:active{ transform: translateY(4px) scale(.98); box-shadow: 0 2px 0 #0c5c2b, 0 4px 8px rgba(0,0,0,.4); }
 .btn-primary.notched{ border-radius:0; }
 .btn-primary.btn-disabled-soft{
@@ -243,7 +241,6 @@ input{ font-family: inherit; }
   box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.5);
   transition: transform .15s var(--ease-bounce), border-color .15s ease, color .15s ease;
 }
-.btn-back:hover{ border-color: var(--green); color: var(--text); }
 .btn-back:active{ transform: scale(.95); }
 .btn-reset{
   margin-top:22px;
@@ -259,7 +256,6 @@ input{ font-family: inherit; }
   width:100%;
   transition: color .15s ease, border-color .15s ease, background .15s ease;
 }
-.btn-reset:hover{ color:#fff; border-color: var(--red); background: rgba(239,68,68,.22); }
 .btn-reset:active{ transform: scale(.98); }
 
 /* качелька-пагинация пар (если в этапе больше 10 пар) */
@@ -441,12 +437,9 @@ input{ font-family: inherit; }
   transition: box-shadow .15s ease;
 }
 .menu-play{ border-color: var(--green); box-shadow: 0 0 0 1px var(--green) inset; }
-.menu-play .menu-icon{ box-shadow: 0 0 0 1px var(--green) inset, 0 0 14px var(--green-glow); }
-.menu-transfer:active, .menu-transfer:hover{ border-color:#7fd3ff; box-shadow:0 0 16px rgba(127,211,255,.18); }
-.menu-transfer .menu-icon{ box-shadow: 0 0 0 1px rgba(127,211,255,.4) inset; }
-.menu-bank:active, .menu-bank:hover{ border-color: var(--gold); box-shadow:0 0 16px rgba(242,183,5,.18); }
-.menu-bank .menu-icon{ box-shadow: 0 0 0 1px rgba(242,183,5,.4) inset; }
-.menu-team:active, .menu-team:hover{ border-color: var(--green); box-shadow:0 0 16px var(--green-glow); }
+.menu-play .menu-icon{ box-shadow: 0 0 0 1px var(--green) inset, 0 0 14px var(--green-glow); }.menu-transfer:active{ border-color:#7fd3ff; box-shadow:0 0 16px rgba(127,211,255,.18); }
+.menu-transfer .menu-icon{ box-shadow: 0 0 0 1px rgba(127,211,255,.4) inset; }.menu-bank:active{ border-color: var(--gold); box-shadow:0 0 16px rgba(242,183,5,.18); }
+.menu-bank .menu-icon{ box-shadow: 0 0 0 1px rgba(242,183,5,.4) inset; }.menu-team:active{ border-color: var(--green); box-shadow:0 0 16px var(--green-glow); }
 .menu-team .menu-icon{ box-shadow: 0 0 0 1px rgba(34,197,94,.4) inset; }
 
 /* manager / stats screen */
@@ -509,7 +502,6 @@ input{ font-family: inherit; }
   border-radius:10px;
   transition: transform .18s var(--ease-bounce), border-color .15s ease;
 }
-.mgr-stat:hover{ transform: translateY(-2px);  border-color: var(--line); }
 .mgr-stat-value{ font-family: var(--ff-display); font-size:24px; }
 .mgr-stat-label{ font-size:10px; color: var(--text-dim); letter-spacing:.5px; margin-top:2px; }
 .mgr-stat.wins .mgr-stat-value{ color: var(--green); }
@@ -519,7 +511,6 @@ input{ font-family: inherit; }
 .mgr-stat.xp .mgr-stat-value{ color:#7fd3ff; }
 .mgr-finance-row{ display:flex; gap:10px; margin-top:14px; }
 .mgr-finance-chip{ flex:1; background: rgb(0 0 0 / 50%); border: 2px solid #082b1a; padding:10px; text-align:center; border-radius:10px; transition: transform .18s var(--ease-bounce); }
-.mgr-finance-chip:hover{ transform: translateY(-2px); }
 .mgr-finance-chip .val{ font-family: var(--ff-display); font-size:18px; display:flex; align-items:center; justify-content:center; gap:5px; }
 .mgr-finance-chip .lbl{ font-size:10px; color: var(--text-dim); }
 
@@ -538,7 +529,6 @@ input{ font-family: inherit; }
   box-shadow: 0 6px 16px rgba(0,0,0,.28);
   transition: transform .18s var(--ease-bounce), border-color .15s ease, box-shadow .18s ease;
 }
-.btn-tasks:hover{ transform: translateY(-2px); border-color: var(--gold); box-shadow: 0 10px 22px rgba(0,0,0,.35); }
 .btn-tasks:active{ transform: translateY(1px) scale(.99); }
 .btn-tasks-icon{
   flex-shrink:0; width:46px; height:46px;
@@ -603,7 +593,6 @@ input{ font-family: inherit; }
   color:#fff;
   text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
 }
-.task-claim-btn:hover{ filter:brightness(1.06); }
 .task-claim-btn:active{ transform: translateY(3px); box-shadow: 0 1px 0 #8a6603; }
 .task-status.done{ font-size:12px; font-weight:800; color: var(--green); }
 
@@ -613,7 +602,6 @@ input{ font-family: inherit; }
   background: rgb(63 169 255 / 15%);
   border-color: #3fa9ff;
 }
-.btn-inventory:hover{ border-color:#3fa9ff; }
 .btn-inventory .btn-tasks-arrow{ color:#3fa9ff; }
 
 /* строки предметов инвентаря (переиспользуют каркас .task-row) */
@@ -625,7 +613,7 @@ input{ font-family: inherit; }
 }
 .inv-row.active{ border-color:#3fa9ff; box-shadow: 0 0 14px rgba(63,169,255,.18); }
 .inv-icon{ flex-shrink:0; }
-.inv-icon-img{ width:48px; height:48px; object-fit:contain; display:block; }
+.inv-icon-img{ width:56px; height:56px; object-fit:contain; display:block; }
 .inv-info{ flex:1; min-width:0; }
 .inv-title{ font-weight:800; font-size:13px; color: var(--text); margin-bottom:4px; }
 .inv-sub{ font-size:11px; color: var(--text-dim); margin-bottom:8px; }
@@ -638,7 +626,6 @@ input{ font-family: inherit; }
   color:#fff;
   text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
 }
-.inv-use-btn:hover{ filter:brightness(1.06); }
 .inv-use-btn:active{ transform: translateY(3px); box-shadow: 0 1px 0 #083a73; }
 .inv-use-btn:disabled{ opacity:.4; cursor:not-allowed; }
 .inv-active-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
@@ -648,7 +635,6 @@ input{ font-family: inherit; }
   font-weight:800; font-size:11px; letter-spacing:.3px;
   padding:6px 10px; border-radius:8px; cursor:pointer;
 }
-.inv-cancel-btn:hover{ background: rgba(239,68,68,.12); }
 .inv-cancel-btn:active{ transform: scale(.96); }
 .inv-empty-label{ font-size:12px; color: var(--text-dim); font-style:italic; }
 
@@ -661,7 +647,6 @@ input{ font-family: inherit; }
   border-radius:10px;
   transition: transform .18s var(--ease-bounce), border-color .15s ease;
 }
-.mgr-trophy-item:hover{ transform: translateX(3px); border-color: var(--gold); }
 .mgr-trophy-icon{ font-size:20px; }
 .mgr-trophy-name{ font-weight:700; font-size:13px; flex:1; }
 .mgr-trophy-date{ font-size:11px; color: var(--text-mute); }
@@ -823,7 +808,6 @@ input{ font-family: inherit; }
   text-align:left;
   transition: transform .18s var(--ease-bounce), border-color .18s ease, box-shadow .18s ease;
 }
-.player-card:hover{ transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0,0,0,.3); }
 .player-card:active{ border-color: var(--green); transform: scale(.97); }
 .player-pos{
   align-self:flex-start;
@@ -895,7 +879,6 @@ input{ font-family: inherit; }
     gap: 14px;
     transition: transform .18s var(--ease-bounce), border-color .18s ease, box-shadow .18s ease;
 }
-.tournament-card:hover{ transform: translateY(-3px) translateX(2px); border-color: var(--green); box-shadow: 0 8px 18px rgba(0,0,0,.3); }
 .tournament-card:active{ transform: scale(.98); }
 .tournament-card.locked{ opacity:.55; }
 .tournament-icon{ font-size:30px; }
@@ -1116,26 +1099,24 @@ input{ font-family: inherit; }
 .bank-card-title{ font-weight:800; font-size:15px; color: var(--text); }
 .bank-card-sub{ font-size:11.5px; color: var(--text-mute); margin-top:2px; }
 
-.coin-buy-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
-@media (min-width:480px){ .coin-buy-grid{ grid-template-columns:repeat(3,1fr); } }
+.coin-buy-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 
 .coin-buy-btn{
   position:relative;
   background: rgb(0 0 0 / 50%);
   border: 2px solid #082b1a;
   border-radius:12px;
-  padding:16px 10px 14px;
+  padding:12px 4px 10px; min-width:0;
   display:flex; flex-direction:column; align-items:center; gap:6px;
   color: var(--text);
   transition: border-color .18s ease;
   overflow:hidden;
 }
-.coin-buy-btn:hover{ border-color: var(--gold); }
 .coin-buy-btn:active{ transform: scale(.97); }
 .coin-buy-icon{ font-size:26px; transition: transform .3s var(--ease-bounce); }
-.coin-buy-amount{ font-family: var(--ff-display); font-size:17px; color: var(--gold); letter-spacing:.3px; }
+.coin-buy-amount{ font-family: var(--ff-display); font-size:13px; white-space:nowrap; color: var(--gold); letter-spacing:.3px; }
 .coin-buy-tag{
-  font-size:9px; font-weight:800; letter-spacing:.8px;
+  font-size:8px; font-weight:800; letter-spacing:.4px;
   color: var(--green);
   background: rgba(34,197,94,.12);
   border:1px solid rgba(34,197,94,.35);
@@ -1143,11 +1124,10 @@ input{ font-family: inherit; }
   border-radius:20px;
   margin-top:2px;
 }
-.coin-buy-btn.silver:hover{ border-color:#c9d2dc; }
 .coin-buy-btn.gold{
   border-color: rgba(242,183,5,.45);
 }
-.coin-buy-btn.gold .coin-buy-amount{ font-size:18px; }
+.coin-buy-btn.gold .coin-buy-amount{ font-size:13px; }
 
 .bank-card-icon.euro{
   background: rgba(127,211,255,.12);
@@ -1157,7 +1137,6 @@ input{ font-family: inherit; }
   font-size:22px;
 }
 .euro-buy-btn .coin-buy-amount{ color:#7fd3ff; }
-.euro-buy-btn:hover{ border-color:#7fd3ff; }
 .euro-buy-btn.gold{
   border-color: rgba(127,211,255,.45);
 }
@@ -1213,7 +1192,6 @@ input{ font-family: inherit; }
     border: 1px solid #082b1a; color: var(--text);
   font-size:11px; font-weight:800; padding:7px 10px; border-radius:8px; cursor:pointer;
 }
-.ts-add-btn:hover{ border-color: var(--green); color: var(--green); }
 
 .training-slot.occupied{
   border:1px solid var(--gold);
@@ -1227,13 +1205,11 @@ input{ font-family: inherit; }
   background: rgba(239,68,68,.10); border:1px solid rgba(239,68,68,.45); color:#ff9d9d;
   font-size:10.5px; font-weight:800; padding:6px 10px; border-radius:8px; cursor:pointer; margin-top:2px;
 }
-.ts-cancel-btn:hover{ background: rgba(239,68,68,.22); color:#fff; }
 
 .ts-upgrade-btn{
   display:block; width:100%; background: var(--surface-3); border:1px solid rgba(242,183,5,.35);
   color: var(--gold); font-weight:800; font-size:12.5px; padding:11px 10px; border-radius:10px; cursor:pointer;
 }
-.ts-upgrade-btn:hover{ border-color: var(--gold); }
 .ts-upgrade-btn:disabled{ opacity:.5; cursor:not-allowed; }
 
 /* окно выбора игрока для тренировки */
@@ -1246,7 +1222,6 @@ input{ font-family: inherit; }
   background: rgb(0 0 0 / 50%); border: 1px solid #082b1a; border-radius:10px;
   padding:9px 10px; cursor:pointer; text-align:left; width:100%;
 }
-.tp-row:hover{ border-color: var(--green); }
 .tp-row.disabled, .tp-row:disabled{ opacity:.4; cursor:not-allowed; }
 .tp-row-name{ flex:1; font-weight:700; font-size:12.5px; color: var(--text); }
 .tp-row-power{ font-size:11px; color: var(--text-dim); }
@@ -1373,7 +1348,6 @@ input{ font-family: inherit; }
   text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
   box-shadow: 0 6px 0 #0c5c2b, 0 8px 16px rgba(0,0,0,.4);
 }
-.cup-action-primary:hover{ filter: brightness(1.06); }
 .cup-action-primary:active{ transform: translateY(4px) scale(.98); box-shadow: 0 2px 0 #0c5c2b, 0 4px 8px rgba(0,0,0,.4); }
 .cup-action-primary:disabled,
 .cup-action-primary.btn-disabled-soft{
@@ -1402,7 +1376,6 @@ input{ font-family: inherit; }
   color:#fff;
   box-shadow: 0 6px 0 #991b1b, 0 8px 16px rgba(0,0,0,.4);
 }
-.cup-action-danger:hover{ filter: brightness(1.06); }
 .cup-action-danger:active{ transform: translateY(4px) scale(.98); box-shadow: 0 2px 0 #991b1b, 0 4px 8px rgba(0,0,0,.4); }
 
 /* ============================================================
@@ -1583,7 +1556,6 @@ input{ font-family: inherit; }
   font-weight:800;
   display:flex; align-items:center; justify-content:center;
 }
-.pitch-slot.empty:hover .pitch-slot-plus{ border-color: var(--gold); color: var(--gold); }
 
 .slot-picker-list{ display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto; }
 .slot-picker-row{
@@ -1595,7 +1567,6 @@ input{ font-family: inherit; }
   cursor:pointer;
   transition: border-color .15s ease, transform .15s var(--ease-bounce);
 }
-.slot-picker-row:hover{ border-color: var(--green); }
 .slot-picker-row:active{ transform: scale(.97); }
 .slot-picker-name{ flex:1; font-weight:700; font-size:13.5px; text-align:left; }
 .slot-picker-power{ font-family: var(--ff-display); font-size:15px; color: var(--green); }
@@ -1644,7 +1615,6 @@ input{ font-family: inherit; }
     border: 1px solid #082b1a; color: var(--gold);
   font-weight:800; font-size:12.5px; padding:9px 12px; border-radius:10px; cursor:pointer;
 }
-.transfer-row-buy:hover{ border-color: var(--gold); }
 .transfer-row-buy:disabled{ opacity:.5; cursor:not-allowed; }
 
 /* ничья */
@@ -1683,3 +1653,24 @@ input{ font-family: inherit; }
 }
 .bank-shop-buy:active{ transform: translateY(3px); box-shadow:0 1px 0 #083a73; }
 .bank-shop-buy.poor{ opacity:.5; }
+
+/* инвентарь: 3 в ряд */
+#inventory-list{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.inv-row{ position:relative; flex-direction:column; align-items:center !important; text-align:center; gap:4px; padding:12px 6px 10px; min-width:0; }
+.inv-count{ position:absolute; top:6px; right:8px; align-self:auto; font-size:11px; }
+.inv-title{ font-size:11px; margin-bottom:0; }
+.inv-sub{ font-size:9.5px; margin-bottom:4px; }
+.inv-use-btn{ font-size:10px; padding:7px 4px; }
+.inv-active-row{ flex-direction:column; gap:6px; width:100%; }
+.inv-active-label{ font-size:10px; }
+.inv-cancel-btn{ width:100%; }
+.inv-empty-label{ font-size:10px; }
+
+/* банк: мотивация 3 в ряд */
+.bank-shop-list{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.bank-shop-row{ position:relative; flex-direction:column; align-items:center; text-align:center; gap:4px; padding:12px 4px 10px; min-width:0; }
+.bank-shop-have{ position:absolute; top:6px; right:8px; font-size:11px; font-weight:800; color:var(--text-dim); }
+.bank-shop-img{ width:56px; height:56px; object-fit:contain; display:block; }
+.bank-shop-name{ font-size:11px; }
+.bank-shop-sub{ font-size:9.5px; margin-top:0; }
+.bank-shop-buy{ width:100%; justify-content:center; gap:3px; font-size:10px; padding:7px 2px; white-space:nowrap; }
