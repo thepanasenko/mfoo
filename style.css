@@ -1055,7 +1055,7 @@ input{ font-family: inherit; }
 .mm-result.win{ color: var(--green); text-shadow:-1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55), 0 0 16px var(--green-glow); }
 .mm-result.lose{ color: var(--red); }
 .mm-reward{
-  margin-top:14px; padding:12px; background: var(--surface-3); border-radius:10px;
+  margin-top:14px; padding:12px; background: rgb(0 0 0 / 50%); border-radius:14px;
   font-size:13px;
 }
 .mm-reward-player{ font-weight:800; color: var(--gold); }
