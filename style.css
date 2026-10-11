@@ -1674,3 +1674,8 @@ input{ font-family: inherit; }
 .bank-shop-name{ font-size:11px; }
 .bank-shop-sub{ font-size:9.5px; margin-top:0; }
 .bank-shop-buy{ width:100%; justify-content:center; gap:3px; font-size:10px; padding:7px 2px; white-space:nowrap; }
+
+/* инвентарь: картинка буста крупнее, кнопка «Применить» компактнее */
+.inv-icon-img{ width:84px; height:84px; }
+.inv-use-btn{ width:auto; min-width:0; font-size:9px; padding:5px 12px; border-radius:6px; box-shadow:0 3px 0 #083a73; letter-spacing:.2px; }
+.inv-use-btn:active{ transform: translateY(2px); box-shadow:0 1px 0 #083a73; }

@@ -58,10 +58,10 @@ const TROPHY_IMG = {
    ИНВЕНТАРЬ — усиления «Мотивация» (+% силы на один следующий матч)
    ============================================================ */
 const INVENTORY_CATALOG = [
-  { key:'motivation25',  name:'Мотивация 25',  percent:25,  price:{ currency:'coins',  amount:25000  } },
-  { key:'motivation50',  name:'Мотивация 50',  percent:50,  price:{ currency:'budget', amount:50000  } },
-  { key:'motivation75',  name:'Мотивация 75',  percent:75,  price:{ currency:'budget', amount:150000 } },
-  { key:'motivation100', name:'Мотивация 100', percent:100, price:{ currency:'budget', amount:250000 } }
+  { key:'motivation25', img:'images/bust1.png',  name:'Мотивация 25',  percent:25,  price:{ currency:'coins',  amount:25000  } },
+  { key:'motivation50', img:'images/bust2.png',  name:'Мотивация 50',  percent:50,  price:{ currency:'budget', amount:50000  } },
+  { key:'motivation75', img:'images/bust3.png',  name:'Мотивация 75',  percent:75,  price:{ currency:'budget', amount:150000 } },
+  { key:'motivation100', img:'images/bust4.png', name:'Мотивация 100', percent:100, price:{ currency:'budget', amount:250000 } }
 ];
 function inventoryItemByKey(key){ return INVENTORY_CATALOG.find(i=>i.key===key); }
 
@@ -995,7 +995,7 @@ function inventoryRowHtml(item){
   return `
     <div class="inv-row ${isActive ? 'active' : ''}">
       <div class="inv-count">×${count}</div>
-      <img src="${IMG.boost}" class="inv-icon-img" alt="${item.name}">
+      <img src="${item.img || IMG.boost}" class="inv-icon-img" alt="${item.name}">
       <div class="inv-title">${item.name}</div>
       <div class="inv-sub">+${item.percent}% силы клуба</div>
       ${statusHtml}
@@ -1792,7 +1792,7 @@ function renderBankShop(){
         return `
           <div class="bank-shop-row">
             <div class="bank-shop-have">×${have}</div>
-            <img src="${IMG.boost}" class="bank-shop-img" alt="${item.name}">
+            <img src="${item.img || IMG.boost}" class="bank-shop-img" alt="${item.name}">
             <div class="bank-shop-name">${item.name}</div>
             <div class="bank-shop-sub">+${item.percent}% силы</div>
             <button class="bank-shop-buy ${can ? '' : 'poor'}" data-buy-item="${item.key}">${bankPriceHtml(item.price)}</button>
