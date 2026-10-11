@@ -643,6 +643,7 @@ input{ font-family: inherit; }
   display:flex; align-items:center; gap:10px;
   background: rgb(0 0 0 / 50%);
     border: 2px solid #082b1a;
+    box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.5);
   padding:10px 12px;
   border-radius:12px;
   transition: transform .18s var(--ease-bounce), border-color .15s ease;
