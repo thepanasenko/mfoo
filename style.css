@@ -791,6 +791,7 @@ input{ font-family: inherit; }
 .player-avatar-img{
   width:44px; height:44px; flex-shrink:0;
   border-radius: 6px;
+      border: solid #082b1a 2px;
   object-fit:cover;
   object-position: center bottom;
   background: rgb(0 0 0 / 37%);
@@ -1147,11 +1148,11 @@ input{ font-family: inherit; }
    ============================================================ */
 .slots-card{
   background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
-  border-radius:14px;
+    border: 2px solid #082b1a;
+    border-radius: 20px;
   padding:16px;
   margin-bottom:18px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
 }
 .slots-card-head{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
 .slots-card-icon{
@@ -1171,14 +1172,14 @@ input{ font-family: inherit; }
   margin-bottom:14px;
 }
 .training-slot{
-  border-radius:12px;
+  border-radius:14px;
   padding:12px 10px;
   text-align:center;
   display:flex; flex-direction:column; align-items:center; gap:4px;
 }
 .training-slot.empty{
   background: rgb(0 0 0 / 50%);
-    border: 1px solid #082b1a;
+    border: 2px solid #082b1a;
   justify-content:center;
   min-height:118px;
 }
@@ -1205,8 +1206,8 @@ input{ font-family: inherit; }
 }
 
 .ts-upgrade-btn{
-  display:block; width:100%; background: var(--surface-3); border:1px solid rgba(242,183,5,.35);
-  color: var(--gold); font-weight:800; font-size:12.5px; padding:11px 10px; border-radius:10px; cursor:pointer;
+  display:block; width:100%; background: rgb(0 0 0 / 50%); border: 2px solid #082b1a;
+  color: var(--gold); font-weight:800; font-size:12.5px; padding:11px 10px; border-radius:12px; box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5); cursor:pointer;
 }
 .ts-upgrade-btn:disabled{ opacity:.5; cursor:not-allowed; }
 
@@ -1575,11 +1576,11 @@ input{ font-family: inherit; }
 .transfer-head{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
+  border: 2px solid #082b1a;
   border-radius:14px;
+  box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
   padding:14px 16px;
   margin-bottom:16px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.3);
 }
 .transfer-head-title{ font-weight:800; font-size:14px; color: var(--text); }
 .transfer-head-sub{ font-size:11.5px; color: var(--text-mute); margin-top:2px; }
