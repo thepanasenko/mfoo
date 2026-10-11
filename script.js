@@ -1609,6 +1609,9 @@ function bindGlobalEvents(){
   document.querySelectorAll('.team-tab-btn[data-team-tab]').forEach(el=>{
     el.addEventListener('click', ()=> switchTeamTab(el.dataset.teamTab));
   });
+  document.querySelectorAll('.team-tab-btn[data-play-tab]').forEach(el=>{
+    el.addEventListener('click', ()=> switchPlayTab(el.dataset.playTab));
+  });
 
   document.getElementById('btn-reset-game').addEventListener('click', onResetGame);
 
@@ -2962,8 +2965,7 @@ function leagueListStatusText(t, opts){
   const hh = String(Math.floor(remaining / 3600000)).padStart(2,'0');
   const mm = String(Math.floor((remaining % 3600000) / 60000)).padStart(2,'0');
   const ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
-  const registered = leagueReg(t).sessionId === leagueSessionId(next);
-  return `${registered ? `<img src="${IMG.check}" class="img-icon" alt=""> Регистрация ` : ''}Старт через ${hh}:${mm}:${ss}`;
+  return `Старт через ${hh}:${mm}:${ss}`;
 }
 
 let leagueListInterval = null;
@@ -2993,37 +2995,57 @@ function startLeagueListTimer(){
       const cup = state.cups[t.id];
       const inProgress = !!(cup && !cup.finished);
       statusEl.innerHTML = leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible, range });
+      const mb = statusEl.parentElement.querySelector('.play-more-btn');
+      if(mb) mb.textContent = playBtnText(t, inProgress);
     });
   }, 1000);
 }
 
+let playActiveTab = 'cups';
+function playBtnText(t, inProgress){
+  if(inProgress) return 'ТУРНИР В ПРОЦЕССЕ';
+  if(t.scheduled){
+    const { next } = getLeagueSessions(t);
+    if(leagueReg(t).sessionId === leagueSessionId(next)) return 'ВЫ ЗАРЕГИСТРИРОВАНЫ';
+  }
+  return 'ПОДРОБНЕЕ';
+}
+function playTabOf(t){
+  if(t.scheduled) return 'leagues';
+  if(t.type === 'group') return 'tournaments';
+  return 'cups';
+}
+function switchPlayTab(tab){
+  playActiveTab = tab;
+  renderTournaments();
+}
+
 function renderTournaments(){
+  document.querySelectorAll('.team-tab-btn[data-play-tab]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.playTab === playActiveTab);
+  });
   checkLeagueRegistrationEligibility();
   const power = calcClubPower(state.players);
   const mainCount = state.players.filter(p=>p.status==='main').length;
   const squadFull = mainCount >= MAIN_SQUAD_SIZE;
   const list = document.getElementById('tournament-list');
 
-  list.innerHTML = TOURNAMENTS.map(t=>{
+  list.innerHTML = TOURNAMENTS.filter(t=> playTabOf(t) === playActiveTab).map(t=>{
     const cup = state.cups[t.id];
     const inProgress = !!(cup && !cup.finished);
     const range = tournamentRange(t, power);
     const eligible = power >= range.min && power <= range.max;
-    let statusText;
-    if(t.scheduled) statusText = leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible, range });
-    else if(inProgress) statusText = 'Турнир в процессе';
-    else if(!squadFull) statusText = `Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`;
-    else if(eligible) statusText = `Сила клуба ${fmt(range.min)}–${fmt(range.max)}`;
-    else statusText = `Нужна сила клуба ${fmt(range.min)}–${fmt(range.max)}`;
+    const statusLine = t.scheduled
+      ? `<div class="tournament-status">${leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible, range })}</div>`
+      : '';
 
     return `
-      <div class="tournament-card" data-cup="${t.id}">
+      <div class="tournament-card play-card" data-cup="${t.id}">
         ${tournamentIconHtml(t)}
-        <div class="tournament-info">
-          <div class="tournament-name">${t.title}</div>
-          <div class="tournament-status">${statusText}</div>
-        </div>
-        <div class="tournament-arrow">›</div>
+        <div class="tournament-name">${t.title}</div>
+        <div class="play-power"><img src="${IMG.sila}" class="img-icon" alt=""> ${fmt(range.min)}–${fmt(range.max)}</div>
+        ${statusLine}
+        <button class="play-more-btn">${playBtnText(t, inProgress)}</button>
       </div>`;
   }).join('');
 

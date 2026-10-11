@@ -106,8 +106,13 @@
 
     <!-- ИГРАТЬ / ТУРНИРЫ -->
     <section id="view-play" class="view">
-      <h2 class="view-title">Турниры</h2>
-      <div id="tournament-list" class="tournament-list"></div>
+      <h2 class="view-title">Игра</h2>
+      <div class="team-tabs">
+        <button class="team-tab-btn active" data-play-tab="cups">Кубки</button>
+        <button class="team-tab-btn" data-play-tab="tournaments">Турниры</button>
+        <button class="team-tab-btn" data-play-tab="leagues">Лиги</button>
+      </div>
+      <div id="tournament-list" class="play-grid"></div>
     </section>
 
     <!-- КУБОК -->
