@@ -32,6 +32,8 @@ const IMG = {
   chempAmeriki: 'images/cup/chempameriki.png',
   chempAzii:  'images/cup/chempazii.png',
   chempEuroazii: 'images/cup/chempeuroazii.png',
+  chempAfrika: 'images/cup/chempafrika.png',
+  chempOkean: 'images/cup/chempokean.png',
   navManager: 'images/manager.png',
   navPlay:    'images/play.png',
   navTeam:    'images/comands.png',
@@ -52,7 +54,9 @@ const TROPHY_IMG = {
   europe:  IMG.chempEurop,
   america: IMG.chempAmeriki,
   asia:    IMG.chempAzii,
-  eurasia: IMG.chempEuroazii
+  eurasia: IMG.chempEuroazii,
+  africa:  IMG.chempAfrika,
+  oceania: IMG.chempOkean
 };
 /* ============================================================
    ИНВЕНТАРЬ — усиления «Мотивация» (+% силы на один следующий матч)
@@ -415,6 +419,70 @@ const TOURNAMENTS = [
     cupWinCoins: 60000
   },
   {
+    id:'africa',
+    title:'ЧЕМПИОНАТ АФРИКИ',
+    icon:'🦁',
+    type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
+    min:5501, max:6600,
+    groupsCount:64,
+    teamsPerGroup:10,
+    teamNames:['MoscowBear','IstanbulBosp','AnkaraAnatol','Novosibirsk','Yekaterinbur','Vladivostok','KyivDnipro','MinskZubrEli','WarsawEagle','BucharestCar','AthensAcropo','CairoSphinx','AlexandriaNi','CasablancaAt','TunisCarthag','AlgiersKasba','TripoliOasis','NicosiaCypru','VallettaMalt','ReykjavikGey','HelsinkiNort','RigaAmber','VilniusHill','TallinnSpire','ChisinauVine','SarajevoBrid','SkopjeVardar','PodgoricaCoa','LjubljanaAlp','BratislavaCa','ViennaRing','ZurichPeak','GenevaLake','BrusselsGran','LuxembourgFo','MonacoRivier','AndorraPeak','SanMarinoTow','VaticanDome','LisbonCoast','MadridCentra','BarcelonaSea','MilanDuomo','NaplesBay','PalermoSun','BernAlpine','MunichBeer','FrankfurtBan','HamburgPort','CopenhagenSp','StockholmIsl','OsloFjordEli','GothenburgHa','KrakowDragon','GdanskAmber','WroclawBridg','SofiaVitosha','BelgradeRive','ZagrebCathed','BudapestBath','Thessaloniki','RotterdamPor','AmsterdamCan','DublinClover'],
+    groupStageReward: { coins:1900, power:1, xp:312 },
+    groupWinBonus: { coins:2500, power:4, xp:750 },
+    // плей-офф на вылет (64 команды): 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:3750, power:6, xp:750 },    // 1/32 финала
+      { coins:6250, power:10, xp:1000 },    // 1/16 финала
+      { coins:9400, power:12, xp:1250 },  // 1/8 финала
+      { coins:12500, power:15, xp:1900 }, // Четвертьфинал
+      { coins:15600, power:19, xp:2500 }, // Полуфинал
+      { coins:25000, power:31, xp:3750 }  // Финал
+    ],
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:25000, power:31, xp:3750 }, // 1-е место
+      { coins:20000, power:25, xp:3000 }, // 2-е место
+      { coins:15600, power:19, xp:2250 }, // 3-е место
+      { coins:11250,  power:14, xp:1600 }, // 4-е место
+      { coins:7500,  power:10,  xp:1125  }, // 5-е место
+      { coins:5000,  power:6,  xp:625  }  // 6-е место
+    ],
+    cupWinCoins: 75000
+  },
+  {
+    id:'oceania',
+    title:'ЧЕМПИОНАТ ОКЕАНИИ',
+    icon:'🌴',
+    type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
+    min:6601, max:7701,
+    groupsCount:64,
+    teamsPerGroup:10,
+    teamNames:['MoscowBear','IstanbulBosp','AnkaraAnatol','Novosibirsk','Yekaterinbur','Vladivostok','KyivDnipro','MinskZubrEli','WarsawEagle','BucharestCar','AthensAcropo','CairoSphinx','AlexandriaNi','CasablancaAt','TunisCarthag','AlgiersKasba','TripoliOasis','NicosiaCypru','VallettaMalt','ReykjavikGey','HelsinkiNort','RigaAmber','VilniusHill','TallinnSpire','ChisinauVine','SarajevoBrid','SkopjeVardar','PodgoricaCoa','LjubljanaAlp','BratislavaCa','ViennaRing','ZurichPeak','GenevaLake','BrusselsGran','LuxembourgFo','MonacoRivier','AndorraPeak','SanMarinoTow','VaticanDome','LisbonCoast','MadridCentra','BarcelonaSea','MilanDuomo','NaplesBay','PalermoSun','BernAlpine','MunichBeer','FrankfurtBan','HamburgPort','CopenhagenSp','StockholmIsl','OsloFjordEli','GothenburgHa','KrakowDragon','GdanskAmber','WroclawBridg','SofiaVitosha','BelgradeRive','ZagrebCathed','BudapestBath','Thessaloniki','RotterdamPor','AmsterdamCan','DublinClover'],
+    groupStageReward: { coins:2250, power:2, xp:375 },
+    groupWinBonus: { coins:3000, power:4, xp:900 },
+    // плей-офф на вылет (64 команды): 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:4500, power:8, xp:900 },    // 1/32 финала
+      { coins:7500, power:12, xp:1200 },    // 1/16 финала
+      { coins:11250, power:15, xp:1500 },  // 1/8 финала
+      { coins:15000, power:18, xp:2250 }, // Четвертьфинал
+      { coins:18750, power:22, xp:3000 }, // Полуфинал
+      { coins:30000, power:38, xp:4500 }  // Финал
+    ],
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:30000, power:38, xp:4500 }, // 1-е место
+      { coins:24000, power:30, xp:3600 }, // 2-е место
+      { coins:18750, power:22, xp:2700 }, // 3-е место
+      { coins:13500,  power:16, xp:1950 }, // 4-е место
+      { coins:9000,  power:12,  xp:1350  }, // 5-е место
+      { coins:6000,  power:8,  xp:750  }  // 6-е место
+    ],
+    cupWinCoins: 90000
+  },
+  {
     id:'bigleague',
     title:'БОЛЬШАЯ ЛИГА',
     icon:'💎',
@@ -507,7 +575,7 @@ function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
    тут же на его месте открылся следующий, посложнее
    ============================================================ */
 const CLASSIC_CUP_IDS = ['novice','jamaica','france','usa','belarus'];
-const CHAMPIONSHIP_IDS = ['europe','america','asia','eurasia'];
+const CHAMPIONSHIP_IDS = ['europe','america','asia','eurasia','africa','oceania'];
 
 function anyCupWon(s){
   return CLASSIC_CUP_IDS.some(id => ((s.taskStats?.cupWins?.[id]) || 0) > 0);

@@ -122,8 +122,8 @@ input {
 }
 
 .coin-buy-img {
-  width: 30px;
-  height: 30px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   display: block;
   margin: 0 auto;
