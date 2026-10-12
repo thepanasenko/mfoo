@@ -1894,8 +1894,8 @@ function renderBankShop(){
     <div class="bank-card-head">
       <img src="${IMG.inventory}" class="bank-card-img" alt="Инвентарь">
       <div>
-        <div class="bank-card-title">Мотивация</div>
-        <div class="bank-card-sub">+% силы клуба на следующий матч</div>
+        <div class="bank-card-title">Инвентарь</div>
+        <div class="bank-card-sub">Увеличивает шанс на победу</div>
       </div>
     </div>
     <div class="bank-shop-list">
