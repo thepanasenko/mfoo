@@ -2883,6 +2883,7 @@ function renderManager(){
         <div class="mgr-stat losses"><div class="mgr-stat-value">${s.losses}</div><div class="mgr-stat-label">ПОРАЖЕНИЯ</div></div>
         <div class="mgr-stat total"><div class="mgr-stat-value">${s.matchesPlayed}</div><div class="mgr-stat-label">ВСЕГО МАТЧЕЙ</div></div>
         <div class="mgr-stat xp"><div class="mgr-stat-value">${state.xp.toLocaleString('ru-RU')}</div><div class="mgr-stat-label">ВСЕГО ОПЫТА</div></div>
+        <div class="mgr-stat health"><div class="mgr-stat-value">100</div><div class="mgr-stat-label">ЗДОРОВЬЕ</div></div>
       </div>
     </div>
     <button id="btn-open-tasks" class="btn-tasks">
@@ -2996,12 +2997,15 @@ function startLeagueListTimer(){
       const inProgress = !!(cup && !cup.finished);
       statusEl.innerHTML = leagueListStatusText(t, { inProgress, squadFull, mainCount, eligible, range });
       const mb = statusEl.parentElement.querySelector('.play-more-btn');
-      if(mb) mb.textContent = playBtnText(t, inProgress);
+      if(mb){ mb.textContent = playBtnText(t, inProgress); mb.classList.toggle('btn-disabled-soft', playBtnSoft(t, inProgress)); }
     });
   }, 1000);
 }
 
 let playActiveTab = 'cups';
+function playBtnSoft(t, inProgress){
+  return !!inProgress || playBtnText(t, false) === 'ВЫ ЗАРЕГИСТРИРОВАНЫ';
+}
 function playBtnText(t, inProgress){
   if(inProgress) return 'ТУРНИР В ПРОЦЕССЕ';
   if(t.scheduled){
@@ -3045,7 +3049,7 @@ function renderTournaments(){
         <div class="tournament-name">${t.title}</div>
         <div class="play-power"><img src="${IMG.sila}" class="img-icon" alt=""> ${fmt(range.min)}–${fmt(range.max)}</div>
         ${statusLine}
-        <button class="play-more-btn">${playBtnText(t, inProgress)}</button>
+        <button class="play-more-btn ${playBtnSoft(t, inProgress) ? 'btn-disabled-soft' : ''}">${playBtnText(t, inProgress)}</button>
       </div>`;
   }).join('');
 

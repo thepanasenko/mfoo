@@ -1698,3 +1698,12 @@ input{ font-family: inherit; }
   text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
 }
 .play-more-btn:active{ transform: translateY(3px); box-shadow:0 1px 0 #0c5c2b; }
+
+.play-more-btn.btn-disabled-soft{
+  background: rgb(0 0 0 / 50%); border: 2px solid #082b1a; box-shadow: inset 15px 15px 30px rgba(0, 0, 0, 0.5), inset -15px -15px 30px rgba(0, 0, 0, 0.5); 
+      color: var(--text-dim);
+      cursor:default;
+}
+.play-more-btn.btn-disabled-soft:active{ transform:none; box-shadow:0 4px 0 #0a1a13; }
+
+.mgr-stat.health .mgr-stat-value{ color: var(--green); }
