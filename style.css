@@ -1693,7 +1693,7 @@ input{ font-family: inherit; }
 .play-more-btn{
   width:100%; margin-top:2px; border:none; cursor:pointer;
   background: linear-gradient(180deg, var(--green) 0%, var(--green-dark) 100%);
-  border-radius:8px; padding:8px 4px; font-weight:900; font-size:10.5px; color:#fff;
+  border-radius:8px; padding:12px 4px; font-weight:900; font-size:10.5px; color:#fff;
   box-shadow:0 4px 0 #0c5c2b;
   text-shadow: -1px -1px 0 rgba(0,0,0,.55), 1px -1px 0 rgba(0,0,0,.55), -1px 1px 0 rgba(0,0,0,.55), 1px 1px 0 rgba(0,0,0,.55);
 }
