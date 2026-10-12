@@ -764,6 +764,40 @@ const TASK_CHAINS = [
     ]
   },
   {
+    id:'boosts',
+    icon:`<img src="${IMG.boost}" class="task-icon-img" alt="Буст">`,
+    tiers:[
+      {
+        title:'Используйте «Мотивация 25» в матче',
+        reward:{ xp:10000, items:{ motivation50:2 } },
+        target:1,
+        progress:(s)=> Math.min((s.taskStats?.boostsUsed?.motivation25) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.boostsUsed?.motivation25) || 0) >= 1
+      },
+      {
+        title:'Используйте «Мотивация 50» в матче',
+        reward:{ xp:20000, items:{ motivation75:2 } },
+        target:1,
+        progress:(s)=> Math.min((s.taskStats?.boostsUsed?.motivation50) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.boostsUsed?.motivation50) || 0) >= 1
+      },
+      {
+        title:'Используйте «Мотивация 75» в матче',
+        reward:{ xp:50000, items:{ motivation100:3 } },
+        target:1,
+        progress:(s)=> Math.min((s.taskStats?.boostsUsed?.motivation75) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.boostsUsed?.motivation75) || 0) >= 1
+      },
+      {
+        title:'Используйте «Мотивация 100» в матче',
+        reward:{ xp:100000, items:{ motivation100:5 }, avatar:6 },
+        target:1,
+        progress:(s)=> Math.min((s.taskStats?.boostsUsed?.motivation100) || 0, 1),
+        isComplete:(s)=> ((s.taskStats?.boostsUsed?.motivation100) || 0) >= 1
+      }
+    ]
+  },
+  {
     id:'formations',
     icon:'📋',
     tiers:[
@@ -810,6 +844,7 @@ function taskRewardText(reward){
   if(reward.budget) parts.push(`+${fmt(reward.budget)} евро`);
   if(reward.xp) parts.push(`+${fmt(reward.xp)} опыта`);
   if(reward.slots) parts.push(`+${reward.slots} слот для тренировок`);
+  if(reward.items) Object.keys(reward.items).forEach(k=>{ const it = inventoryItemByKey(k); if(it) parts.push(`${reward.items[k]}× ${it.name}`); });
   if(reward.avatar !== undefined) parts.push('новая аватарка');
   return parts.join(' · ');
 }
@@ -820,6 +855,7 @@ function taskRewardHtml(reward){
   if(reward.budget) parts.push(`<img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${fmt(reward.budget)}`);
   if(reward.xp) parts.push(`<img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(reward.xp)}`);
   if(reward.slots) parts.push(`<img src="${IMG.training}" class="img-icon" alt="Слот тренировки"> +${reward.slots} слот`);
+  if(reward.items) Object.keys(reward.items).forEach(k=>{ const it = inventoryItemByKey(k); if(it) parts.push(`<img src="${IMG.boost}" class="img-icon" alt=""> ${reward.items[k]}× ${it.name}`); });
   if(reward.avatar !== undefined) parts.push(`<img src="${managerAvatarSrc(reward.avatar)}" class="img-icon" alt="Аватар"> аватарка`);
   return parts.join(' &nbsp;·&nbsp; ');
 }
@@ -836,6 +872,12 @@ function claimTask(chainId){
   if(tier.reward.slots){
     const current = state.trainingSlotsMax || 3;
     state.trainingSlotsMax = Math.min(SLOT_UPGRADE_MAX, current + tier.reward.slots);
+  }
+  if(tier.reward.items){
+    if(!state.inventory) state.inventory = { items:{}, activeBoost:null };
+    Object.keys(tier.reward.items).forEach(k=>{
+      state.inventory.items[k] = (state.inventory.items[k] || 0) + tier.reward.items[k];
+    });
   }
   if(tier.reward.avatar !== undefined) unlockAvatar(tier.reward.avatar);
   if(!state.taskChainTier) state.taskChainTier = {};
@@ -1462,6 +1504,7 @@ function migrateState(s){
   if(!s.taskStats.cupPlays) s.taskStats.cupPlays = {};
   if(!s.taskStats.cupWins) s.taskStats.cupWins = {};
   if(!Array.isArray(s.taskStats.formationsPlayed)) s.taskStats.formationsPlayed = [];
+  if(!s.taskStats.boostsUsed) s.taskStats.boostsUsed = {};
   if(!s.taskChainTier) s.taskChainTier = {};
   if(!s.inventory) s.inventory = { items:{}, activeBoost:null };
   if(!s.inventory.items) s.inventory.items = {};
@@ -3973,6 +4016,9 @@ function playCurrentRound(cupId) {
       if(actualMatch.teamA.isPlayer) powerA = Math.round(powerA * mult);
       else if(actualMatch.teamB.isPlayer) powerB = Math.round(powerB * mult);
       if(actualMatch.teamA.isPlayer || actualMatch.teamB.isPlayer){
+        if(!state.taskStats) state.taskStats = { cupPlays:{}, cupWins:{} };
+        if(!state.taskStats.boostsUsed) state.taskStats.boostsUsed = {};
+        state.taskStats.boostsUsed[activeBoost.key] = (state.taskStats.boostsUsed[activeBoost.key] || 0) + 1;
         state.inventory.activeBoost = null; // потрачен на этот матч
       }
     }
