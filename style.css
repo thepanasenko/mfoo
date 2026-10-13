@@ -3610,3 +3610,4 @@ input {
   transform: none;
   box-shadow: 0 4px 0 #0a1a13;
 }
+.pm-health-value{ font-family: var(--ff-display); font-size:26px; color:#7fd3ff; }

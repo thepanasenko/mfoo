@@ -65,8 +65,13 @@ const INVENTORY_CATALOG = [
   { key:'motivation25', img:'images/bust1.png',  name:'Мотивация 25',  percent:25,  price:{ currency:'coins',  amount:25000  } },
   { key:'motivation50', img:'images/bust2.png',  name:'Мотивация 50',  percent:50,  price:{ currency:'budget', amount:50000  } },
   { key:'motivation75', img:'images/bust3.png',  name:'Мотивация 75',  percent:75,  price:{ currency:'budget', amount:150000 } },
-  { key:'motivation100', img:'images/bust4.png', name:'Мотивация 100', percent:100, price:{ currency:'budget', amount:250000 } }
+  { key:'motivation100', img:'images/bust4.png', name:'Мотивация 100', percent:100, price:{ currency:'budget', amount:250000 } },
+  { key:'medkit20', img:'images/apteka.png',  name:'Аптечка 20', heal:20, price:{ currency:'coins', amount:30000 } },
+  { key:'medkit40', img:'images/bapteka.png', name:'Аптечка 40', heal:40, price:{ currency:'coins', amount:80000 } }
 ];
+function inventoryItemDesc(item){
+  return item.heal ? `+${item.heal} здоровья всем игрокам` : `+${item.percent}% силы клуба`;
+}
 function inventoryItemByKey(key){ return INVENTORY_CATALOG.find(i=>i.key===key); }
 
 function trophyIconHtml(tournament){
@@ -1062,6 +1067,21 @@ function useInventoryItem(key){
   if(!state.inventory) state.inventory = { items:{}, activeBoost:null };
   const count = state.inventory.items[key] || 0;
   if(count <= 0) return;
+  if(item.heal){
+    healthRecoveryTick();
+    if(!state.players.some(p=>playerHealth(p) < HEALTH_MAX)){
+      showToast('У всех игроков уже полное здоровье');
+      return;
+    }
+    state.players.forEach(p=>{ p.health = Math.min(HEALTH_MAX, playerHealth(p) + item.heal); });
+    state.inventory.items[key] = count - 1;
+    state.healthTickAt = Date.now();
+    save();
+    updateHealthUi();
+    renderInventoryView();
+    showToast(`💊 «${item.name}»: здоровье игроков +${item.heal}`);
+    return;
+  }
   if(state.inventory.activeBoost){
     showToast('⚠️ Сначала отмените активный буст — можно применить только один за раз');
     return;
@@ -1097,7 +1117,7 @@ function inventoryRowHtml(item){
         <button class="inv-cancel-btn" data-cancel-boost="1">ОТМЕНИТЬ</button>
       </div>`;
   } else if(count > 0){
-    statusHtml = `<button class="inv-use-btn" data-use-item="${item.key}" ${boost ? 'disabled' : ''}>ПРИМЕНИТЬ</button>`;
+    statusHtml = `<button class="inv-use-btn" data-use-item="${item.key}" ${(boost && !item.heal) ? 'disabled' : ''}>ПРИМЕНИТЬ</button>`;
   } else {
     statusHtml = `<div class="inv-empty-label">Нет в наличии</div>`;
   }
@@ -1107,7 +1127,7 @@ function inventoryRowHtml(item){
       <div class="inv-count">×${count}</div>
       <img src="${item.img || IMG.boost}" class="inv-icon-img" alt="${item.name}">
       <div class="inv-title">${item.name}</div>
-      <div class="inv-sub">+${item.percent}% силы клуба</div>
+      <div class="inv-sub">${inventoryItemDesc(item)}</div>
       ${statusHtml}
     </div>`;
 }
@@ -1434,6 +1454,66 @@ function generateSquad(){
   return players;
 }
 
+
+/* ============================================================
+   ЗДОРОВЬЕ ИГРОКОВ
+   ============================================================ */
+const HEALTH_MAX = 100;
+const HEALTH_RECOVER_MS = 5000; // +1 здоровья каждые 5 секунд
+function playerHealth(p){
+  return (p && typeof p.health === 'number') ? Math.max(0, Math.min(HEALTH_MAX, p.health)) : HEALTH_MAX;
+}
+function avgMainHealth(players){
+  const main = (players || []).filter(p=>p.status==='main');
+  if(!main.length) return HEALTH_MAX;
+  return Math.round(main.reduce((s,p)=> s + playerHealth(p), 0) / main.length);
+}
+/* списание здоровья основному составу после матча менеджера */
+function applyMatchFatigue(result){
+  healthRecoveryTick();
+  state.players.forEach(p=>{
+    if(p.status !== 'main') return;
+    let loss;
+    if(result === 'win') loss = rnd(3, 6);
+    else if(result === 'draw') loss = 2;
+    else loss = rnd(2, 4);
+    p.health = Math.max(0, playerHealth(p) - loss);
+  });
+  state.healthTickAt = Date.now();
+  updateHealthUi();
+}
+function healthRecoveryTick(){
+  if(!state || !Array.isArray(state.players)) return;
+  const now = Date.now();
+  if(!state.healthTickAt){ state.healthTickAt = now; return; }
+  const units = Math.floor((now - state.healthTickAt) / HEALTH_RECOVER_MS);
+  if(units <= 0) return;
+  state.healthTickAt += units * HEALTH_RECOVER_MS;
+  let changed = false;
+  state.players.forEach(p=>{
+    const h = playerHealth(p);
+    if(h < HEALTH_MAX){ p.health = Math.min(HEALTH_MAX, h + units); changed = true; }
+  });
+  if(changed){ save(); updateHealthUi(); }
+}
+let healthModalPlayerId = null;
+function updateHealthUi(){
+  const mg = document.getElementById('mgr-health-val');
+  if(mg && state) mg.textContent = avgMainHealth(state.players);
+  const pm = document.getElementById('pm-health-val');
+  const modal = document.getElementById('player-modal');
+  if(pm && healthModalPlayerId && modal && !modal.classList.contains('hidden')){
+    const p = state.players.find(x=>x.id===healthModalPlayerId);
+    if(p) pm.textContent = playerHealth(p);
+  }
+}
+
+/* здоровье бота: случайное 60–100, обновляется после каждого его матча */
+function botHealth(team){
+  if(typeof team.health !== 'number') team.health = rnd(60, 100);
+  return team.health;
+}
+
 function calcClubPower(players){
   return players.filter(p=>p.status==='main').reduce((sum,p)=>sum+p.power,0);
 }
@@ -1542,7 +1622,7 @@ function migrateState(s){
   if(!Array.isArray(s.unlockedAvatars)) s.unlockedAvatars = [];
   if(!PLAYER_AVATAR_NUMS.includes(s.managerAvatar) || (LOCKED_AVATAR_NUMS.includes(s.managerAvatar) && !s.unlockedAvatars.includes(s.managerAvatar))) s.managerAvatar = 1;
   if(Array.isArray(s.players)){
-    s.players.forEach(p=>{ if(!p.avatar) p.avatar = randomAvatarNum(); });
+    s.players.forEach(p=>{ if(!p.avatar) p.avatar = randomAvatarNum(); if(typeof p.health !== 'number') p.health = HEALTH_MAX; });
   }
   if(s.transferMarket && Array.isArray(s.transferMarket.players)){
     s.transferMarket.players.forEach(p=>{ if(!p.avatar) p.avatar = randomAvatarNum(); });
@@ -1701,6 +1781,8 @@ function showApp(){
   navigate('manager');
   restoreTrainingTimers();
   startLeagueNotificationPoll();
+  healthRecoveryTick();
+  if(!window.__healthTimer) window.__healthTimer = setInterval(healthRecoveryTick, 1000);
   ensureAllCupFlowsRunning();
 }
 
@@ -1908,7 +1990,7 @@ function renderBankShop(){
             <div class="bank-shop-have">×${have}</div>
             <img src="${item.img || IMG.boost}" class="bank-shop-img" alt="${item.name}">
             <div class="bank-shop-name">${item.name}</div>
-            <div class="bank-shop-sub">+${item.percent}% силы</div>
+            <div class="bank-shop-sub">${item.heal ? '+'+item.heal+' здоровья' : '+'+item.percent+'% силы'}</div>
             <button class="bank-shop-buy ${can ? '' : 'poor'}" data-buy-item="${item.key}">${bankPriceHtml(item.price)}</button>
           </div>`;
       }).join('')}
@@ -2627,11 +2709,14 @@ function openPlayerModal(id){
     <div class="pm-pos">${posLabel(p.pos)}</div>
     <div class="pm-power-label">СИЛА ИГРОКА</div>
     <div class="pm-power-value">${fmt(p.power)}</div>
+    <div class="pm-power-label" style="margin-top:8px;">ЗДОРОВЬЕ</div>
+    <div class="pm-health-value"><span id="pm-health-val">${playerHealth(p)}</span></div>
     <div class="pm-status">Статус: ${p.status==='main' ? 'Основной состав' : 'Запасной'}</div>
     ${timeDisplay}
     ${swapButton}
     ${sellButton}
   `;
+  healthModalPlayerId = id;
   document.getElementById('player-modal').classList.remove('hidden');
 
   if(isTraining && p.trainingEndTime) {
@@ -2994,7 +3079,7 @@ function renderManager(){
         <div class="mgr-stat losses"><div class="mgr-stat-value">${s.losses}</div><div class="mgr-stat-label">ПОРАЖЕНИЯ</div></div>
         <div class="mgr-stat total"><div class="mgr-stat-value">${s.matchesPlayed}</div><div class="mgr-stat-label">ВСЕГО МАТЧЕЙ</div></div>
         <div class="mgr-stat xp"><div class="mgr-stat-value">${state.xp.toLocaleString('ru-RU')}</div><div class="mgr-stat-label">ВСЕГО ОПЫТА</div></div>
-        <div class="mgr-stat health"><div class="mgr-stat-value">100</div><div class="mgr-stat-label">ЗДОРОВЬЕ</div></div>
+        <div class="mgr-stat health"><div class="mgr-stat-value" id="mgr-health-val">${avgMainHealth(state.players)}</div><div class="mgr-stat-label">ЗДОРОВЬЕ</div></div>
       </div>
     </div>
     <button id="btn-open-tasks" class="btn-tasks">
@@ -4078,6 +4163,14 @@ function playCurrentRound(cupId) {
 
     // инвентарь: буст «Мотивация» действует ровно на один ближайший матч игрока
     let powerA = actualMatch.teamA.power, powerB = actualMatch.teamB.power;
+    // здоровье: сила игрока считается пропорционально среднему здоровью основы (до схемы и бустов)
+    healthRecoveryTick();
+    const healthMult = avgMainHealth(state.players) / HEALTH_MAX;
+    if(actualMatch.teamA.isPlayer) powerA = Math.round(powerA * healthMult);
+    else if(actualMatch.teamB.isPlayer) powerB = Math.round(powerB * healthMult);
+    // у ботов общее здоровье случайное 60–100%
+    if(!actualMatch.teamA.isPlayer){ powerA = Math.round(powerA * botHealth(actualMatch.teamA) / 100); }
+    if(!actualMatch.teamB.isPlayer){ powerB = Math.round(powerB * botHealth(actualMatch.teamB) / 100); }
     const activeBoost = state.inventory && state.inventory.activeBoost;
     if(activeBoost){
       const mult = 1 + activeBoost.percent / 100;
@@ -4096,6 +4189,8 @@ function playCurrentRound(cupId) {
       actualMatch.teamA.formation, actualMatch.teamB.formation,
       drawsAllowed(t, cup, actualMatch.round)
     );
+    if(!actualMatch.teamA.isPlayer) actualMatch.teamA.health = rnd(60, 100);
+    if(!actualMatch.teamB.isPlayer) actualMatch.teamB.health = rnd(60, 100);
     actualMatch.scoreA = result.scoreA;
     actualMatch.scoreB = result.scoreB;
     actualMatch.draw = !!result.draw;
@@ -4111,6 +4206,7 @@ function playCurrentRound(cupId) {
       if(actualMatch.draw) state.stats.draws++;
       else if(playerWon) state.stats.wins++;
       else state.stats.losses++;
+      applyMatchFatigue(actualMatch.draw ? 'draw' : (playerWon ? 'win' : 'loss'));
 
       const playerTeam = actualMatch.teamA.isPlayer ? actualMatch.teamA : actualMatch.teamB;
       if(playerTeam && playerTeam.formation){
@@ -4647,6 +4743,10 @@ function openBotModal(team) {
           <div style="background: var(--surface-3); padding: 10px; border-radius: 8px;">
             <div style="font-size: 10px; color: var(--text-dim);">СХЕМА</div>
             <div style="font-weight: 700; font-size: 14px; color: var(--text);">${botFormation}</div>
+          </div>
+          <div style="background: var(--surface-3); padding: 10px; border-radius: 8px; grid-column: 1 / -1;">
+            <div style="font-size: 10px; color: var(--text-dim);">ЗДОРОВЬЕ</div>
+            <div style="font-weight: 700; font-size: 14px; color: #7fd3ff;">${botHealth(team)}</div>
           </div>
         </div>
         ${matchupNote}
