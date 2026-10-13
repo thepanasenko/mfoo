@@ -1806,7 +1806,8 @@ function bindGlobalEvents(){
     el.addEventListener('click', ()=> switchPlayTab(el.dataset.playTab));
   });
 
-  document.getElementById('btn-reset-game').addEventListener('click', onResetGame);
+  document.getElementById('btn-open-settings').addEventListener('click', openSettingsModal);
+  initClickSound();
 
   document.getElementById('player-modal-close').addEventListener('click', closePlayerModal);
   document.getElementById('player-modal').addEventListener('click', e=>{
@@ -1911,8 +1912,78 @@ function onRegisterConfirm(){
   showApp();
 }
 
+
+/* ============================================================
+   ЗВУК И НАСТРОЙКИ
+   ============================================================ */
+const SOUND_SRC = 'sound/sound.mp3';
+const SOUND_KEY = 'mfoot_sound_on';
+function isSoundOn(){
+  try{ return localStorage.getItem(SOUND_KEY) !== '0'; }catch(e){ return true; }
+}
+function setSoundOn(on){
+  try{ localStorage.setItem(SOUND_KEY, on ? '1' : '0'); }catch(e){}
+}
+let clickSoundBase = null;
+function playClickSound(){
+  if(!isSoundOn()) return;
+  try{
+    if(!clickSoundBase){ clickSoundBase = new Audio(SOUND_SRC); clickSoundBase.preload = 'auto'; }
+    const a = clickSoundBase.cloneNode();
+    a.volume = 0.6;
+    const pr = a.play();
+    if(pr && pr.catch) pr.catch(()=>{});
+  }catch(e){}
+}
+const CLICKABLE_SELECTOR = 'button, [data-nav], [data-cup], [data-team-tab], [data-play-tab], .tournament-card, .player-row, .player-card, .vs-side-opp, .vs-side-me, .avatar-picker-option, .kit-color-btn, .coin-buy-btn, .btn-tasks, .settings-switch, [role="button"]';
+let clickSoundReady = false;
+function initClickSound(){
+  if(clickSoundReady) return;
+  clickSoundReady = true;
+  document.addEventListener('click', e=>{
+    const el = e.target.closest && e.target.closest(CLICKABLE_SELECTOR);
+    if(!el || el.disabled) return;
+    playClickSound();
+  }, true);
+}
+
+function closeSettingsModal(){
+  const o = document.getElementById('settings-modal-overlay');
+  if(o) o.remove();
+}
+function openSettingsModal(){
+  closeSettingsModal();
+  const overlay = document.createElement('div');
+  overlay.id = 'settings-modal-overlay';
+  overlay.className = 'modal-overlay';
+  const on = isSoundOn();
+  overlay.innerHTML = `
+    <div class="modal-card settings-modal-card">
+      <button class="modal-close" id="settings-modal-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
+      <div class="tp-title">⚙️ Настройки</div>
+      <div class="settings-row">
+        <div class="settings-label">Звук</div>
+        <button class="settings-switch ${on ? 'on' : ''}" id="settings-sound-switch" aria-pressed="${on}"><span class="settings-knob"></span></button>
+      </div>
+      <button id="settings-reset-btn" class="btn-reset">Сбросить игру</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e=>{ if(e.target === overlay) closeSettingsModal(); });
+  overlay.querySelector('#settings-modal-close').addEventListener('click', closeSettingsModal);
+  const sw = overlay.querySelector('#settings-sound-switch');
+  sw.addEventListener('click', ()=>{
+    const next = !isSoundOn();
+    setSoundOn(next);
+    sw.classList.toggle('on', next);
+    sw.setAttribute('aria-pressed', String(next));
+    if(next) playClickSound();
+  });
+  overlay.querySelector('#settings-reset-btn').addEventListener('click', onResetGame);
+}
+
 function onResetGame(){
   showConfirm('Весь прогресс будет удалён без возможности восстановления.', ()=>{
+    closeSettingsModal();
     localStorage.removeItem(SAVE_KEY);
     Object.keys(cupTimers).forEach(cid => stopCupTimer(cid));
     cupTimers = {};
