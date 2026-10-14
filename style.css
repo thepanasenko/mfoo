@@ -2960,7 +2960,7 @@ input {
   gap: 8px;
   background: rgb(0 0 0 / 50%);
   border: 2px solid #082b1a;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 10px 12px;
 }
 
@@ -3039,6 +3039,7 @@ input {
   font-weight: 800;
   font-size: 13px;
   letter-spacing: .5px;
+  box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
   transition: transform .15s var(--ease-bounce), border-color .15s ease, color .15s ease, background .15s ease;
 }
 
@@ -3049,7 +3050,7 @@ input {
 .formation-btn.active {
   color: #e39500;
   border-color: #e39500;
-  background: rgba(34, 197, 94, .12);
+  background: rgba(197, 145, 34, 0.12);
   box-shadow: 0 0 0 1px #e39500;
 }
 
@@ -3061,7 +3062,7 @@ input {
   position: relative;
   width: 100%;
   aspect-ratio: 3 / 4;
-  border-radius: 16px;
+  border-radius: 20px;
   background-image: url('images/pole.png');
   background-size: cover;
   background-position: center;
