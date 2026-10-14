@@ -17,6 +17,9 @@ const IMG = {
   tasks:      'images/zadanie.png',
   inventory:  'images/inventar.png',
   boost:      'images/bust1.png',
+  shema:      'images/shema.png',
+  settings:   'images/settings.png',
+  zalslava:   'images/zalslava.png',
   check:      'images/galocka.png',
   cross:      'images/krest.png',
   plus:       'images/plus.png',
@@ -838,41 +841,55 @@ const TASK_CHAINS = [
   },
   {
     id:'boosts',
-    icon:`<img src="${IMG.boost}" class="task-icon-img" alt="Буст">`,
+    icon:`<img src="${IMG.inventory}" class="task-icon-img" alt="Инвентарь">`,
     tiers:[
       {
-        title:'Используйте «Мотивация 25» в матче',
+        title:'Используйте «Мотивация 25»',
         reward:{ xp:10000, items:{ motivation50:2 } },
         target:1,
         progress:(s)=> Math.min((s.taskStats?.boostsUsed?.motivation25) || 0, 1),
         isComplete:(s)=> ((s.taskStats?.boostsUsed?.motivation25) || 0) >= 1
       },
       {
-        title:'Используйте «Мотивация 50» в матче',
+        title:'Используйте «Мотивация 50»',
         reward:{ xp:20000, items:{ motivation75:2 } },
         target:1,
         progress:(s)=> Math.min((s.taskStats?.boostsUsed?.motivation50) || 0, 1),
         isComplete:(s)=> ((s.taskStats?.boostsUsed?.motivation50) || 0) >= 1
       },
       {
-        title:'Используйте «Мотивация 75» в матче',
+        title:'Используйте «Мотивация 75»',
         reward:{ xp:50000, items:{ motivation100:3 } },
         target:1,
         progress:(s)=> Math.min((s.taskStats?.boostsUsed?.motivation75) || 0, 1),
         isComplete:(s)=> ((s.taskStats?.boostsUsed?.motivation75) || 0) >= 1
       },
       {
-        title:'Используйте «Мотивация 100» в матче',
+        title:'Используйте «Мотивация 100»',
         reward:{ xp:100000, items:{ motivation100:5 }, avatar:6 },
         target:1,
         progress:(s)=> Math.min((s.taskStats?.boostsUsed?.motivation100) || 0, 1),
         isComplete:(s)=> ((s.taskStats?.boostsUsed?.motivation100) || 0) >= 1
+      },
+      {
+        title:'Используйте «Аптечка 20»',
+        reward:{ coins:25000, items:{ medkit20:5 } },
+        target:20,
+        progress:(s)=> Math.min((s.taskStats?.boostsUsed?.medkit20) || 0, 20),
+        isComplete:(s)=> ((s.taskStats?.boostsUsed?.medkit20) || 0) >= 20
+      },
+      {
+        title:'Используйте «Аптечка 40»',
+        reward:{ budget:50000, items:{ medkit40:25 } },
+        target:50,
+        progress:(s)=> Math.min((s.taskStats?.boostsUsed?.medkit40) || 0, 50),
+        isComplete:(s)=> ((s.taskStats?.boostsUsed?.medkit40) || 0) >= 50
       }
     ]
   },
   {
     id:'formations',
-    icon:'📋',
+    icon:`<img src="${IMG.shema}" class="task-icon-img" alt="Схемы">`,
     tiers:[
       {
         title:'Сыграйте матч на всех 3 схемах',
@@ -928,7 +945,7 @@ function taskRewardHtml(reward){
   if(reward.budget) parts.push(`<img src="${IMG.cash}" class="img-icon" alt="Бюджет"> +${fmt(reward.budget)}`);
   if(reward.xp) parts.push(`<img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(reward.xp)}`);
   if(reward.slots) parts.push(`<img src="${IMG.training}" class="img-icon" alt="Слот тренировки"> +${reward.slots} слот`);
-  if(reward.items) Object.keys(reward.items).forEach(k=>{ const it = inventoryItemByKey(k); if(it) parts.push(`<img src="${IMG.boost}" class="img-icon" alt=""> ${reward.items[k]}× ${it.name}`); });
+  if(reward.items) Object.keys(reward.items).forEach(k=>{ const it = inventoryItemByKey(k); if(it) parts.push(`<img src="${it.img || IMG.boost}" class="img-icon" alt=""> ${reward.items[k]}× ${it.name}`); });
   if(reward.avatar !== undefined) parts.push(`<img src="${managerAvatarSrc(reward.avatar)}" class="img-icon" alt="Аватар"> аватарка`);
   return parts.join(' &nbsp;·&nbsp; ');
 }
@@ -1075,6 +1092,9 @@ function useInventoryItem(key){
     }
     state.players.forEach(p=>{ p.health = Math.min(HEALTH_MAX, playerHealth(p) + item.heal); });
     state.inventory.items[key] = count - 1;
+    if(!state.taskStats) state.taskStats = { cupPlays:{}, cupWins:{} };
+    if(!state.taskStats.boostsUsed) state.taskStats.boostsUsed = {};
+    state.taskStats.boostsUsed[key] = (state.taskStats.boostsUsed[key] || 0) + 1;
     state.healthTickAt = Date.now();
     save();
     updateHealthUi();
@@ -1158,6 +1178,25 @@ function openInventoryModal(){
 function openInventoryFromCup(){
   inventoryReturn = { name:'cup', cupId: currentCupId };
   navigate('inventory');
+}
+
+function openHallView(){ navigate('hall'); }
+
+function renderHallView(){
+  const box = document.getElementById('hall-list');
+  if(!box || !state) return;
+  const counts = {};
+  state.trophies.forEach(t=>{
+    if(!counts[t.name]) counts[t.name] = { count:0, tournament: TOURNAMENTS.find(x=>x.title===t.name) || null };
+    counts[t.name].count++;
+  });
+  const names = Object.keys(counts);
+  box.innerHTML = names.length
+    ? `<div class="mgr-trophy-list">` + names.map(name=>{
+        const d = counts[name];
+        return `<div class="mgr-trophy-item">${trophyIconHtml(d.tournament)}<span class="mgr-trophy-name">${name}</span><span class="mgr-trophy-count">×${d.count}</span></div>`;
+      }).join('') + `</div>`
+    : `<div class="mgr-empty">Пока нет завоёванных кубков</div>`;
 }
 
 function closeInventoryView(){
@@ -1806,7 +1845,6 @@ function bindGlobalEvents(){
     el.addEventListener('click', ()=> switchPlayTab(el.dataset.playTab));
   });
 
-  document.getElementById('btn-open-settings').addEventListener('click', openSettingsModal);
   initClickSound();
 
   document.getElementById('player-modal-close').addEventListener('click', closePlayerModal);
@@ -1816,6 +1854,7 @@ function bindGlobalEvents(){
 
   document.getElementById('btn-cup-back').addEventListener('click', ()=> navigate('play'));
   document.getElementById('btn-inventory-back').addEventListener('click', closeInventoryView);
+  document.getElementById('btn-hall-back').addEventListener('click', ()=> navigate('manager'));
   document.getElementById('btn-cup-start').addEventListener('click', onCupStart);
   document.getElementById('btn-play-now').addEventListener('click', onPlayNow);
   document.getElementById('btn-leave-cup').addEventListener('click', onLeaveCup);
@@ -2003,11 +2042,11 @@ function navigate(name, cupId){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
 
-  const map = { manager:'view-manager', play:'view-play', team:'view-team', transfer:'view-transfer', bank:'view-bank', cup:'view-cup', inventory:'view-inventory' };
+  const map = { manager:'view-manager', play:'view-play', team:'view-team', transfer:'view-transfer', bank:'view-bank', cup:'view-cup', inventory:'view-inventory', hall:'view-hall' };
   const viewEl = document.getElementById(map[name]);
   if(viewEl) viewEl.classList.add('active');
 
-  const navKey = (name === 'cup') ? 'play' : (name === 'inventory') ? (inventoryReturn.name === 'cup' ? 'play' : 'manager') : name;
+  const navKey = (name === 'cup') ? 'play' : (name === 'inventory') ? (inventoryReturn.name === 'cup' ? 'play' : 'manager') : (name === 'hall') ? 'manager' : name;
   if(navKey){
     const btn = document.querySelector(`.nav-btn[data-nav="${navKey}"]`);
     if(btn) btn.classList.add('active');
@@ -2023,6 +2062,7 @@ function navigate(name, cupId){
   if(name === 'manager') renderManager();
   if(name === 'bank') renderBankShop();
   if(name === 'inventory') renderInventoryView();
+  if(name === 'hall') renderHallView();
 }
 
 /* ============================================================
@@ -3074,29 +3114,6 @@ function renderManager(){
 
   const xpPercent = isMaxLevel ? 100 : Math.min(100, Math.round((xpInCurrentLevel / xpForNextLevel) * 100));
 
-  const trophiesCount = {};
-  state.trophies.forEach(t => {
-    const key = t.name;
-    if (!trophiesCount[key]) {
-      const matchedTournament = TOURNAMENTS.find(x => x.title === t.name);
-      trophiesCount[key] = { count: 0, tournament: matchedTournament || null };
-    }
-    trophiesCount[key].count++;
-  });
-
-  const trophiesHtml = Object.keys(trophiesCount).length
-    ? Object.keys(trophiesCount).map(name => {
-        const data = trophiesCount[name];
-        const countText = `×${data.count}`;
-        return `
-          <div class="mgr-trophy-item">
-            ${trophyIconHtml(data.tournament)}
-            <span class="mgr-trophy-name">${name}</span>
-            <span class="mgr-trophy-count">${countText}</span>
-          </div>`;
-      }).join('')
-    : `<div class="mgr-empty">Пока нет завоёванных кубков</div>`;
-
   const xpToNext = isMaxLevel ? 0 : getXpForLevel(level + 1) - state.xp;
 
   document.getElementById('manager-body').innerHTML = `
@@ -3169,12 +3186,28 @@ function renderManager(){
       </span>
       <span class="btn-tasks-arrow">›</span>
     </button>
-    <h3 class="squad-heading">ЗАЛ СЛАВЫ</h3>
-    <div class="mgr-trophy-list">${trophiesHtml}</div>
+    <div class="mgr-action-row">
+      <button id="btn-open-hall" class="mgr-action-btn mgr-hall-btn">
+        <img src="${IMG.zalslava}" class="mgr-action-img" alt="Зал славы">
+        <span class="btn-tasks-text">
+          <span class="btn-tasks-title">Зал славы</span>
+          <span class="btn-tasks-sub">Трофеи: ${state.trophies.length}</span>
+        </span>
+      </button>
+      <button id="btn-open-settings" class="mgr-action-btn mgr-settings-btn">
+        <img src="${IMG.settings}" class="mgr-action-img" alt="Настройки">
+        <span class="btn-tasks-text">
+          <span class="btn-tasks-title">Настройки</span>
+          <span class="btn-tasks-sub">Звук, сброс</span>
+        </span>
+      </button>
+    </div>
   `;
 
   document.getElementById('btn-open-tasks').addEventListener('click', openTasksModal);
   document.getElementById('btn-open-inventory').addEventListener('click', openInventoryModal);
+  document.getElementById('btn-open-hall').addEventListener('click', openHallView);
+  document.getElementById('btn-open-settings').addEventListener('click', openSettingsModal);
   updateTasksBadge();
 
   const avatarBtn = document.getElementById('btn-manager-avatar');

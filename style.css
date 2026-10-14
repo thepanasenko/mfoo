@@ -3638,3 +3638,32 @@ input {
   background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.4); transition: transform .2s var(--ease-bounce);
 }
 .settings-switch.on .settings-knob{ transform: translateX(22px); }
+
+/* ряд кнопок «Зал славы» и «Настройки» */
+.mgr-action-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:0 0 16px; }
+.mgr-action-btn{
+  display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 10px;
+    border-radius: 18px;
+    border: 2px solid;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, .28);
+    transition: transform .18s var(--ease-bounce);
+    flex-direction: row;
+    align-content: center;
+    justify-content: space-evenly;
+}
+.mgr-action-btn:active{ transform: translateY(1px) scale(.99); }
+.mgr-action-img{ width:46px; height:46px; object-fit:contain; display:block; }
+.mgr-action-title{ font-family:var(--ff-display); font-size:15px; color:var(--text); letter-spacing:.3px; }
+.mgr-hall-btn{ background: rgb(255 140 0 / 15%); border-color:#ff8c00; }
+.mgr-settings-btn{ background: rgb(150 150 150 / 15%); border-color:#9a9a9a; }
+
+.mgr-action-sub{ font-size:11px; color:var(--text-dim); margin-top:-4px; text-align:center; }
+
+/* кнопки ряда — как «Инвентарь»: иконка слева, название и серая подпись справа */
+.mgr-action-btn{ flex-direction:row; justify-content:flex-start; gap:10px; padding:14px 12px; text-align:left; }
+.mgr-action-btn .btn-tasks-text{ flex:1; min-width:0; }
+.mgr-action-btn .btn-tasks-title{ white-space:nowrap; }
