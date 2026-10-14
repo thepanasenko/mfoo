@@ -46,6 +46,7 @@ const IMG = {
 };
 /* per-tournament trophy images (falls back to emoji icon) */
 const TROPHY_IMG = {
+  friendly: 'images/cup/tovar.png',
   novice:  IMG.cupNew,
   bigleague: IMG.bliga,
   championsleague: IMG.cliga,
@@ -73,7 +74,7 @@ const INVENTORY_CATALOG = [
   { key:'medkit40', img:'images/bapteka.png', name:'Аптечка 40', heal:40, price:{ currency:'coins', amount:80000 } }
 ];
 function inventoryItemDesc(item){
-  return item.heal ? `+${item.heal} здоровья всем игрокам` : `+${item.percent}% силы клуба`;
+  return item.heal ? `+${item.heal} здоровья` : `+${item.percent}% силы клуба`;
 }
 function inventoryItemByKey(key){ return INVENTORY_CATALOG.find(i=>i.key===key); }
 
@@ -227,6 +228,20 @@ function syncStatusFromLineup(s){
 
 /* ---------- tournament tiers ---------- */
 const TOURNAMENTS = [
+  {
+    id:'friendly',
+    title:'ТОВАРИЩЕСКИЙ МАТЧ',
+    icon:'🤝',
+    friendly:true,
+    min:0, max:Infinity,
+    teamCount:2,
+    teamNames:['FriendlyFC','SparringClub','TrainingUnited','PracticeCity'],
+    // один матч с одним ботом, без трофея
+    rounds:[
+      { coins:100, power:0, xp:100 }
+    ],
+    cupWinCoins: 0
+  },
   {
     id:'novice',
     title:'КУБОК НОВИЧКОВ',
@@ -3163,7 +3178,7 @@ function renderManager(){
     </div>
 
     <div class="mgr-card">
-      <div style="background: rgb(0 0 0 / 50%); border: 2px solid #082b1a; padding: 12px; border-radius: 10px;">
+      <div style="background: rgb(0 0 0 / 50%); border: 2px solid #082b1a; padding: 12px; border-radius: 14px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-size: 11px; color: var(--text-dim); letter-spacing: 1px;">УРОВЕНЬ</div>
@@ -3381,7 +3396,7 @@ function renderTournaments(){
       <div class="tournament-card play-card" data-cup="${t.id}">
         ${tournamentIconHtml(t)}
         <div class="tournament-name">${t.title}</div>
-        <div class="play-power"><img src="${IMG.sila}" class="img-icon" alt=""> ${fmt(range.min)}–${fmt(range.max)}</div>
+        <div class="play-power"><img src="${IMG.sila}" class="img-icon" alt=""> ${t.friendly ? 'Любая' : `${fmt(range.min)}–${fmt(range.max)}`}</div>
         ${statusLine}
         <button class="play-more-btn ${playBtnSoft(t, inProgress) ? 'btn-disabled-soft' : ''}">${playBtnText(t, inProgress)}</button>
       </div>`;
@@ -3837,9 +3852,9 @@ function renderCupRewardsList(t){
         <span class="cup-reward-stage">${isFinal ? '🏆 ' : ''}${roundTitles[round] || `РАУНД ${round}`}</span>
         <span class="cup-reward-values">
           <span class="cup-reward-chip coins"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${r.coins.toLocaleString('ru-RU')}</span>
-          <span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${r.power}</span>
+          ${r.power ? `<span class="cup-reward-chip power"><img src="${IMG.sila}" class="img-icon" alt="Сила"> +${r.power}</span>` : ''}
           <span class="cup-reward-chip xp"><img src="${IMG.xp}" class="img-icon" alt="Опыт"> +${fmt(r.xp)} XP</span>
-          ${isFinal ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>` : ''}
+          ${isFinal && t.cupWinCoins ? `<span class="cup-reward-chip trophy"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> +${t.cupWinCoins.toLocaleString('ru-RU')}</span>` : ''}
         </span>
       </div>`);
   }
@@ -4075,7 +4090,8 @@ function initCup(cupId){
 
   for (let i = 0; i < teamCount; i++) {
     const name = names[i % names.length];
-    const botPower = rnd(t.min, t.max);
+    const botRange = t.friendly ? bigLeagueRangeForPower(power) : { min: t.min, max: t.max };
+    const botPower = rnd(botRange.min, botRange.max);
     botTeams.push({
       id: uid(),
       name: name,
@@ -4491,6 +4507,12 @@ function finishCup(cupId){
   cup.finished = true;
   cup.won = !!playerWonFinal;
   recordCupPlayed(t.id);
+  if(t.friendly){
+    save();
+    if(onScreen) renderCupScreen();
+    else showToast(playerWonFinal ? `🤝 «${t.title}»: победа!` : `«${t.title}» сыгран.`);
+    return;
+  }
   if(playerWonFinal){
     const cupWinCoins = t.cupWinCoins;
     state.coins += cupWinCoins;

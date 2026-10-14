@@ -882,10 +882,10 @@ input {
 
 .mgr-stat {
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
+  border: 2px solid #082b1a;
   padding: 12px 8px;
   text-align: center;
-  border-radius: 10px;
+  border-radius: 14px;
   transition: transform .18s var(--ease-bounce), border-color .15s ease;
 }
 
@@ -3251,13 +3251,14 @@ input {
 .transfer-filter-btn {
   flex: 0 0 auto;
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
+  border: 2px solid #082b1a;
   color: var(--text-mute);
   font-weight: 800;
   font-size: 12px;
   letter-spacing: .3px;
   padding: 9px 16px;
   border-radius: 10px;
+  box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
