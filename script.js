@@ -888,6 +888,40 @@ const TASK_CHAINS = [
     ]
   },
   {
+    id:'trophies',
+    icon:`<img src="${IMG.zalslava}" class="task-icon-img" alt="Зал славы">`,
+    tiers:[
+      {
+        title:'Получите трофеев: 10',
+        reward:{ xp:10000 },
+        target:10,
+        progress:(s)=> Math.min((s.trophies?.length) || 0, 10),
+        isComplete:(s)=> ((s.trophies?.length) || 0) >= 10
+      },
+      {
+        title:'Получите трофеев: 25',
+        reward:{ xp:25000 },
+        target:25,
+        progress:(s)=> Math.min((s.trophies?.length) || 0, 25),
+        isComplete:(s)=> ((s.trophies?.length) || 0) >= 25
+      },
+      {
+        title:'Получите трофеев: 50',
+        reward:{ xp:50000, avatar:5 },
+        target:50,
+        progress:(s)=> Math.min((s.trophies?.length) || 0, 50),
+        isComplete:(s)=> ((s.trophies?.length) || 0) >= 50
+      },
+      {
+        title:'Получите трофеев: 100',
+        reward:{ xp:100000, items:{ motivation100:10 } },
+        target:100,
+        progress:(s)=> Math.min((s.trophies?.length) || 0, 100),
+        isComplete:(s)=> ((s.trophies?.length) || 0) >= 100
+      }
+    ]
+  },
+  {
     id:'formations',
     icon:`<img src="${IMG.shema}" class="task-icon-img" alt="Схемы">`,
     tiers:[
