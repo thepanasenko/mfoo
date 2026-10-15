@@ -3246,6 +3246,7 @@ input {
   gap: 8px;
   margin-bottom: 14px;
   overflow-x: auto;
+  justify-content: space-around;
 }
 
 .transfer-filter-btn {
