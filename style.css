@@ -221,7 +221,7 @@ input {
 .input-team-name {
   width: 100%;
   padding: 16px 18px;
-  background: var(--surface);
+  background: rgb(0 0 0 / 50%);
   border: 2px solid var(--line);
   border-radius: 14px;
   color: var(--text);
