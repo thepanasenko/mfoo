@@ -24,6 +24,7 @@ const IMG = {
   cross:      'images/krest.png',
   redname:    'images/redname.png',
   plus:       'images/plus.png',
+  time:       'images/time.png',
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
   cliga:      'images/cup/cliga.png',
@@ -1878,6 +1879,7 @@ function showApp(){
   refreshTopbar();
   navigate('manager');
   restoreTrainingTimers();
+  ensureTrainingTick();
   startLeagueNotificationPoll();
   healthRecoveryTick();
   if(!window.__healthTimer) window.__healthTimer = setInterval(healthRecoveryTick, 1000);
@@ -1996,8 +1998,8 @@ function onBuyEuro(btn){
   setTimeout(()=> btn.classList.remove('coin-buy-pop'), 350);
 }
 
-const NAME_BAD_RE = /[^A-Za-zА-Яа-яЁё]/g;
-const NAME_OK_RE = /^[A-Za-zА-Яа-яЁё]+$/;
+const NAME_BAD_RE = /[^A-Za-zА-Яа-яЁё0-9]/g;
+const NAME_OK_RE = /^[A-Za-zА-Яа-яЁё0-9]+$/;
 function attachNameFilter(input){
   input.addEventListener('input', ()=>{
     const clean = input.value.replace(NAME_BAD_RE, '');
@@ -2018,7 +2020,7 @@ function onRegisterConfirm(){
   if(!NAME_OK_RE.test(name)){
     input.focus();
     input.style.borderColor = 'var(--red)';
-    showToast('❌ Только кириллица и латинские буквы');
+    showToast('❌ Только буквы (кириллица, латиница) и цифры');
     return;
   }
   state = newGameState(name, selectedKitColor);
@@ -2250,17 +2252,18 @@ function switchTeamTab(tab){
   });
 }
 
+const timeIcon = (cls='')=> `<img src="${IMG.time}" class="time-icon ${cls}" alt="">`;
+function fmtTrainLeft(endTime){
+  const remaining = Math.max(0, Math.floor((endTime - Date.now()) / 1000));
+  return `${Math.floor(remaining/60)}:${String(remaining%60).padStart(2,'0')}`;
+}
+
 function playerListRowHtml(p){
   let statusText;
   if(p.training){
-    let timeLeft = '';
-    if(p.trainingEndTime){
-      const remaining = Math.max(0, Math.floor((p.trainingEndTime - Date.now()) / 1000));
-      const mins = Math.floor(remaining / 60);
-      const secs = remaining % 60;
-      timeLeft = ` — осталось ${mins}:${secs.toString().padStart(2,'0')}`;
-    }
-    statusText = `⏳ На тренировке${timeLeft}`;
+    statusText = p.trainingEndTime
+      ? `${timeIcon()} На тренировке — <span data-train-timer="${p.id}">${fmtTrainLeft(p.trainingEndTime)}</span>`
+      : `${timeIcon()} На тренировке`;
   } else {
     statusText = `${posLabel(p.pos)} · Сила ${fmt(p.power)}`;
   }
@@ -2466,7 +2469,7 @@ function trainingSlotOccupiedHtml(p){
       <span class="player-pos ${pos.css}">${pos.code}</span>
       <div class="ts-name">${p.name}</div>
       <div class="ts-power">Сила ${fmt(p.power)}</div>
-      <div class="ts-timer" data-training-timer="${p.id}">⏳ --:--</div>
+      <div class="ts-timer">${timeIcon()} <span data-train-timer="${p.id}">${p.trainingEndTime ? fmtTrainLeft(p.trainingEndTime) : '--:--'}</span></div>
       <button class="ts-cancel-btn" data-player-id="${p.id}">✕ Снять</button>
     </div>`;
 }
@@ -2518,31 +2521,38 @@ function renderTrainingSlotsPanel(){
   startTrainingSlotsTimer();
 }
 
-let trainingSlotsInterval = null;
-function startTrainingSlotsTimer(){
-  if(trainingSlotsInterval){ clearInterval(trainingSlotsInterval); trainingSlotsInterval = null; }
-  updateTrainingSlotsTimers();
-  trainingSlotsInterval = setInterval(()=>{
-    const view = document.getElementById('view-team');
-    if(!view || !view.classList.contains('active')){
-      clearInterval(trainingSlotsInterval);
-      trainingSlotsInterval = null;
-      return;
-    }
-    updateTrainingSlotsTimers();
-  }, 1000);
+/* общий таймер тренировок: раз в секунду завершает истёкшие тренировки
+   (на любой вкладке, даже если карточка игрока не открыта) и обновляет
+   все отображаемые таймеры: список, слоты, карточка игрока */
+let trainingTickInterval = null;
+function startTrainingSlotsTimer(){ updateTrainingSlotsTimers(); }
+function ensureTrainingTick(){
+  if(trainingTickInterval) return;
+  trainingTickInterval = setInterval(trainingTick, 1000);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) trainingTick(); });
 }
-
 function updateTrainingSlotsTimers(){
-  document.querySelectorAll('[data-training-timer]').forEach(el=>{
-    const id = el.dataset.trainingTimer;
-    const p = state.players.find(pl=>pl.id===id);
+  if(!state || !state.players) return;
+  document.querySelectorAll('[data-train-timer]').forEach(el=>{
+    const p = state.players.find(pl=>pl.id===el.dataset.trainTimer);
     if(!p || !p.training || !p.trainingEndTime) return;
-    const remaining = Math.max(0, Math.floor((p.trainingEndTime - Date.now()) / 1000));
-    const mins = Math.floor(remaining / 60);
-    const secs = remaining % 60;
-    el.textContent = `⏳ ${mins}:${secs.toString().padStart(2,'0')}`;
+    el.textContent = fmtTrainLeft(p.trainingEndTime);
   });
+}
+function trainingTick(){
+  if(!state || !state.players) return;
+  const now = Date.now();
+  const expired = state.players.filter(p=>p.training && p.trainingEndTime && p.trainingEndTime <= now).map(p=>p.id);
+  if(expired.length){
+    const modal = document.getElementById('player-modal');
+    const modalId = (modal && !modal.classList.contains('hidden')) ? healthModalPlayerId : null;
+    expired.forEach(id=>{
+      if(trainingTimers[id]){ clearTimeout(trainingTimers[id]); delete trainingTimers[id]; }
+      finishTraining(id);
+    });
+    if(modalId && expired.includes(modalId)) openPlayerModal(modalId);
+  }
+  updateTrainingSlotsTimers();
 }
 
 /* окно выбора запасного игрока для отправки на тренировку */
@@ -2872,7 +2882,7 @@ function openPlayerModalInner(id){
       const secs = remaining % 60;
       timeLeft = `${mins}:${secs.toString().padStart(2, '0')}`;
     }
-    timeDisplay = `<div style="color:var(--gold);font-weight:700;margin-top:8px;font-size:18px;">⏳ На тренировке — осталось ${timeLeft}</div>`;
+    timeDisplay = `<div class="pm-train-time">${timeIcon('time-icon-lg')} На тренировке — <span data-train-timer="${p.id}">${timeLeft}</span></div>`;
   } else if(p.status === 'bench') {
     timeDisplay = `<div style="color:var(--text-mute);font-size:12px;margin-top:8px;">Отправить на тренировку можно в «Команде», в слотах тренировок.</div>`;
   }
@@ -2881,7 +2891,7 @@ function openPlayerModalInner(id){
   if(p.status === 'main'){
     swapButton = `<button id="btn-swap-status" class="btn-secondary btn-big" style="margin-top:10px;">🔻 Отправить в запас</button>`;
   } else if(isTraining){
-    swapButton = `<button class="btn-secondary btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">⏳ Снимите с тренировки, чтобы поставить в основу</button>`;
+    swapButton = `<button class="btn-secondary btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">${timeIcon()} Снимите с тренировки, чтобы поставить в основу</button>`;
   } else {
     const canPlace = hasAvailableSlotForPos(p.pos);
     swapButton = canPlace
@@ -2892,7 +2902,7 @@ function openPlayerModalInner(id){
   let sellButton = '';
   if(p.status === 'bench'){
     if(isTraining){
-      sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">⏳ Нельзя продать во время тренировки</button>`;
+      sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">${timeIcon()} Нельзя продать во время тренировки</button>`;
     } else {
       const price = sellPlayerPrice(p.power);
       sellButton = `<button id="btn-sell-player" class="btn-danger btn-big" style="margin-top:10px;">💰 Продать за ${fmt(price)} <img src="${IMG.coin}" class="img-icon" alt="Монеты"></button>`;
@@ -3017,46 +3027,7 @@ function toggleSquadStatus(playerId){
   }
 }
 
-function startTrainingTimeUpdate(playerId) {
-  if(trainingUpdateInterval) {
-    clearInterval(trainingUpdateInterval);
-    trainingUpdateInterval = null;
-  }
-
-  trainingUpdateInterval = setInterval(() => {
-    const modal = document.getElementById('player-modal');
-    if(modal.classList.contains('hidden')) {
-      clearInterval(trainingUpdateInterval);
-      trainingUpdateInterval = null;
-      return;
-    }
-
-    const p = state.players.find(pl => pl.id === playerId);
-    if(!p || !p.training || !p.trainingEndTime) {
-      clearInterval(trainingUpdateInterval);
-      trainingUpdateInterval = null;
-      return;
-    }
-
-    const remaining = Math.max(0, Math.floor((p.trainingEndTime - Date.now()) / 1000));
-    const mins = Math.floor(remaining / 60);
-    const secs = remaining % 60;
-    const timeStr = `${mins}:${secs.toString().padStart(2, '0')}`;
-
-    const timeDisplay = modal.querySelector('.pm-power-value')?.parentElement?.querySelector('[style*="color:var(--gold)"]');
-    if(timeDisplay) {
-      timeDisplay.textContent = `⏳ Осталось: ${timeStr}`;
-    }
-
-    if(remaining <= 0) {
-      clearInterval(trainingUpdateInterval);
-      trainingUpdateInterval = null;
-      finishTraining(playerId);
-      closePlayerModal();
-      renderTeam();
-    }
-  }, 1000);
-}
+function startTrainingTimeUpdate(){ updateTrainingSlotsTimers(); }
 
 function startTraining(playerId){
   const p = state.players.find(pl=>pl.id===playerId);
@@ -3102,8 +3073,9 @@ function startTraining(playerId){
   save();
   refreshTopbar();
   renderTeam();
+  ensureTrainingTick();
 
-  showToast(`⏳ Тренировка ${p.name} началась! (30 мин, −${fmt(cost)} монет)`);
+  showToast(`${timeIcon()} Тренировка ${p.name} началась! (30 мин, −${fmt(cost)} монет)`);
 
   const timerId = setTimeout(() => {
     finishTraining(playerId);
@@ -3349,7 +3321,7 @@ function openRenameClubModal(){
     }
     if(!NAME_OK_RE.test(name)){
       input.style.borderColor = 'var(--red)';
-      showToast('❌ Только кириллица и латинские буквы');
+      showToast('❌ Только буквы (кириллица, латиница) и цифры');
       return;
     }
     if(name === state.teamName){
@@ -3714,7 +3686,7 @@ function updateLeagueCountdown(t){
     } else {
       reg.sessionId = null;
       save();
-      showToast(`⌛ Вы не успели зайти к старту «${t.title}». Регистрация на новый старт открыта.`);
+      showToast(`${timeIcon()} Вы не успели зайти к старту «${t.title}». Регистрация на новый старт открыта.`);
     }
   }
 

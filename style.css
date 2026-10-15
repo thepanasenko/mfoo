@@ -3700,3 +3700,8 @@ input {
 
 /* Фон вкладки «Банк» */
 body.bank-bg::before{ background-image:url('images/fonbank.png'); }
+
+/* иконка времени (images/time.png) вместо песочных часов */
+.time-icon{ width:16px; height:16px; object-fit:contain; vertical-align:-3px; display:inline-block; pointer-events:none; }
+.time-icon-lg{ width:22px; height:22px; vertical-align:-5px; }
+.pm-train-time{ color:var(--gold); font-weight:700; margin-top:8px; font-size:18px; }
