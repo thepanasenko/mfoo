@@ -1889,6 +1889,7 @@ function showApp(){
    ============================================================ */
 function bindGlobalEvents(){
   document.getElementById('btn-confirm-register').addEventListener('click', onRegisterConfirm);
+  attachNameFilter(document.getElementById('team-name-input'));
   document.getElementById('team-name-input').addEventListener('keydown', e=>{
     if(e.key === 'Enter') onRegisterConfirm();
   });
@@ -1995,6 +1996,15 @@ function onBuyEuro(btn){
   setTimeout(()=> btn.classList.remove('coin-buy-pop'), 350);
 }
 
+const NAME_BAD_RE = /[^A-Za-zА-Яа-яЁё]/g;
+const NAME_OK_RE = /^[A-Za-zА-Яа-яЁё]+$/;
+function attachNameFilter(input){
+  input.addEventListener('input', ()=>{
+    const clean = input.value.replace(NAME_BAD_RE, '');
+    if(clean !== input.value) input.value = clean;
+  });
+}
+
 function onRegisterConfirm(){
   const input = document.getElementById('team-name-input');
   let name = input.value.trim();
@@ -2003,6 +2013,12 @@ function onRegisterConfirm(){
     input.focus();
     input.style.borderColor = 'var(--red)';
     showToast('❌ Название команды должно быть от 4 до 12 символов');
+    return;
+  }
+  if(!NAME_OK_RE.test(name)){
+    input.focus();
+    input.style.borderColor = 'var(--red)';
+    showToast('❌ Только кириллица и латинские буквы');
     return;
   }
   state = newGameState(name, selectedKitColor);
@@ -2102,6 +2118,7 @@ function navigate(name, cupId){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
 
   const map = { manager:'view-manager', play:'view-play', team:'view-team', transfer:'view-transfer', bank:'view-bank', cup:'view-cup', inventory:'view-inventory', hall:'view-hall' };
+  document.body.classList.toggle('bank-bg', name === 'bank');
   const viewEl = document.getElementById(map[name]);
   if(viewEl) viewEl.classList.add('active');
 
@@ -3330,6 +3347,11 @@ function openRenameClubModal(){
       showToast('❌ Название команды должно быть от 4 до 12 символов');
       return;
     }
+    if(!NAME_OK_RE.test(name)){
+      input.style.borderColor = 'var(--red)';
+      showToast('❌ Только кириллица и латинские буквы');
+      return;
+    }
     if(name === state.teamName){
       input.style.borderColor = 'var(--red)';
       showToast('Введите новое название');
@@ -3353,6 +3375,7 @@ function openRenameClubModal(){
     showToast(`✅ Клуб переименован в «${name}»`);
   };
   overlay.querySelector('#rename-club-confirm').addEventListener('click', confirmRename);
+  attachNameFilter(input);
   input.addEventListener('keydown', e=>{ if(e.key === 'Enter') confirmRename(); });
 }
 

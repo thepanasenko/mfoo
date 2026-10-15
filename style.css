@@ -1587,8 +1587,8 @@ input {
 }
 
 .player-row.training {
-  border-color: rgba(242, 183, 5, .4);
-  background: rgba(242, 183, 5, .06);
+  border-color: var(--gold);
+  background: rgb(0 0 0 / 50%);
 }
 
 .player-card {
@@ -2573,9 +2573,9 @@ input {
 }
 
 .training-slot.occupied {
-  border: 1px solid var(--gold);
-  background: rgba(242, 183, 5, .08);
-  box-shadow: 0 0 14px rgba(242, 183, 5, .15);
+  border: 2px solid var(--gold);
+  background: rgb(0 0 0 / 50%);
+  box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
 }
 
 .ts-name {
@@ -3697,3 +3697,6 @@ input {
 .pm-stat-power{ color:var(--green); }
 .pm-stat-health{ color:#7fd3ff; }
 .pm-stat-status{ font-size:16px; color:var(--text); }
+
+/* Фон вкладки «Банк» */
+body.bank-bg::before{ background-image:url('images/fonbank.png'); }
