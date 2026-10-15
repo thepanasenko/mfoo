@@ -3032,7 +3032,7 @@ input {
 .formation-btn {
   flex: 1 1 0;
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
+  border: 2px solid #082b1a;
   color: var(--text-dim);
   padding: 10px 6px;
   border-radius: 10px;
@@ -3048,10 +3048,10 @@ input {
 }
 
 .formation-btn.active {
-  color: #e39500;
-  border-color: #e39500;
-  background: rgba(197, 145, 34, 0.12);
-  box-shadow: 0 0 0 1px #e39500;
+  color: var(--gold);
+  border-color: var(--gold);
+  background: rgb(0 0 0 / 50%);
+  box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.5);
 }
 
 .pitch-wrap {
@@ -3669,3 +3669,12 @@ input {
 .mgr-action-btn{ flex-direction:row; justify-content:flex-start; gap:10px; padding:14px 12px; text-align:left; }
 .mgr-action-btn .btn-tasks-text{ flex:1; min-width:0; }
 .mgr-action-btn .btn-tasks-title{ white-space:nowrap; }
+
+/* переименование клуба */
+.mgr-club-name-row{ display:flex; align-items:center; gap:6px; min-width:0; }
+.mgr-club-name-row .mgr-club-name{ min-width:0; }
+.mgr-rename-btn{ flex-shrink:0; width:22px; height:22px; padding:0; background:none; border:none; cursor:pointer; }
+.mgr-rename-img{ width:22px; height:22px; object-fit:contain; display:block; }
+.rename-club-card{ max-width:340px; width:100%; }
+.rename-club-card .input-team-name{ margin-top:12px; }
+.rename-club-hint{ font-size:11px; color:var(--text-dim); margin:6px 0 14px; }

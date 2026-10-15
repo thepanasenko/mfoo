@@ -22,6 +22,7 @@ const IMG = {
   zalslava:   'images/zalslava.png',
   check:      'images/galocka.png',
   cross:      'images/krest.png',
+  redname:    'images/redname.png',
   plus:       'images/plus.png',
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
@@ -3171,7 +3172,10 @@ function renderManager(){
         <img src="${managerAvatarSrc(state.managerAvatar)}" class="mgr-avatar-img" alt="Аватар клуба">
       </button>
       <div class="mgr-club-info">
-        <span class="mgr-club-name">${state.teamName}</span>
+        <span class="mgr-club-name-row">
+          <span class="mgr-club-name">${state.teamName}</span>
+          <button id="btn-rename-club" class="mgr-rename-btn" aria-label="Изменить название"><img src="${IMG.redname}" class="mgr-rename-img" alt="Изменить название"></button>
+        </span>
         <span class="mgr-club-federation">Без федерации</span>
       </div>
       <span class="mgr-power-pill">СИЛА ${fmt(power)}</span>
@@ -3261,6 +3265,63 @@ function renderManager(){
 
   const avatarBtn = document.getElementById('btn-manager-avatar');
   if(avatarBtn) avatarBtn.addEventListener('click', openManagerAvatarPicker);
+  const renameBtn = document.getElementById('btn-rename-club');
+  if(renameBtn) renameBtn.addEventListener('click', openRenameClubModal);
+}
+
+/* смена названия клуба за евро */
+const RENAME_CLUB_COST = 50000;
+function openRenameClubModal(){
+  const old = document.getElementById('rename-club-overlay');
+  if(old) old.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'rename-club-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-card rename-club-card">
+      <button class="modal-close" id="rename-club-close"><img src="${IMG.cross}" class="modal-close-icon" alt="Закрыть"></button>
+      <div class="tp-title">Название клуба</div>
+      <input id="rename-club-input" class="input-team-name" type="text" minlength="4" maxlength="12" placeholder="Новое название" value="${String(state.teamName).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">
+      <div class="rename-club-hint">От 4 до 12 символов</div>
+      <button id="rename-club-confirm" class="btn-primary btn-big">Изменить за <img src="${IMG.cash}" class="img-icon" alt="Бюджет"> ${fmt(RENAME_CLUB_COST)}</button>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const close = ()=> overlay.remove();
+  overlay.querySelector('#rename-club-close').addEventListener('click', close);
+  overlay.addEventListener('click', e=>{ if(e.target === overlay) close(); });
+  const input = overlay.querySelector('#rename-club-input');
+  const confirmRename = ()=>{
+    const name = input.value.trim();
+    if(name.length < 4 || name.length > 12){
+      input.style.borderColor = 'var(--red)';
+      showToast('❌ Название команды должно быть от 4 до 12 символов');
+      return;
+    }
+    if(name === state.teamName){
+      input.style.borderColor = 'var(--red)';
+      showToast('Введите новое название');
+      return;
+    }
+    if(state.budget < RENAME_CLUB_COST){
+      showToast(`❌ Не хватает евро: нужно ${fmt(RENAME_CLUB_COST)}`);
+      return;
+    }
+    state.budget -= RENAME_CLUB_COST;
+    state.teamName = name;
+    Object.keys(state.cups || {}).forEach(id=>{
+      const cup = state.cups[id];
+      const you = cup && cup.teams && cup.teams.find(t=>t.isPlayer);
+      if(you) you.name = name;
+    });
+    save();
+    refreshTopbar();
+    close();
+    renderManager();
+    showToast(`✅ Клуб переименован в «${name}»`);
+  };
+  overlay.querySelector('#rename-club-confirm').addEventListener('click', confirmRename);
+  input.addEventListener('keydown', e=>{ if(e.key === 'Enter') confirmRename(); });
 }
 
 /* окно выбора аватарки клуба/менеджера (0..3) */
