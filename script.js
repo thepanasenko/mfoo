@@ -480,7 +480,7 @@ const TOURNAMENTS = [
     icon:'🌴',
     type:'group',
     tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
-    min:6601, max:7701,
+    min:6601, max:7700,
     groupsCount:64,
     teamsPerGroup:10,
     teamNames:['MoscowBear','IstanbulBosp','AnkaraAnatol','Novosibirsk','Yekaterinbur','Vladivostok','KyivDnipro','MinskZubrEli','WarsawEagle','BucharestCar','AthensAcropo','CairoSphinx','AlexandriaNi','CasablancaAt','TunisCarthag','AlgiersKasba','TripoliOasis','NicosiaCypru','VallettaMalt','ReykjavikGey','HelsinkiNort','RigaAmber','VilniusHill','TallinnSpire','ChisinauVine','SarajevoBrid','SkopjeVardar','PodgoricaCoa','LjubljanaAlp','BratislavaCa','ViennaRing','ZurichPeak','GenevaLake','BrusselsGran','LuxembourgFo','MonacoRivier','AndorraPeak','SanMarinoTow','VaticanDome','LisbonCoast','MadridCentra','BarcelonaSea','MilanDuomo','NaplesBay','PalermoSun','BernAlpine','MunichBeer','FrankfurtBan','HamburgPort','CopenhagenSp','StockholmIsl','OsloFjordEli','GothenburgHa','KrakowDragon','GdanskAmber','WroclawBridg','SofiaVitosha','BelgradeRive','ZagrebCathed','BudapestBath','Thessaloniki','RotterdamPor','AmsterdamCan','DublinClover'],
@@ -819,7 +819,7 @@ const TASK_CHAINS = [
   },
   {
     id:'win_titles',
-    icon:'🏆',
+    icon:`<img src="${IMG.cupNew}" class="task-icon-img" alt="Кубок">`,
     tiers:[
       {
         title:'Выиграйте любой Кубок',
@@ -852,6 +852,14 @@ const TASK_CHAINS = [
         iconImg: ()=> TROPHY_IMG.championsleague,
         progress:(s)=> ((s.taskStats?.cupWins?.championsleague) || 0) >= 1 ? 1 : 0,
         isComplete:(s)=> ((s.taskStats?.cupWins?.championsleague) || 0) >= 1
+      },
+      {
+        title:'Выиграйте Чемпионат Мира',
+        reward:{ coins:100000, xp:50000 },
+        target:1,
+        iconImg: ()=> TROPHY_IMG.worldcup,
+        progress:(s)=> ((s.taskStats?.cupWins?.worldcup) || 0) >= 1 ? 1 : 0,
+        isComplete:(s)=> ((s.taskStats?.cupWins?.worldcup) || 0) >= 1
       }
     ]
   },
@@ -1548,9 +1556,10 @@ function generateSquad(){
    ЗДОРОВЬЕ ИГРОКОВ
    ============================================================ */
 const HEALTH_MAX = 100;
+const HEALTH_MIN = 40; // ниже этого здоровье игрока не падает
 const HEALTH_RECOVER_MS = 5000; // +1 здоровья каждые 5 секунд
 function playerHealth(p){
-  return (p && typeof p.health === 'number') ? Math.max(0, Math.min(HEALTH_MAX, p.health)) : HEALTH_MAX;
+  return (p && typeof p.health === 'number') ? Math.max(HEALTH_MIN, Math.min(HEALTH_MAX, p.health)) : HEALTH_MAX;
 }
 function avgMainHealth(players){
   const main = (players || []).filter(p=>p.status==='main');
@@ -1566,7 +1575,7 @@ function applyMatchFatigue(result){
     if(result === 'win') loss = rnd(3, 6);
     else if(result === 'draw') loss = 2;
     else loss = rnd(2, 4);
-    p.health = Math.max(0, playerHealth(p) - loss);
+    p.health = Math.max(HEALTH_MIN, playerHealth(p) - loss);
   });
   state.healthTickAt = Date.now();
   updateHealthUi();
@@ -2823,9 +2832,18 @@ function openTransferPlayerModal(id){
 }
 
 function openPlayerModal(id){
+  try{
+    openPlayerModalInner(id);
+  }catch(err){
+    console.error(err);
+    showToast('❌ Не удалось открыть игрока: ' + (err && err.message ? err.message : err));
+  }
+}
+
+function openPlayerModalInner(id){
   const p = state.players.find(pl=>pl.id===id);
   if(!p) return;
-  const pos = posByCode(p.pos);
+  const pos = posByCode(p.pos) || { code: p.pos || '?', css: '' };
   const isTraining = p.training;
 
   let timeDisplay = '';
@@ -2864,15 +2882,29 @@ function openPlayerModal(id){
     }
   }
 
+  const statusText = isTraining ? 'На тренировке' : (p.status==='main' ? 'Основной состав' : 'Запасной');
   document.getElementById('player-modal-body').innerHTML = `
-    <span class="player-pos ${pos.css}">${pos.code}</span>
-    <div class="pm-name">${p.name}</div>
-    <div class="pm-pos">${posLabel(p.pos)}</div>
-    <div class="pm-power-label">СИЛА ИГРОКА</div>
-    <div class="pm-power-value">${fmt(p.power)}</div>
-    <div class="pm-power-label" style="margin-top:8px;">ЗДОРОВЬЕ</div>
-    <div class="pm-health-value"><span id="pm-health-val">${playerHealth(p)}</span></div>
-    <div class="pm-status">Статус: ${p.status==='main' ? 'Основной состав' : 'Запасной'}</div>
+    <div class="pm-head">
+      <img src="${playerAvatarSrc(p)}" class="pm-photo" alt="${p.name}">
+      <div class="pm-head-info">
+        <div class="pm-name">${p.name}</div>
+        <div class="pm-pos"><span class="player-pos ${pos.css}">${pos.code}</span> ${posLabel(p.pos)}</div>
+      </div>
+    </div>
+    <div class="pm-stats-grid">
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">СИЛА</div>
+        <div class="pm-stat-value pm-stat-power">${fmt(p.power)}</div>
+      </div>
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">ЗДОРОВЬЕ</div>
+        <div class="pm-stat-value pm-stat-health"><span id="pm-health-val">${playerHealth(p)}</span></div>
+      </div>
+      <div class="pm-stat-box pm-stat-wide">
+        <div class="pm-stat-label">СТАТУС</div>
+        <div class="pm-stat-value pm-stat-status">${statusText}</div>
+      </div>
+    </div>
     ${timeDisplay}
     ${swapButton}
     ${sellButton}
@@ -3186,7 +3218,7 @@ function renderManager(){
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-size: 11px; color: var(--text-dim); letter-spacing: 1px;">УРОВЕНЬ</div>
-            <div style="font-family: var(--ff-display); font-size: 28px; color: var(--gold);">
+            <div style="font-family: var(--ff-display); font-size: 28px; color: #e39500;">
               ${level} ${isMaxLevel ? '👑' : ''}
             </div>
           </div>

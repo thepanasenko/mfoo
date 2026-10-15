@@ -508,7 +508,7 @@ input {
 
 /* уровень — золотой, с картинкой lvl.png */
 .stat-chip.level {
-  color: var(--gold);
+  color: #e39500;
   font-family: var(--ff-display);
   font-size: 18px;
   gap: 6px;
@@ -3678,3 +3678,21 @@ input {
 .rename-club-card{ max-width:340px; width:100%; }
 .rename-club-card .input-team-name{ margin-top:12px; }
 .rename-club-hint{ font-size:11px; color:var(--text-dim); margin:6px 0 14px; }
+
+/* карточка игрока */
+.pm-head{ display:flex; align-items:center; gap:12px; margin:4px 28px 14px 0; }
+.pm-photo{
+  width:56px; height:56px; flex-shrink:0; border-radius:10px; border:2px solid #082b1a;
+  object-fit:cover; object-position:center bottom; background:rgb(0 0 0 / 37%);
+}
+.pm-head-info{ min-width:0; }
+.pm-head .pm-name{ margin:0 0 4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.pm-head .pm-pos{ margin:0; display:flex; align-items:center; gap:6px; }
+.pm-stats-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.pm-stat-box{ background:rgb(0 0 0 / 50%); border:2px solid #082b1a; border-radius:14px; padding:12px 10px; text-align:center; }
+.pm-stat-wide{ grid-column:1 / -1; }
+.pm-stat-label{ font-size:10px; color:var(--text-dim); letter-spacing:1px; }
+.pm-stat-value{ font-family:var(--ff-display); font-size:24px; margin-top:4px; }
+.pm-stat-power{ color:var(--green); }
+.pm-stat-health{ color:#7fd3ff; }
+.pm-stat-status{ font-size:16px; color:var(--text); }
