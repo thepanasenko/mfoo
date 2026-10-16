@@ -416,8 +416,9 @@ input {
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: var(--surface-3);
-  border: 1px solid var(--line);
+  background: rgb(0 0 0 / 50%);
+  border: 2px solid #082b1a;
+  box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.5), inset -5px -5px 10px rgba(0, 0, 0, 0.5);
   color: var(--text);
   font-size: 18px;
   line-height: 1;
