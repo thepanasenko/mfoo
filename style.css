@@ -3705,3 +3705,12 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .time-icon{ width:16px; height:16px; object-fit:contain; vertical-align:-3px; display:inline-block; pointer-events:none; }
 .time-icon-lg{ width:22px; height:22px; vertical-align:-5px; }
 .pm-train-time{ color:var(--gold); font-weight:700; margin-top:8px; font-size:18px; }
+
+/* карточка игрока: сетка 2×2 и кнопки одной высоты */
+.pm-stat-status{ font-size:15px; line-height:1.2; }
+.pm-stat-box{ display:flex; flex-direction:column; justify-content:center; }
+#player-modal-body .btn-big{
+  height:52px; min-height:52px; padding:0 12px; font-size:14px; line-height:1.1; width:100%;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px; text-align:center;
+}
+#player-modal-body .btn-secondary{ border-width:1px; }

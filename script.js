@@ -2837,16 +2837,36 @@ function openTransferPlayerModal(id){
   const affordable = state.coins >= p.price;
 
   document.getElementById('player-modal-body').innerHTML = `
-    <span class="player-pos ${pos.css}">${pos.code}</span>
-    <div class="pm-name">${p.name}</div>
-    <div class="pm-pos">${posLabel(p.pos)}</div>
-    <div class="pm-power-label">СИЛА ИГРОКА</div>
-    <div class="pm-power-value">${fmt(p.power)}</div>
-    <div class="pm-status">Свободный агент — доступен на трансфере</div>
+    <div class="pm-head">
+      <img src="${playerAvatarSrc(p)}" class="pm-photo" alt="${p.name}">
+      <div class="pm-head-info">
+        <div class="pm-name">${p.name}</div>
+        <div class="pm-pos"><span class="player-pos ${pos.css}">${pos.code}</span></div>
+      </div>
+    </div>
+    <div class="pm-stats-grid">
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">СИЛА</div>
+        <div class="pm-stat-value pm-stat-power">${fmt(p.power)}</div>
+      </div>
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">ЗДОРОВЬЕ</div>
+        <div class="pm-stat-value pm-stat-health">${playerHealth(p)}</div>
+      </div>
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">СТАТУС</div>
+        <div class="pm-stat-value pm-stat-status">Трансфер</div>
+      </div>
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">ПОЗИЦИЯ</div>
+        <div class="pm-stat-value pm-stat-status">${posLabel(p.pos)}</div>
+      </div>
+    </div>
     <button id="btn-buy-transfer-player" class="btn-primary btn-big" style="margin-top:14px;" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
       <img src="${IMG.coin}" class="img-icon" alt="Монеты"> Купить за ${fmt(p.price)}
     </button>
   `;
+  healthModalPlayerId = null;
   document.getElementById('player-modal').classList.remove('hidden');
 
   const buyBtn = document.getElementById('btn-buy-transfer-player');
@@ -2891,31 +2911,31 @@ function openPlayerModalInner(id){
   if(p.status === 'main'){
     swapButton = `<button id="btn-swap-status" class="btn-secondary btn-big" style="margin-top:10px;">🔻 Отправить в запас</button>`;
   } else if(isTraining){
-    swapButton = `<button class="btn-secondary btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">${timeIcon()} Снимите с тренировки, чтобы поставить в основу</button>`;
+    swapButton = `<button class="btn-secondary btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">${timeIcon()} Снимите с тренировки</button>`;
   } else {
     const canPlace = hasAvailableSlotForPos(p.pos);
     swapButton = canPlace
       ? `<button id="btn-swap-status" class="btn-primary btn-big" style="margin-top:10px;">🔺 В основной состав</button>`
-      : `<button class="btn-secondary btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">❌ Нет места на позиции «${posLabel(p.pos)}» в схеме ${state.formation}</button>`;
+      : `<button class="btn-secondary btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">❌ Нет места в схеме ${state.formation}</button>`;
   }
 
   let sellButton = '';
   if(p.status === 'bench'){
     if(isTraining){
-      sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">${timeIcon()} Нельзя продать во время тренировки</button>`;
+      sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">${timeIcon()} Нельзя продать на тренировке</button>`;
     } else {
       const price = sellPlayerPrice(p.power);
       sellButton = `<button id="btn-sell-player" class="btn-danger btn-big" style="margin-top:10px;">💰 Продать за ${fmt(price)} <img src="${IMG.coin}" class="img-icon" alt="Монеты"></button>`;
     }
   }
 
-  const statusText = isTraining ? 'На тренировке' : (p.status==='main' ? 'Основной состав' : 'Запасной');
+  const statusText = isTraining ? 'На тренировке' : (p.status==='main' ? 'Основной' : 'Запасной');
   document.getElementById('player-modal-body').innerHTML = `
     <div class="pm-head">
       <img src="${playerAvatarSrc(p)}" class="pm-photo" alt="${p.name}">
       <div class="pm-head-info">
         <div class="pm-name">${p.name}</div>
-        <div class="pm-pos"><span class="player-pos ${pos.css}">${pos.code}</span> ${posLabel(p.pos)}</div>
+        <div class="pm-pos"><span class="player-pos ${pos.css}">${pos.code}</span></div>
       </div>
     </div>
     <div class="pm-stats-grid">
@@ -2927,9 +2947,13 @@ function openPlayerModalInner(id){
         <div class="pm-stat-label">ЗДОРОВЬЕ</div>
         <div class="pm-stat-value pm-stat-health"><span id="pm-health-val">${playerHealth(p)}</span></div>
       </div>
-      <div class="pm-stat-box pm-stat-wide">
+      <div class="pm-stat-box">
         <div class="pm-stat-label">СТАТУС</div>
         <div class="pm-stat-value pm-stat-status">${statusText}</div>
+      </div>
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">ПОЗИЦИЯ</div>
+        <div class="pm-stat-value pm-stat-status">${posLabel(p.pos)}</div>
       </div>
     </div>
     ${timeDisplay}
@@ -5159,6 +5183,7 @@ function showConfirm(text, onYes, opts){
   overlay.addEventListener('click', e => { if(e.target === overlay) close(); });
 }
 
+const TOAST_MAX = 5;
 function showToast(text){
   let container = document.getElementById('toast-container');
   if(!container){
@@ -5166,9 +5191,13 @@ function showToast(text){
     container.id = 'toast-container';
     document.body.appendChild(container);
   }
-  container.innerHTML = '';
+  /* одинаковое уведомление показываем только одно — старое убираем, новое появляется заново */
+  Array.from(container.children).forEach(el=>{ if(el.dataset.text === text) el.remove(); });
+  /* не больше TOAST_MAX одновременно — самые старые убираем */
+  while(container.children.length >= TOAST_MAX) container.firstElementChild.remove();
   const t = document.createElement('div');
   t.className = 'toast';
+  t.dataset.text = text;
   t.innerHTML = text;
   container.appendChild(t);
   setTimeout(()=> t.remove(), 2500);
