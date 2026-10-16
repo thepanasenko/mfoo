@@ -151,15 +151,13 @@
     <!-- ТРАНСФЕР -->
     <section id="view-transfer" class="view">
       <h2 class="view-title">Трансфер</h2>
-      <div class="transfer-head">
-        <div class="transfer-head-text">
-          <div class="transfer-head-title">Рынок игроков</div>
-          <div class="transfer-head-sub">12 новых игроков каждый час</div>
-        </div>
-        <div id="transfer-timer" class="transfer-timer">--:--</div>
+      <div class="team-tabs">
+        <button class="team-tab-btn active" data-transfer-tab="buy">Купить</button>
+        <button class="team-tab-btn" data-transfer-tab="sell">Продать</button>
       </div>
       <div id="transfer-filter" class="transfer-filter"></div>
       <div id="transfer-list" class="tournament-list"></div>
+      <div id="transfer-pager"></div>
     </section>
 
     <!-- БАНК -->

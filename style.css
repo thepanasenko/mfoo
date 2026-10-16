@@ -2345,7 +2345,7 @@ input {
    ============================================================ */
 .bank-card {
   background: rgb(0 0 0 / 50%);
-  border: 2px solid #083a73;
+  border: 2px solid #082b1a;
   border-radius: 20px;
   padding: 18px;
   margin-bottom: 16px;
@@ -2393,7 +2393,7 @@ input {
 .coin-buy-btn {
   position: relative;
   background: rgb(0 0 0 / 50%);
-  border: 2px solid #083a73;
+  border: 2px solid #082b1a;
   border-radius: 14px;
   padding: 12px 4px 10px;
   min-width: 0;
@@ -3373,7 +3373,7 @@ input {
   justify-content: space-between;
   gap: 10px;
   background: rgb(0 0 0 / 50%);
-  border: 2px solid #083a73;
+  border: 2px solid #082b1a;
   border-radius: 14px;
   padding: 10px 12px;
 }
@@ -3714,3 +3714,17 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
   display:inline-flex; align-items:center; justify-content:center; gap:6px; text-align:center;
 }
 #player-modal-body .btn-secondary{ border-width:1px; }
+
+/* трансфер: вкладки, продажи, пагинация */
+.team-tab-btn{ position:relative; }
+.transfer-tab-badge{ top:-6px; right:10px; border-color:#082b1a; }
+#transfer-pager .matches-pager{ margin-top:14px; }
+.sale-row.sold{ border-color:var(--gold); }
+.sale-row .tournament-status{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+.sale-claim-btn{ background:linear-gradient(180deg,var(--gold) 0%,var(--gold-dark) 100%); color:#fff; border:none; box-shadow:0 4px 0 #8a6603; }
+.sale-cancel-btn{ color:var(--red); border-color:var(--red); }
+.transfer-row.tr-new{ animation:tr-new-glow 3s ease-out; }
+@keyframes tr-new-glow{ 0%{ border-color:var(--green); box-shadow:0 0 16px var(--green-glow);} 100%{ border-color:#082b1a; } }
+
+.pm-stat-price{ color:var(--gold); display:flex; align-items:center; justify-content:center; gap:6px; }
+.transfer-row-buy.unaffordable{ opacity:.6; }

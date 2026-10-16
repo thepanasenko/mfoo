@@ -1406,7 +1406,6 @@ function updatePlayNowButton(cupId){
 }
 let trainingTimers = {};
 let trainingUpdateInterval = null;
-let transferTimerInterval = null;
 
 /* ---------- utils ---------- */
 function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
@@ -1691,6 +1690,7 @@ function newGameState(teamName, kitColor){
     level: 1,
     xp: 0,
     transferMarket: { players: [], generatedAt: 0 },
+    transferSales: [],
     formation: DEFAULT_FORMATION,
     lineups: {},
     leagueRegistrations: {},
@@ -1747,6 +1747,7 @@ function migrateState(s){
   if(s.level === undefined) s.level = 1;
   if(s.xp === undefined) s.xp = 0;
   if(!s.transferMarket) s.transferMarket = { players: [], generatedAt: 0 };
+  if(!Array.isArray(s.transferSales)) s.transferSales = [];
   if(!s.taskStats) s.taskStats = { cupPlays: {}, cupWins: {} };
   if(!s.taskStats.cupPlays) s.taskStats.cupPlays = {};
   if(!s.taskStats.cupWins) s.taskStats.cupWins = {};
@@ -1880,6 +1881,10 @@ function showApp(){
   navigate('manager');
   restoreTrainingTimers();
   ensureTrainingTick();
+  ensureTransferMarket();
+  processTransferSales();
+  updateTransferNavBadge();
+  ensureTransferTick();
   startLeagueNotificationPoll();
   healthRecoveryTick();
   if(!window.__healthTimer) window.__healthTimer = setInterval(healthRecoveryTick, 1000);
@@ -2656,17 +2661,22 @@ function onBuySlotUpgrade(){
 /* ============================================================
    TRANSFER MARKET
    ============================================================ */
-const TRANSFER_MARKET_SIZE = 12;
-const TRANSFER_REFRESH_MS = 60 * 60 * 1000;
-const TRANSFER_MIN_POWER = 30;
+const TRANSFER_MIN_COUNT = 30;
+const TRANSFER_MAX_COUNT = 50;
+const TRANSFER_MIN_POWER = 180;
 const TRANSFER_MAX_POWER = 1000;
+const TRANSFER_PRICE_PER_POWER = 140;     /* 1 сила = 140 монет */
+const TRANSFER_PAGE_SIZE = 10;
+const TRANSFER_SELL_WINDOW_MS = 15 * 60 * 1000;  /* игрок продаётся в течение 15 минут */
+const MIN_SQUAD_PLAYERS = 11;
+const TRANSFER_MARKET_VERSION = 3;
 
 function transferPlayerPrice(power){
-  return Math.round(power / 10) * 1000;
+  return power * TRANSFER_PRICE_PER_POWER;
 }
 
 function sellPlayerPrice(power){
-  return Math.max(300, Math.round(transferPlayerPrice(power) * 0.5 / 100) * 100);
+  return transferPlayerPrice(power);
 }
 
 function generateTransferPlayer(usedNames){
@@ -2685,18 +2695,101 @@ function generateTransferPlayer(usedNames){
 function generateTransferMarket(){
   const usedNames = new Set();
   const players = [];
-  for(let i = 0; i < TRANSFER_MARKET_SIZE; i++){
+  const count = rnd(TRANSFER_MIN_COUNT, TRANSFER_MAX_COUNT);
+  for(let i = 0; i < count; i++){
     players.push(generateTransferPlayer(usedNames));
   }
   players.sort((a,b) => a.power - b.power);
-  state.transferMarket = { players, generatedAt: Date.now() };
+  state.transferMarket = { players, generatedAt: Date.now(), v: TRANSFER_MARKET_VERSION, nextEventAt: Date.now() + rnd(15000, 60000) };
   save();
 }
 
 function ensureTransferMarket(){
   const market = state.transferMarket;
-  if(!market || !market.players || !market.players.length || (Date.now() - (market.generatedAt || 0)) >= TRANSFER_REFRESH_MS){
+  if(!state.transferSales) state.transferSales = [];
+  if(!market || !market.players || market.v !== TRANSFER_MARKET_VERSION || market.players.length < TRANSFER_MIN_COUNT){
     generateTransferMarket();
+    /* пересчитываем цену ещё не проданных игроков по новому курсу */
+    state.transferSales.forEach(x=>{ if(!x.sold) x.price = sellPlayerPrice(x.player.power); });
+    save();
+  }
+}
+
+/* боты иногда покупают игроков и выставляют новых (30–50 на рынке) */
+function transferMarketStep(){
+  const m = state.transferMarket;
+  if(!m || !m.players) return false;
+  const now = Date.now();
+  if(!m.nextEventAt) m.nextEventAt = now + rnd(15000, 60000);
+  let changed = false, guard = 0;
+  while(m.nextEventAt <= now && guard++ < 300){
+    const n = m.players.length;
+    const add = n <= TRANSFER_MIN_COUNT ? true : n >= TRANSFER_MAX_COUNT ? false : Math.random() < 0.5;
+    if(add){
+      const used = new Set(m.players.map(p=>p.name));
+      const np = generateTransferPlayer(used);
+      np.addedAt = m.nextEventAt;
+      m.players.push(np);
+      m.players.sort((x,y) => x.power - y.power);
+    } else {
+      m.players.splice(rnd(0, n - 1), 1);
+    }
+    m.nextEventAt += rnd(15000, 60000);
+    changed = true;
+  }
+  return changed;
+}
+
+/* продажа выставленных игроков: каждый продаётся в случайный момент в течение 15 минут */
+function processTransferSales(){
+  if(!state.transferSales) state.transferSales = [];
+  const now = Date.now();
+  let changed = false;
+  state.transferSales.forEach(sale=>{
+    /* старые заявки (с окном в час) тоже укладываем в 15 минут */
+    if(!sale.sold && sale.sellAt > sale.listedAt + TRANSFER_SELL_WINDOW_MS) sale.sellAt = sale.listedAt + rnd(30 * 1000, TRANSFER_SELL_WINDOW_MS);
+    if(!sale.sold && sale.sellAt <= now){ sale.sold = true; sale.soldAt = sale.sellAt; changed = true; }
+  });
+  return changed;
+}
+
+function soldUnclaimedCount(){
+  return (state.transferSales || []).filter(x=>x.sold).length;
+}
+
+function updateTransferNavBadge(){
+  const btn = document.querySelector('.nav-btn[data-nav="transfer"]');
+  if(!btn || !state) return;
+  const n = soldUnclaimedCount();
+  let badge = btn.querySelector('.task-badge');
+  if(n > 0){
+    if(!badge){
+      badge = document.createElement('span');
+      badge.className = 'task-badge nav-task-badge';
+      btn.appendChild(badge);
+    }
+    badge.textContent = '!';
+  } else if(badge){
+    badge.remove();
+  }
+}
+
+let transferTickInterval = null;
+function ensureTransferTick(){
+  if(transferTickInterval) return;
+  transferTickInterval = setInterval(transferTick, 2000);
+}
+function transferTick(){
+  if(!state || !state.players) return;
+  ensureTransferMarket();
+  const c1 = processTransferSales();
+  const c2 = transferMarketStep();
+  if(c1 || c2) save();
+  updateTransferNavBadge();
+  const view = document.getElementById('view-transfer');
+  const modal = document.getElementById('player-modal');
+  if((c1 || c2) && view && view.classList.contains('active') && modal && modal.classList.contains('hidden')){
+    renderTransferMarket();
   }
 }
 
@@ -2705,13 +2798,13 @@ let transferActiveFilter = 'all';
 function transferPlayerRowHtml(p){
   const affordable = state.coins >= p.price;
   return `
-  <div class="tournament-card transfer-row" data-id="${p.id}">
+  <div class="tournament-card transfer-row ${(p.addedAt && Date.now() - p.addedAt < 6000) ? 'tr-new' : ''}" data-id="${p.id}">
     ${playerAvatarHtml(p)}
     <div class="tournament-info">
       <div class="tournament-name">${p.name}</div>
       <div class="tournament-status">${posLabel(p.pos)} · Сила ${fmt(p.power)}</div>
     </div>
-    <button class="transfer-row-buy" data-buy-id="${p.id}" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
+    <button class="transfer-row-buy ${affordable ? '' : 'unaffordable'}" data-open-id="${p.id}">
       <img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${fmt(p.price)}
     </button>
   </div>`;
@@ -2727,74 +2820,209 @@ function transferFilterHtml(){
   `).join('');
 }
 
+function saleRowHtml(sale){
+  const p = sale.player;
+  const pos = posByCode(p.pos) || { code: p.pos || '?', css: '' };
+  const right = sale.sold
+    ? `<button class="transfer-row-buy sale-claim-btn" data-claim="${sale.id}">ЗАБРАТЬ</button>`
+    : `<button class="transfer-row-buy" data-open-sale="${sale.id}"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${fmt(sale.price)}</button>`;
+  return `
+  <div class="tournament-card transfer-row sale-row ${sale.sold ? 'sold' : ''}" data-sale="${sale.id}">
+    ${playerAvatarHtml(p)}
+    <div class="tournament-info">
+      <div class="tournament-name">${p.name}</div>
+      <div class="tournament-status">${sale.sold ? 'Продан · +' + fmt(sale.price) : posLabel(p.pos) + ' · Сила ' + fmt(p.power)}</div>
+    </div>
+    ${right}
+  </div>`;
+}
+
+function claimTransferSale(saleId){
+  const i = state.transferSales.findIndex(x=>x.id === saleId);
+  if(i === -1) return;
+  const sale = state.transferSales[i];
+  if(!sale.sold) return;
+  state.coins += sale.price;
+  state.transferSales.splice(i, 1);
+  save();
+  refreshTopbar();
+  updateTransferNavBadge();
+  closePlayerModal();
+  showToast(`<img src="${IMG.coin}" class="img-icon" alt=""> ${sale.player.name} продан — получено ${fmt(sale.price)}`);
+  renderTransferMarket();
+}
+
+function cancelTransferSale(saleId){
+  const i = state.transferSales.findIndex(x=>x.id === saleId);
+  if(i === -1) return;
+  const sale = state.transferSales[i];
+  if(sale.sold){
+    showToast('Игрок уже продан — заберите деньги');
+    closePlayerModal();
+    renderTransferMarket();
+    return;
+  }
+  state.transferSales.splice(i, 1);
+  state.players.push(Object.assign({}, sale.player, { status:'bench', training:false, trainingEndTime:null }));
+  save();
+  refreshTopbar();
+  closePlayerModal();
+  showToast(`${sale.player.name} снят с трансфера и вернулся в запас`);
+  renderTransferMarket();
+}
+
+function transferCardHtml(p, statusLabel, price){
+  const pos = posByCode(p.pos) || { code: p.pos || '?', css: '' };
+  return `
+    <div class="pm-head">
+      <img src="${playerAvatarSrc(p)}" class="pm-photo" alt="${p.name}">
+      <div class="pm-head-info">
+        <div class="pm-name">${p.name}</div>
+        <div class="pm-pos"><span class="player-pos ${pos.css}">${pos.code}</span></div>
+      </div>
+    </div>
+    <div class="pm-stats-grid">
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">СИЛА</div>
+        <div class="pm-stat-value pm-stat-power">${fmt(p.power)}</div>
+      </div>
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">ЗДОРОВЬЕ</div>
+        <div class="pm-stat-value pm-stat-health">${playerHealth(p)}</div>
+      </div>
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">СТАТУС</div>
+        <div class="pm-stat-value pm-stat-status">${statusLabel}</div>
+      </div>
+      <div class="pm-stat-box">
+        <div class="pm-stat-label">ПОЗИЦИЯ</div>
+        <div class="pm-stat-value pm-stat-status">${posLabel(p.pos)}</div>
+      </div>
+      <div class="pm-stat-box pm-stat-wide">
+        <div class="pm-stat-label">ЦЕНА</div>
+        <div class="pm-stat-value pm-stat-price"><img src="${IMG.coin}" class="img-icon-lg" alt="Монеты"> ${fmt(price)}</div>
+      </div>
+    </div>`;
+}
+
+function openSaleModal(saleId){
+  const sale = (state.transferSales || []).find(x=>x.id === saleId);
+  if(!sale) return;
+  const p = sale.player;
+  const btn = sale.sold
+    ? `<button id="btn-sale-action" class="btn-primary btn-big" style="margin-top:14px;">Забрать <img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${fmt(sale.price)}</button>`
+    : `<button id="btn-sale-action" class="btn-secondary btn-big" style="margin-top:14px;">Снять с трансфера</button>`;
+  document.getElementById('player-modal-body').innerHTML =
+    transferCardHtml(p, sale.sold ? 'Продан' : 'Трансфер', sale.price) + btn;
+  healthModalPlayerId = null;
+  document.getElementById('player-modal').classList.remove('hidden');
+  document.getElementById('btn-sale-action').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    if(sale.sold) claimTransferSale(sale.id); else cancelTransferSale(sale.id);
+  });
+}
+
+let transferActiveTab = 'buy';
+let transferBuyPage = 0;
+
 function renderTransferMarket(){
   ensureTransferMarket();
+  processTransferSales();
+  transferMarketStep();
 
+  const sold = soldUnclaimedCount();
+  document.querySelectorAll('[data-transfer-tab]').forEach(btn=>{
+    const tab = btn.dataset.transferTab;
+    btn.classList.toggle('active', tab === transferActiveTab);
+    btn.onclick = ()=>{ transferActiveTab = tab; transferBuyPage = 0; renderTransferMarket(); };
+    const old = btn.querySelector('.transfer-tab-badge');
+    if(old) old.remove();
+    if(tab === 'sell' && sold > 0){
+      const b = document.createElement('span');
+      b.className = 'task-badge transfer-tab-badge';
+      b.textContent = sold;
+      btn.appendChild(b);
+    }
+  });
+  updateTransferNavBadge();
+
+  const isSell = transferActiveTab === 'sell';
   const filterEl = document.getElementById('transfer-filter');
+  const list = document.getElementById('transfer-list');
+  const pagerEl = document.getElementById('transfer-pager');
+
   filterEl.innerHTML = transferFilterHtml();
   filterEl.querySelectorAll('.transfer-filter-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       transferActiveFilter = btn.dataset.filter;
+      transferBuyPage = 0;
       renderTransferMarket();
     });
   });
 
-  const list = document.getElementById('transfer-list');
-  const players = state.transferMarket.players.filter(p =>
-    transferActiveFilter === 'all' || p.pos === transferActiveFilter
-  );
-  list.innerHTML = players.length
-    ? players.map(transferPlayerRowHtml).join('')
-    : `<div class="stub-card"><div class="stub-icon">🔁</div><p>${state.transferMarket.players.length ? 'Нет игроков по этому фильтру' : 'Рынок пуст. Загляните позже.'}</p></div>`;
+  let all;
+  if(isSell){
+    all = (state.transferSales || [])
+      .filter(x => transferActiveFilter === 'all' || x.player.pos === transferActiveFilter)
+      .sort((a,b)=> (b.sold?1:0) - (a.sold?1:0) || a.listedAt - b.listedAt);
+  } else {
+    all = state.transferMarket.players.filter(p =>
+      transferActiveFilter === 'all' || p.pos === transferActiveFilter
+    );
+  }
+  const totalPages = Math.max(1, Math.ceil(all.length / TRANSFER_PAGE_SIZE));
+  if(transferBuyPage > totalPages - 1) transferBuyPage = totalPages - 1;
+  if(transferBuyPage < 0) transferBuyPage = 0;
+  const pageItems = all.slice(transferBuyPage * TRANSFER_PAGE_SIZE, (transferBuyPage + 1) * TRANSFER_PAGE_SIZE);
 
+  if(pageItems.length){
+    list.innerHTML = pageItems.map(isSell ? saleRowHtml : transferPlayerRowHtml).join('');
+  } else {
+    const hasAnySales = (state.transferSales || []).length > 0;
+    list.innerHTML = `<div class="stub-card"><div class="stub-icon">🔁</div><p>${
+      isSell && !hasAnySales
+        ? 'Вы пока никого не выставили на трансфер. Откройте карточку запасного игрока и нажмите «На трансфер».'
+        : 'Нет игроков по этому фильтру'}</p></div>`;
+  }
+
+  if(totalPages > 1){
+    const from = transferBuyPage * TRANSFER_PAGE_SIZE + 1;
+    const to = Math.min((transferBuyPage + 1) * TRANSFER_PAGE_SIZE, all.length);
+    pagerEl.innerHTML = `
+      <div class="matches-pager">
+        <button class="pager-btn pager-prev" ${transferBuyPage <= 0 ? 'disabled' : ''}>‹</button>
+        <span class="pager-info">Игроки ${from}–${to} из ${all.length} · стр. ${transferBuyPage + 1}/${totalPages}</span>
+        <button class="pager-btn pager-next" ${transferBuyPage >= totalPages - 1 ? 'disabled' : ''}>›</button>
+      </div>`;
+    const prev = pagerEl.querySelector('.pager-prev');
+    const next = pagerEl.querySelector('.pager-next');
+    if(prev) prev.addEventListener('click', ()=>{ transferBuyPage--; renderTransferMarket(); window.scrollTo(0,0); });
+    if(next) next.addEventListener('click', ()=>{ transferBuyPage++; renderTransferMarket(); window.scrollTo(0,0); });
+  } else {
+    pagerEl.innerHTML = '';
+  }
+
+  /* нажатие на строку или на цену открывает карточку; купить/снять можно только в карточке */
   list.querySelectorAll('.transfer-row').forEach(row=>{
-    row.addEventListener('click', ()=> openTransferPlayerModal(row.dataset.id));
-  });
-  list.querySelectorAll('.transfer-row-buy').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      onBuyTransferPlayer(btn.dataset.buyId, btn);
+    row.addEventListener('click', ()=>{
+      if(row.dataset.sale) openSaleModal(row.dataset.sale);
+      else openTransferPlayerModal(row.dataset.id);
     });
   });
-
-  updateTransferTimer();
-  if(transferTimerInterval){
-    clearInterval(transferTimerInterval);
-    transferTimerInterval = null;
-  }
-  transferTimerInterval = setInterval(()=>{
-    const view = document.getElementById('view-transfer');
-    if(!view || !view.classList.contains('active')){
-      clearInterval(transferTimerInterval);
-      transferTimerInterval = null;
-      return;
-    }
-    updateTransferTimer();
-  }, 1000);
-}
-
-function updateTransferTimer(){
-  const timerEl = document.getElementById('transfer-timer');
-  if(!timerEl) return;
-
-  const generatedAt = state.transferMarket.generatedAt || Date.now();
-  const remaining = Math.max(0, (generatedAt + TRANSFER_REFRESH_MS) - Date.now());
-
-  if(remaining <= 0){
-    generateTransferMarket();
-    renderTransferMarket();
-    return;
-  }
-
-  const mins = Math.floor(remaining / 60000);
-  const secs = Math.floor((remaining % 60000) / 1000);
-  timerEl.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+  list.querySelectorAll('[data-claim]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); claimTransferSale(btn.dataset.claim); });
+  });
 }
 
 function onBuyTransferPlayer(playerId, btnEl){
   const market = state.transferMarket;
   const idx = market.players.findIndex(p => p.id === playerId);
-  if(idx === -1) return;
+  if(idx === -1){
+    showToast('Этого игрока уже купил другой клуб');
+    closePlayerModal();
+    renderTransferMarket();
+    return;
+  }
   const p = market.players[idx];
 
   if(state.coins < p.price){
@@ -2832,38 +3060,11 @@ function openTransferPlayerModal(id){
   const market = state.transferMarket;
   const p = market.players.find(pl => pl.id === id);
   if(!p) return;
-
-  const pos = posByCode(p.pos);
   const affordable = state.coins >= p.price;
 
-  document.getElementById('player-modal-body').innerHTML = `
-    <div class="pm-head">
-      <img src="${playerAvatarSrc(p)}" class="pm-photo" alt="${p.name}">
-      <div class="pm-head-info">
-        <div class="pm-name">${p.name}</div>
-        <div class="pm-pos"><span class="player-pos ${pos.css}">${pos.code}</span></div>
-      </div>
-    </div>
-    <div class="pm-stats-grid">
-      <div class="pm-stat-box">
-        <div class="pm-stat-label">СИЛА</div>
-        <div class="pm-stat-value pm-stat-power">${fmt(p.power)}</div>
-      </div>
-      <div class="pm-stat-box">
-        <div class="pm-stat-label">ЗДОРОВЬЕ</div>
-        <div class="pm-stat-value pm-stat-health">${playerHealth(p)}</div>
-      </div>
-      <div class="pm-stat-box">
-        <div class="pm-stat-label">СТАТУС</div>
-        <div class="pm-stat-value pm-stat-status">Трансфер</div>
-      </div>
-      <div class="pm-stat-box">
-        <div class="pm-stat-label">ПОЗИЦИЯ</div>
-        <div class="pm-stat-value pm-stat-status">${posLabel(p.pos)}</div>
-      </div>
-    </div>
+  document.getElementById('player-modal-body').innerHTML = transferCardHtml(p, 'Трансфер', p.price) + `
     <button id="btn-buy-transfer-player" class="btn-primary btn-big" style="margin-top:14px;" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
-      <img src="${IMG.coin}" class="img-icon" alt="Монеты"> Купить за ${fmt(p.price)}
+      Купить
     </button>
   `;
   healthModalPlayerId = null;
@@ -2925,7 +3126,11 @@ function openPlayerModalInner(id){
       sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">${timeIcon()} Нельзя продать на тренировке</button>`;
     } else {
       const price = sellPlayerPrice(p.power);
-      sellButton = `<button id="btn-sell-player" class="btn-danger btn-big" style="margin-top:10px;">💰 Продать за ${fmt(price)} <img src="${IMG.coin}" class="img-icon" alt="Монеты"></button>`;
+      if(state.players.length <= MIN_SQUAD_PLAYERS){
+        sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">Минимум ${MIN_SQUAD_PLAYERS} игроков</button>`;
+      } else {
+        sellButton = `<button id="btn-sell-player" class="btn-danger btn-big" style="margin-top:10px;">На трансфер за ${fmt(price)} <img src="${IMG.coin}" class="img-icon" alt="Монеты"></button>`;
+      }
     }
   }
 
@@ -2988,30 +3193,45 @@ function onSellPlayer(playerId){
   const p = state.players.find(pl=>pl.id===playerId);
   if(!p) return;
   if(p.status !== 'bench'){
-    showToast('❌ Нельзя продать игрока из основного состава — сначала отправьте в запас');
+    showToast('❌ Нельзя выставить игрока из основного состава — сначала отправьте в запас');
     return;
   }
   if(p.training){
-    showToast('❌ Нельзя продать игрока во время тренировки — сначала снимите его со слота');
+    showToast('❌ Нельзя выставить игрока во время тренировки — сначала снимите его со слота');
+    return;
+  }
+  if(state.players.length <= MIN_SQUAD_PLAYERS){
+    showToast(`❌ В команде должно быть не меньше ${MIN_SQUAD_PLAYERS} игроков`);
     return;
   }
   const price = sellPlayerPrice(p.power);
-  showConfirm(`Продать <b>${p.name}</b> за ${fmt(price)} монет? Это действие нельзя отменить.`, ()=>{
+  showConfirm(`Выставить <b>${p.name}</b> на трансфер за ${fmt(price)} монет? Игрок будет продан в течение 15 минут. До продажи его можно снять с трансфера.`, ()=>{
+    if(state.players.length <= MIN_SQUAD_PLAYERS) return;
     if(state.lineups){
       Object.keys(state.lineups).forEach(fid=>{
         const lineup = state.lineups[fid];
         for(let i=0;i<lineup.length;i++){ if(lineup[i]===playerId) lineup[i] = null; }
       });
     }
+    const snapshot = Object.assign({}, p);
     state.players = state.players.filter(pl=>pl.id!==playerId);
-    state.coins += price;
+    if(!state.transferSales) state.transferSales = [];
+    const now = Date.now();
+    state.transferSales.push({
+      id: uid(),
+      player: snapshot,
+      price,
+      listedAt: now,
+      sellAt: now + rnd(30 * 1000, TRANSFER_SELL_WINDOW_MS),
+      sold: false
+    });
 
     save();
     refreshTopbar();
     closePlayerModal();
     renderTeam();
-    showToast(`💰 ${p.name} продан за ${fmt(price)} монет`);
-  }, { icon:'💰', title:'Продать игрока?', yesText:'Продать' });
+    showToast(`${p.name} выставлен на трансфер за ${fmt(price)} монет`);
+  }, { icon:'🔁', title:'Выставить на трансфер?', yesText:'Выставить' });
 }
 
 const MAIN_SQUAD_SIZE = 11;
