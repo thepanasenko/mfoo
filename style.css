@@ -2345,7 +2345,7 @@ input {
    ============================================================ */
 .bank-card {
   background: rgb(0 0 0 / 50%);
-  border: 2px solid #082b1a;
+  border: 2px solid #083a73;
   border-radius: 20px;
   padding: 18px;
   margin-bottom: 16px;
@@ -2393,7 +2393,7 @@ input {
 .coin-buy-btn {
   position: relative;
   background: rgb(0 0 0 / 50%);
-  border: 2px solid #082b1a;
+  border: 2px solid #083a73;
   border-radius: 14px;
   padding: 12px 4px 10px;
   min-width: 0;
@@ -3373,7 +3373,7 @@ input {
   justify-content: space-between;
   gap: 10px;
   background: rgb(0 0 0 / 50%);
-  border: 2px solid #082b1a;
+  border: 2px solid #083a73;
   border-radius: 14px;
   padding: 10px 12px;
 }
