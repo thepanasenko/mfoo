@@ -2322,8 +2322,9 @@ input {
 /* stub sections */
 .stub-card {
   background: rgb(0 0 0 / 50%);
-  border: 1px solid #082b1a;
-  border-radius: 14px;
+  box-shadow: inset 30px 30px 60px rgba(0, 0, 0, 0.5), inset -30px -30px 60px rgba(0, 0, 0, 0.5);
+  border: 2px solid #082b1a;
+  border-radius: 20px;
   padding: 34px 18px;
   text-align: center;
   color: var(--text-dim);
