@@ -2669,6 +2669,7 @@ const TRANSFER_PRICE_PER_POWER = 140;     /* 1 сила = 140 монет */
 const TRANSFER_PAGE_SIZE = 10;
 const TRANSFER_SELL_WINDOW_MS = 15 * 60 * 1000;  /* игрок продаётся в течение 15 минут */
 const MIN_SQUAD_PLAYERS = 11;
+const MIN_TRANSFER_POWER_TO_SELL = 180;   /* ниже этой силы игрока на трансфер выставить нельзя */
 const TRANSFER_MARKET_VERSION = 3;
 
 function transferPlayerPrice(power){
@@ -3063,7 +3064,7 @@ function openTransferPlayerModal(id){
   const affordable = state.coins >= p.price;
 
   document.getElementById('player-modal-body').innerHTML = transferCardHtml(p, 'Трансфер', p.price) + `
-    <button id="btn-buy-transfer-player" class="btn-primary btn-big" style="margin-top:14px;" ${affordable ? '' : 'disabled style="opacity:.5;cursor:not-allowed;"'}>
+    <button id="btn-buy-transfer-player" class="btn-primary btn-big ${affordable ? '' : 'btn-disabled-soft'}" style="margin-top:14px;${affordable ? '' : 'opacity:.5;cursor:not-allowed;'}" ${affordable ? '' : 'disabled'}>
       Купить
     </button>
   `;
@@ -3126,7 +3127,9 @@ function openPlayerModalInner(id){
       sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">${timeIcon()} Нельзя продать на тренировке</button>`;
     } else {
       const price = sellPlayerPrice(p.power);
-      if(state.players.length <= MIN_SQUAD_PLAYERS){
+      if(p.power < MIN_TRANSFER_POWER_TO_SELL){
+        sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">Сила от ${MIN_TRANSFER_POWER_TO_SELL} для трансфера</button>`;
+      } else if(state.players.length <= MIN_SQUAD_PLAYERS){
         sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">Минимум ${MIN_SQUAD_PLAYERS} игроков</button>`;
       } else {
         sellButton = `<button id="btn-sell-player" class="btn-danger btn-big" style="margin-top:10px;">На трансфер за ${fmt(price)} <img src="${IMG.coin}" class="img-icon" alt="Монеты"></button>`;
@@ -3198,6 +3201,10 @@ function onSellPlayer(playerId){
   }
   if(p.training){
     showToast('❌ Нельзя выставить игрока во время тренировки — сначала снимите его со слота');
+    return;
+  }
+  if(p.power < MIN_TRANSFER_POWER_TO_SELL){
+    showToast(`❌ Выставить на трансфер можно игрока с силой от ${MIN_TRANSFER_POWER_TO_SELL}`);
     return;
   }
   if(state.players.length <= MIN_SQUAD_PLAYERS){

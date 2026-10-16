@@ -3718,7 +3718,7 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 
 /* трансфер: вкладки, продажи, пагинация */
 .team-tab-btn{ position:relative; }
-.transfer-tab-badge{ top:-6px; right:10px; border-color:#082b1a; }
+.transfer-tab-badge{ top:-6px; right:-6px; border-color:#082b1a; }
 #transfer-pager .matches-pager{ margin-top:14px; }
 .sale-row.sold{ border-color:var(--gold); }
 .sale-row .tournament-status{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
