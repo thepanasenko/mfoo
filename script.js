@@ -64,7 +64,10 @@ const TROPHY_IMG = {
   asia:    IMG.chempAzii,
   eurasia: IMG.chempEuroazii,
   africa:  IMG.chempAfrika,
-  oceania: IMG.chempOkean
+  oceania: IMG.chempOkean,
+  china:   'images/cup/chempchina.png',
+  mexico:  'images/cup/chempmexica.png',
+  greenland: 'images/cup/chempgrenland.png'
 };
 /* ============================================================
    ИНВЕНТАРЬ — усиления «Мотивация» (+% силы на один следующий матч)
@@ -510,6 +513,102 @@ const TOURNAMENTS = [
     cupWinCoins: 90000
   },
   {
+    id:'china',
+    title:'ЧЕМПИОНАТ КИТАЯ',
+    icon:'🐉',
+    type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
+    min:7701, max:8800,
+    groupsCount:64,
+    teamsPerGroup:10,
+    teamNames:['MoscowBear','IstanbulBosp','AnkaraAnatol','Novosibirsk','Yekaterinbur','Vladivostok','KyivDnipro','MinskZubrEli','WarsawEagle','BucharestCar','AthensAcropo','CairoSphinx','AlexandriaNi','CasablancaAt','TunisCarthag','AlgiersKasba','TripoliOasis','NicosiaCypru','VallettaMalt','ReykjavikGey','HelsinkiNort','RigaAmber','VilniusHill','TallinnSpire','ChisinauVine','SarajevoBrid','SkopjeVardar','PodgoricaCoa','LjubljanaAlp','BratislavaCa','ViennaRing','ZurichPeak','GenevaLake','BrusselsGran','LuxembourgFo','MonacoRivier','AndorraPeak','SanMarinoTow','VaticanDome','LisbonCoast','MadridCentra','BarcelonaSea','MilanDuomo','NaplesBay','PalermoSun','BernAlpine','MunichBeer','FrankfurtBan','HamburgPort','CopenhagenSp','StockholmIsl','OsloFjordEli','GothenburgHa','KrakowDragon','GdanskAmber','WroclawBridg','SofiaVitosha','BelgradeRive','ZagrebCathed','BudapestBath','Thessaloniki','RotterdamPor','AmsterdamCan','DublinClover'],
+    groupStageReward: { coins:2600, power:2, xp:440 },
+    groupWinBonus: { coins:3500, power:5, xp:1050 },
+    // плей-офф на вылет (64 команды): 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:5250, power:9, xp:1050 },    // 1/32 финала
+      { coins:8750, power:14, xp:1400 },    // 1/16 финала
+      { coins:13100, power:18, xp:1750 },  // 1/8 финала
+      { coins:17500, power:21, xp:2625 }, // Четвертьфинал
+      { coins:21900, power:26, xp:3500 }, // Полуфинал
+      { coins:35000, power:44, xp:5250 }  // Финал
+    ],
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:35000, power:44, xp:5250 }, // 1-е место
+      { coins:28000, power:35, xp:4200 }, // 2-е место
+      { coins:21900, power:26, xp:3150 }, // 3-е место
+      { coins:15750,  power:19, xp:2275 }, // 4-е место
+      { coins:10500,  power:14,  xp:1575  }, // 5-е место
+      { coins:7000,  power:9,  xp:875  }  // 6-е место
+    ],
+    cupWinCoins: 105000
+  },
+  {
+    id:'mexico',
+    title:'ЧЕМПИОНАТ МЕКСИКИ',
+    icon:'🌮',
+    type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
+    min:8801, max:9900,
+    groupsCount:64,
+    teamsPerGroup:10,
+    teamNames:['MoscowBear','IstanbulBosp','AnkaraAnatol','Novosibirsk','Yekaterinbur','Vladivostok','KyivDnipro','MinskZubrEli','WarsawEagle','BucharestCar','AthensAcropo','CairoSphinx','AlexandriaNi','CasablancaAt','TunisCarthag','AlgiersKasba','TripoliOasis','NicosiaCypru','VallettaMalt','ReykjavikGey','HelsinkiNort','RigaAmber','VilniusHill','TallinnSpire','ChisinauVine','SarajevoBrid','SkopjeVardar','PodgoricaCoa','LjubljanaAlp','BratislavaCa','ViennaRing','ZurichPeak','GenevaLake','BrusselsGran','LuxembourgFo','MonacoRivier','AndorraPeak','SanMarinoTow','VaticanDome','LisbonCoast','MadridCentra','BarcelonaSea','MilanDuomo','NaplesBay','PalermoSun','BernAlpine','MunichBeer','FrankfurtBan','HamburgPort','CopenhagenSp','StockholmIsl','OsloFjordEli','GothenburgHa','KrakowDragon','GdanskAmber','WroclawBridg','SofiaVitosha','BelgradeRive','ZagrebCathed','BudapestBath','Thessaloniki','RotterdamPor','AmsterdamCan','DublinClover'],
+    groupStageReward: { coins:3000, power:3, xp:500 },
+    groupWinBonus: { coins:4000, power:5, xp:1200 },
+    // плей-офф на вылет (64 команды): 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:6000, power:11, xp:1200 },    // 1/32 финала
+      { coins:10000, power:16, xp:1600 },    // 1/16 финала
+      { coins:15000, power:20, xp:2000 },  // 1/8 финала
+      { coins:20000, power:24, xp:3000 }, // Четвертьфинал
+      { coins:25000, power:29, xp:4000 }, // Полуфинал
+      { coins:40000, power:51, xp:6000 }  // Финал
+    ],
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:40000, power:51, xp:6000 }, // 1-е место
+      { coins:32000, power:40, xp:4800 }, // 2-е место
+      { coins:25000, power:29, xp:3600 }, // 3-е место
+      { coins:18000,  power:21, xp:2600 }, // 4-е место
+      { coins:12000,  power:16,  xp:1800  }, // 5-е место
+      { coins:8000,  power:11,  xp:1000  }  // 6-е место
+    ],
+    cupWinCoins: 120000
+  },
+  {
+    id:'greenland',
+    title:'ЧЕМПИОНАТ ГРЕНЛАНДИИ',
+    icon:'❄️',
+    type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
+    min:9901, max:11000,
+    groupsCount:64,
+    teamsPerGroup:10,
+    teamNames:['MoscowBear','IstanbulBosp','AnkaraAnatol','Novosibirsk','Yekaterinbur','Vladivostok','KyivDnipro','MinskZubrEli','WarsawEagle','BucharestCar','AthensAcropo','CairoSphinx','AlexandriaNi','CasablancaAt','TunisCarthag','AlgiersKasba','TripoliOasis','NicosiaCypru','VallettaMalt','ReykjavikGey','HelsinkiNort','RigaAmber','VilniusHill','TallinnSpire','ChisinauVine','SarajevoBrid','SkopjeVardar','PodgoricaCoa','LjubljanaAlp','BratislavaCa','ViennaRing','ZurichPeak','GenevaLake','BrusselsGran','LuxembourgFo','MonacoRivier','AndorraPeak','SanMarinoTow','VaticanDome','LisbonCoast','MadridCentra','BarcelonaSea','MilanDuomo','NaplesBay','PalermoSun','BernAlpine','MunichBeer','FrankfurtBan','HamburgPort','CopenhagenSp','StockholmIsl','OsloFjordEli','GothenburgHa','KrakowDragon','GdanskAmber','WroclawBridg','SofiaVitosha','BelgradeRive','ZagrebCathed','BudapestBath','Thessaloniki','RotterdamPor','AmsterdamCan','DublinClover'],
+    groupStageReward: { coins:3400, power:3, xp:560 },
+    groupWinBonus: { coins:4500, power:6, xp:1350 },
+    // плей-офф на вылет (64 команды): 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:6750, power:12, xp:1350 },    // 1/32 финала
+      { coins:11250, power:18, xp:1800 },    // 1/16 финала
+      { coins:16900, power:22, xp:2250 },  // 1/8 финала
+      { coins:22500, power:27, xp:3375 }, // Четвертьфинал
+      { coins:28100, power:33, xp:4500 }, // Полуфинал
+      { coins:45000, power:57, xp:6750 }  // Финал
+    ],
+    // призовые за топ-6 мест в таблице (1-е место — ещё и кубок ниже)
+    placeRewards:[
+      { coins:45000, power:57, xp:6750 }, // 1-е место
+      { coins:36000, power:45, xp:5400 }, // 2-е место
+      { coins:28100, power:33, xp:4050 }, // 3-е место
+      { coins:20250,  power:24, xp:2925 }, // 4-е место
+      { coins:13500,  power:18,  xp:2025  }, // 5-е место
+      { coins:9000,  power:12,  xp:1125  }  // 6-е место
+    ],
+    cupWinCoins: 135000
+  },
+  {
     id:'bigleague',
     title:'БОЛЬШАЯ ЛИГА',
     icon:'💎',
@@ -602,7 +701,7 @@ function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
    тут же на его месте открылся следующий, посложнее
    ============================================================ */
 const CLASSIC_CUP_IDS = ['novice','jamaica','france','usa','belarus'];
-const CHAMPIONSHIP_IDS = ['europe','america','asia','eurasia','africa','oceania'];
+const CHAMPIONSHIP_IDS = ['europe','america','asia','eurasia','africa','oceania','china','mexico','greenland'];
 
 function anyCupWon(s){
   return CLASSIC_CUP_IDS.some(id => ((s.taskStats?.cupWins?.[id]) || 0) > 0);
@@ -2671,6 +2770,7 @@ const TRANSFER_PRICE_PER_POWER = 140;     /* 1 сила = 140 монет */
 const TRANSFER_PAGE_SIZE = 10;
 const TRANSFER_SELL_WINDOW_MS = 15 * 60 * 1000;  /* игрок продаётся в течение 15 минут */
 const MIN_SQUAD_PLAYERS = 11;
+const MAX_SQUAD_PLAYERS = 22;
 const MIN_TRANSFER_POWER_TO_SELL = 180;   /* ниже этой силы игрока на трансфер выставить нельзя */
 const TRANSFER_MARKET_VERSION = 3;
 
@@ -2865,6 +2965,10 @@ function cancelTransferSale(saleId){
     renderTransferMarket();
     return;
   }
+  if(state.players.length >= MAX_SQUAD_PLAYERS){
+    showToast(`❌ В команде максимум ${MAX_SQUAD_PLAYERS} игроков — снять с трансфера нельзя`);
+    return;
+  }
   state.transferSales.splice(i, 1);
   state.players.push(Object.assign({}, sale.player, { status:'bench', training:false, trainingEndTime:null }));
   save();
@@ -2984,7 +3088,7 @@ function renderTransferMarket(){
     const hasAnySales = (state.transferSales || []).length > 0;
     list.innerHTML = `<div class="stub-card"><div class="stub-icon"><img src="${IMG.notransfer}" class="stub-icon-img" alt=""></div><p>${
       isSell && !hasAnySales
-        ? 'Вы пока никого не выставили на трансфер. Откройте карточку запасного игрока и нажмите «На трансфер».'
+        ? 'Вы пока никого не выставили на трансфер.'
         : 'Нет игроков по этому фильтру'}</p></div>`;
   }
 
@@ -3028,6 +3132,10 @@ function onBuyTransferPlayer(playerId, btnEl){
   }
   const p = market.players[idx];
 
+  if(state.players.length >= MAX_SQUAD_PLAYERS){
+    showToast(`❌ В команде максимум ${MAX_SQUAD_PLAYERS} игроков`);
+    return;
+  }
   if(state.coins < p.price){
     showToast('Недостаточно монет для покупки!');
     return;
@@ -3063,11 +3171,12 @@ function openTransferPlayerModal(id){
   const market = state.transferMarket;
   const p = market.players.find(pl => pl.id === id);
   if(!p) return;
-  const affordable = state.coins >= p.price;
+  const squadFull = state.players.length >= MAX_SQUAD_PLAYERS;
+  const affordable = state.coins >= p.price && !squadFull;
 
   document.getElementById('player-modal-body').innerHTML = transferCardHtml(p, 'Трансфер', p.price) + `
     <button id="btn-buy-transfer-player" class="btn-primary btn-big ${affordable ? '' : 'btn-disabled-soft'}" style="margin-top:14px;${affordable ? '' : 'opacity:.5;cursor:not-allowed;'}" ${affordable ? '' : 'disabled'}>
-      Купить
+      ${squadFull ? 'Команда заполнена (' + MAX_SQUAD_PLAYERS + '/' + MAX_SQUAD_PLAYERS + ')' : 'Купить'}
     </button>
   `;
   healthModalPlayerId = null;
@@ -3130,7 +3239,9 @@ function openPlayerModalInner(id){
     } else {
       const price = sellPlayerPrice(p.power);
       if(p.power < MIN_TRANSFER_POWER_TO_SELL){
-        sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">Сила от ${MIN_TRANSFER_POWER_TO_SELL} для трансфера</button>`;
+        sellButton = state.players.length <= MIN_SQUAD_PLAYERS
+          ? `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">Минимум ${MIN_SQUAD_PLAYERS} игроков</button>`
+          : `<button id="btn-terminate-player" class="btn-danger btn-big" style="margin-top:10px;">Разорвать контракт</button>`;
       } else if(state.players.length <= MIN_SQUAD_PLAYERS){
         sellButton = `<button class="btn-danger btn-big" disabled style="margin-top:10px;opacity:0.5;cursor:not-allowed;">Минимум ${MIN_SQUAD_PLAYERS} игроков</button>`;
       } else {
@@ -3185,6 +3296,14 @@ function openPlayerModalInner(id){
     });
   }
 
+  const termBtn = document.getElementById('btn-terminate-player');
+  if(termBtn){
+    termBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      onTerminateContract(id);
+    });
+  }
+
   const sellBtn = document.getElementById('btn-sell-player');
   if(sellBtn){
     sellBtn.addEventListener('click', (e) => {
@@ -3192,6 +3311,43 @@ function openPlayerModalInner(id){
       onSellPlayer(id);
     });
   }
+}
+
+/* игрок с силой < 180: контракт можно расторгнуть — игрок удаляется, денег за это нет */
+function onTerminateContract(playerId){
+  const p = state.players.find(pl=>pl.id===playerId);
+  if(!p) return;
+  if(p.status !== 'bench'){
+    showToast('❌ Сначала отправьте игрока в запас');
+    return;
+  }
+  if(p.training){
+    showToast('❌ Нельзя разорвать контракт во время тренировки — сначала снимите игрока со слота');
+    return;
+  }
+  if(p.power >= MIN_TRANSFER_POWER_TO_SELL){
+    showToast('❌ Контракт можно разорвать только у игрока с силой меньше ' + MIN_TRANSFER_POWER_TO_SELL);
+    return;
+  }
+  if(state.players.length <= MIN_SQUAD_PLAYERS){
+    showToast(`❌ В команде должно быть не меньше ${MIN_SQUAD_PLAYERS} игроков`);
+    return;
+  }
+  showConfirm(`Разорвать контракт с <b>${p.name}</b>? Игрок будет удалён из команды, выплат за это нет. Действие нельзя отменить.`, ()=>{
+    if(state.players.length <= MIN_SQUAD_PLAYERS) return;
+    if(state.lineups){
+      Object.keys(state.lineups).forEach(fid=>{
+        const lineup = state.lineups[fid];
+        for(let i=0;i<lineup.length;i++){ if(lineup[i]===playerId) lineup[i] = null; }
+      });
+    }
+    state.players = state.players.filter(pl=>pl.id!==playerId);
+    save();
+    refreshTopbar();
+    closePlayerModal();
+    renderTeam();
+    showToast(`${p.name} покинул команду`);
+  }, { icon:'📄', title:'Разорвать контракт?', yesText:'Разорвать' });
 }
 
 function onSellPlayer(playerId){
