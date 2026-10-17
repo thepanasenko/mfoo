@@ -6,6 +6,9 @@
 const SAVE_KEY = 'mfoot_save_v1';
 
 /* ---------- asset paths ---------- */
+const BIG_TIER_LIMIT = 11000;        // с этой силы начинается диапазон «11 000+»
+const RANGE_UNLIMITED = 999999999;   // «без верхнего предела» (конечное число, чтобы сохранялось в JSON)
+const BOT_POWER_CAP = 15000;         // боты никогда не сильнее этого значения
 const IMG = {
   coin:       'images/coin.png',
   cash:       'images/cash.png',
@@ -67,7 +70,8 @@ const TROPHY_IMG = {
   oceania: IMG.chempOkean,
   china:   'images/cup/chempchina.png',
   mexico:  'images/cup/chempmexica.png',
-  greenland: 'images/cup/chempgrenland.png'
+  greenland: 'images/cup/chempgrenland.png',
+  planet:  'images/cup/cupnew.png'
 };
 /* ============================================================
    ИНВЕНТАРЬ — усиления «Мотивация» (+% силы на один следующий матч)
@@ -578,7 +582,7 @@ const TOURNAMENTS = [
   },
   {
     id:'greenland',
-    title:'ЧЕМПИОНАТ ГРЕНЛАНДИИ',
+    title:'ЧЕМП ГРЕНЛАНДИИ',
     icon:'❄️',
     type:'group',
     tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
@@ -607,6 +611,37 @@ const TOURNAMENTS = [
       { coins:9000,  power:12,  xp:1125  }  // 6-е место
     ],
     cupWinCoins: 135000
+  },
+  {
+    id:'planet',
+    title:'ЧЕМПИОНАТ ПЛАНЕТЫ',
+    icon:'🌍',
+    type:'group',
+    tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
+    min:11000, max:RANGE_UNLIMITED,
+    groupsCount:64,
+    teamsPerGroup:10,
+    teamNames:['MoscowBear','IstanbulBosp','AnkaraAnatol','Novosibirsk','Yekaterinbur','Vladivostok','KyivDnipro','MinskZubrEli','WarsawEagle','BucharestCar','AthensAcropo','CairoSphinx','AlexandriaNi','CasablancaAt','TunisCarthag','AlgiersKasba','TripoliOasis','NicosiaCypru','VallettaMalt','ReykjavikGey','HelsinkiNort','RigaAmber','VilniusHill','TallinnSpire','ChisinauVine','SarajevoBrid','SkopjeVardar','PodgoricaCoa','LjubljanaAlp','BratislavaCa','ViennaRing','ZurichPeak','GenevaLake','BrusselsGran','LuxembourgFo','MonacoRivier','AndorraPeak','SanMarinoTow','VaticanDome','LisbonCoast','MadridCentra','BarcelonaSea','MilanDuomo','NaplesBay','PalermoSun','BernAlpine','MunichBeer','FrankfurtBan','HamburgPort','CopenhagenSp','StockholmIsl','OsloFjordEli','GothenburgHa','KrakowDragon','GdanskAmber','WroclawBridg','SofiaVitosha','BelgradeRive','ZagrebCathed','BudapestBath','Thessaloniki','RotterdamPor','AmsterdamCan','DublinClover'],
+    groupStageReward: { coins:5100, power:4, xp:840 },
+    groupWinBonus: { coins:6750, power:9, xp:2025 },
+    // плей-офф на вылет (64 команды): 1/32, 1/16, 1/8, Четвертьфинал, Полуфинал, Финал
+    koRounds:[
+      { coins:10100, power:18, xp:2025 },
+      { coins:16900, power:27, xp:2700 },
+      { coins:25350, power:33, xp:3375 },
+      { coins:33750, power:40, xp:5060 },
+      { coins:42150, power:50, xp:6750 },
+      { coins:67500, power:85, xp:10100 }
+    ],
+    placeRewards:[
+      { coins:67500, power:85, xp:10100 },
+      { coins:54000, power:68, xp:8100 },
+      { coins:42150, power:50, xp:6075 },
+      { coins:30400, power:36, xp:4390 },
+      { coins:20250, power:27, xp:3040 },
+      { coins:13500, power:18, xp:1690 }
+    ],
+    cupWinCoins: 200000
   },
   {
     id:'bigleague',
@@ -701,7 +736,7 @@ function tournamentById(id){ return TOURNAMENTS.find(t=>t.id===id); }
    тут же на его месте открылся следующий, посложнее
    ============================================================ */
 const CLASSIC_CUP_IDS = ['novice','jamaica','france','usa','belarus'];
-const CHAMPIONSHIP_IDS = ['europe','america','asia','eurasia','africa','oceania','china','mexico','greenland'];
+const CHAMPIONSHIP_IDS = ['europe','america','asia','eurasia','africa','oceania','china','mexico','greenland','planet'];
 
 function anyCupWon(s){
   return CLASSIC_CUP_IDS.some(id => ((s.taskStats?.cupWins?.[id]) || 0) > 0);
@@ -1516,9 +1551,13 @@ function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
 /* формат чисел с разделителем тысяч: 1250 -> 1 250 */
 function fmt(n){ return Number(n || 0).toLocaleString('ru-RU'); }
 
+function rangeLabel(r){ return r.max >= RANGE_UNLIMITED ? `${fmt(r.min)}+` : `${fmt(r.min)}–${fmt(r.max)}`; }
+function botRange(r){ return { min: Math.min(r.min, BOT_POWER_CAP), max: Math.min(r.max, BOT_POWER_CAP) }; }
+
 /* Большая Лига: диапазон силы подбирается под силу клуба, шаг 1100.
    100–1100, 1101–2200, 2201–3300 ... и так далее (без верхнего предела). */
 function bigLeagueRangeForPower(power){
+  if(power > BIG_TIER_LIMIT) return { min: BIG_TIER_LIMIT, max: RANGE_UNLIMITED }; // 11000+
   const step = 1100;
   const tier = Math.max(1, Math.ceil(power / step));
   const min = tier === 1 ? 100 : (tier - 1) * step + 1;
@@ -3806,7 +3845,7 @@ function leagueListStatusText(t, opts){
   const { inProgress, squadFull, mainCount, eligible, range } = opts;
   if(inProgress) return 'Идёт групповой этап / плей-офф';
   if(!squadFull) return `Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`;
-  if(!eligible) return `Нужна сила клуба ${fmt(range.min)}–${fmt(range.max)}`;
+  if(!eligible) return `Нужна сила клуба ${rangeLabel(range)}`;
   const { next } = getLeagueSessions(t);
   const remaining = Math.max(0, next.getTime() - Date.now());
   const hh = String(Math.floor(remaining / 3600000)).padStart(2,'0');
@@ -3893,7 +3932,7 @@ function renderTournaments(){
       <div class="tournament-card play-card" data-cup="${t.id}">
         ${tournamentIconHtml(t)}
         <div class="tournament-name">${t.title}</div>
-        <div class="play-power"><img src="${IMG.sila}" class="img-icon" alt=""> ${t.friendly ? 'Любая' : `${fmt(range.min)}–${fmt(range.max)}`}</div>
+        <div class="play-power"><img src="${IMG.sila}" class="img-icon" alt=""> ${t.friendly ? 'Любая' : `${rangeLabel(range)}`}</div>
         ${statusLine}
         <button class="play-more-btn ${playBtnSoft(t, inProgress) ? 'btn-disabled-soft' : ''}">${playBtnText(t, inProgress)}</button>
       </div>`;
@@ -4016,7 +4055,7 @@ function renderLeagueIntro(t, ctx){
     eligEl.classList.add('bad');
     eligEl.textContent = ctx.power < ctx.range.min
       ? `Ваша команда слишком слабая для турнира «${t.title}». Нужна сила от ${fmt(ctx.range.min)}.`
-      : `Ваша команда слишком сильная для своего диапазона в «${t.title}» (${fmt(ctx.range.min)}–${fmt(ctx.range.max)}).`;
+      : `Ваша команда слишком сильная для своего диапазона в «${t.title}» (${rangeLabel(ctx.range)}).`;
     startBtn.classList.add('hidden');
     hideLeagueCancelBtn();
     stopLeagueCountdown();
@@ -4109,7 +4148,7 @@ function updateLeagueCountdown(t){
 
   const power = calcClubPower(state.players);
   const range = registered && reg.range ? reg.range : bigLeagueRangeForPower(power);
-  const rangeLine = `<br><span style="font-size:12px;color:var(--text-dim)">Диапазон силы клуба ${registered ? '(закреплён при регистрации)' : 'для вашей текущей силы'}: ${fmt(range.min)}–${fmt(range.max)}. Ваша сила: ${fmt(power)}.</span>`;
+  const rangeLine = `<br><span style="font-size:12px;color:var(--text-dim)">Диапазон силы клуба ${registered ? '(закреплён при регистрации)' : 'для вашей текущей силы'}: ${rangeLabel(range)}. Ваша сила: ${fmt(power)}.</span>`;
 
   eligEl.innerHTML = (registered
     ? `<img src="${IMG.check}" class="img-icon" alt=""> Вы зарегистрированы! До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b>`
@@ -4147,7 +4186,7 @@ function checkLeagueRegistrationEligibility(){
     reg.range = null;
     reg.notifiedSessionId = null;
     save();
-    showToast(`❌ Регистрация в «${t.title}» отменена: сила клуба ${fmt(power)} вышла из диапазона ${fmt(range.min)}–${fmt(range.max)}.`);
+    showToast(`❌ Регистрация в «${t.title}» отменена: сила клуба ${fmt(power)} вышла из диапазона ${rangeLabel(range)}.`);
     anyCancelled = true;
   });
   return anyCancelled;
@@ -4180,7 +4219,7 @@ function onLeagueRegister(){
   reg.notifiedSessionId = null;
   save();
   updateLeagueCountdown(t);
-  showToast(`<img src="${IMG.check}" class="img-icon" alt=""> Вы зарегистрированы на ближайший старт «${t.title}»! Диапазон: ${fmt(range.min)}–${fmt(range.max)}.`);
+  showToast(`<img src="${IMG.check}" class="img-icon" alt=""> Вы зарегистрированы на ближайший старт «${t.title}»! Диапазон: ${rangeLabel(range)}.`);
 }
 
 function startLeagueSession(t, sessionStartDate){
@@ -4374,7 +4413,7 @@ function initEuroCup(cupId){
     groupOpponents.push({
       id: uid(),
       name: names[i % names.length],
-      power: rnd(range.min, range.max),
+      power: rnd(botRange(range).min, botRange(range).max),
       isPlayer: false,
       formation: pick(FORMATION_IDS),
       clubAvatar: BOT_AVATAR_NUM
@@ -4451,7 +4490,7 @@ function simulateGroupWinner(t, range){
   const names = shuffle([...t.teamNames]);
   const teams = [];
   for(let i=0; i<t.teamsPerGroup; i++){
-    teams.push({ id: uid(), name: names[i % names.length], power: rnd(range.min, range.max), isPlayer:false, formation: pick(FORMATION_IDS), clubAvatar: BOT_AVATAR_NUM });
+    teams.push({ id: uid(), name: names[i % names.length], power: rnd(botRange(range).min, botRange(range).max), isPlayer:false, formation: pick(FORMATION_IDS), clubAvatar: BOT_AVATAR_NUM });
   }
   const rounds = roundRobinRounds(teams.length);
   const stats = {};
@@ -4587,8 +4626,8 @@ function initCup(cupId){
 
   for (let i = 0; i < teamCount; i++) {
     const name = names[i % names.length];
-    const botRange = t.friendly ? bigLeagueRangeForPower(power) : { min: t.min, max: t.max };
-    const botPower = rnd(botRange.min, botRange.max);
+    const bRange = t.friendly ? bigLeagueRangeForPower(power) : { min: t.min, max: t.max };
+    const botPower = rnd(botRange(bRange).min, botRange(bRange).max);
     botTeams.push({
       id: uid(),
       name: name,
