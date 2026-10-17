@@ -71,7 +71,7 @@ const TROPHY_IMG = {
   china:   'images/cup/chempchina.png',
   mexico:  'images/cup/chempmexica.png',
   greenland: 'images/cup/chempgrenland.png',
-  planet:  'images/cup/cupnew.png'
+  planet:  'images/cup/planet.png'
 };
 /* ============================================================
    ИНВЕНТАРЬ — усиления «Мотивация» (+% силы на один следующий матч)
