@@ -3722,3 +3722,6 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 
 .pm-stat-price{ color:var(--gold); display:flex; align-items:center; justify-content:center; gap:6px; }
 .transfer-row-buy.unaffordable{ opacity:.6; }
+
+/* картинки в пустых состояниях */
+.stub-icon-img{ width:96px; height:96px; object-fit:contain; display:block; margin:0 auto; }

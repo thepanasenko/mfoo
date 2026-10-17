@@ -25,6 +25,8 @@ const IMG = {
   redname:    'images/redname.png',
   plus:       'images/plus.png',
   time:       'images/time.png',
+  zapas:      'images/zapas.png',
+  notransfer: 'images/notransfer.png',
   cupNew:     'images/cup/cupnew.png',
   bliga:      'images/cup/bliga.png',
   cliga:      'images/cup/cliga.png',
@@ -2299,7 +2301,7 @@ function renderTeam(){
 
   document.getElementById('roster-bench').innerHTML = bench.length
     ? bench.map(playerListRowHtml).join('')
-    : `<div class="stub-card"><div class="stub-icon">🪑</div><p>Нет запасных игроков</p></div>`;
+    : `<div class="stub-card"><div class="stub-icon"><img src="${IMG.zapas}" class="stub-icon-img" alt=""></div><p>Нет запасных игроков</p></div>`;
 
   document.querySelectorAll('#roster-main .player-row, #roster-bench .player-row').forEach(row=>{
     row.addEventListener('click', ()=> openPlayerModal(row.dataset.id));
@@ -2980,7 +2982,7 @@ function renderTransferMarket(){
     list.innerHTML = pageItems.map(isSell ? saleRowHtml : transferPlayerRowHtml).join('');
   } else {
     const hasAnySales = (state.transferSales || []).length > 0;
-    list.innerHTML = `<div class="stub-card"><div class="stub-icon">🔁</div><p>${
+    list.innerHTML = `<div class="stub-card"><div class="stub-icon"><img src="${IMG.notransfer}" class="stub-icon-img" alt=""></div><p>${
       isSell && !hasAnySales
         ? 'Вы пока никого не выставили на трансфер. Откройте карточку запасного игрока и нажмите «На трансфер».'
         : 'Нет игроков по этому фильтру'}</p></div>`;
