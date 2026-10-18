@@ -3713,7 +3713,6 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .team-tab-btn{ position:relative; }
 .transfer-tab-badge{ top:-6px; right:-6px; border-color:#082b1a; }
 #transfer-pager .matches-pager{ margin-top:14px; }
-.sale-row.sold{ border-color:var(--gold); }
 .sale-row .tournament-status{ display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
 .sale-claim-btn{ background:linear-gradient(180deg,var(--gold) 0%,var(--gold-dark) 100%); color:#fff; border:none; box-shadow:0 4px 0 #8a6603; }
 .sale-cancel-btn{ color:var(--red); border-color:var(--red); }
@@ -3725,3 +3724,9 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 
 /* картинки в пустых состояниях */
 .stub-icon-img{ width:96px; height:96px; object-fit:contain; display:block; margin:0 auto; }
+
+/* статус продажи игрока на трансфере */
+.sale-status{ flex-shrink:0; display:flex; align-items:center; justify-content:center; gap:5px; min-width:84px; padding:8px 12px; border-radius:10px; font-weight:800; font-size:12.5px; background:rgb(0 0 0 / 50%); border:2px solid #082b1a; }
+.sale-status-listed{ color:var(--gold); border-color:var(--gold); }
+.sale-status-sold{ color:var(--green); border-color:var(--green); }
+.sale-status-expired{ color:var(--red); border-color:var(--red); }

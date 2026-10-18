@@ -2807,7 +2807,8 @@ const TRANSFER_MIN_POWER = 180;
 const TRANSFER_MAX_POWER = 1000;
 const TRANSFER_PRICE_PER_POWER = 140;     /* 1 сила = 140 монет */
 const TRANSFER_PAGE_SIZE = 10;
-const TRANSFER_SELL_WINDOW_MS = 15 * 60 * 1000;  /* игрок продаётся в течение 15 минут */
+const TRANSFER_SELL_WINDOW_MS = 30 * 60 * 1000;  /* на продажу даётся 30 минут */
+const TRANSFER_SELL_CHANCE = 0.85;               /* шанс, что игрок продастся (иначе — «Не продан») */
 const MIN_SQUAD_PLAYERS = 11;
 const MAX_SQUAD_PLAYERS = 22;
 const MIN_TRANSFER_POWER_TO_SELL = 180;   /* ниже этой силы игрока на трансфер выставить нельзя */
@@ -2882,21 +2883,33 @@ function transferMarketStep(){
   return changed;
 }
 
-/* продажа выставленных игроков: каждый продаётся в случайный момент в течение 15 минут */
+/* продажа выставленных игроков: 30 минут на продажу; 85% — продан, 15% — истекло */
+function saleState(sale){ return sale.sold ? 'sold' : (sale.expired ? 'expired' : 'listed'); }
 function processTransferSales(){
   if(!state.transferSales) state.transferSales = [];
   const now = Date.now();
   let changed = false;
   state.transferSales.forEach(sale=>{
-    /* старые заявки (с окном в час) тоже укладываем в 15 минут */
-    if(!sale.sold && sale.sellAt > sale.listedAt + TRANSFER_SELL_WINDOW_MS) sale.sellAt = sale.listedAt + rnd(30 * 1000, TRANSFER_SELL_WINDOW_MS);
-    if(!sale.sold && sale.sellAt <= now){ sale.sold = true; sale.soldAt = sale.sellAt; changed = true; }
+    if(sale.sold || sale.expired) return;
+    if(!sale.expiresAt) sale.expiresAt = sale.listedAt + TRANSFER_SELL_WINDOW_MS;
+    if(sale.sellAt && sale.sellAt <= now){ sale.sold = true; sale.soldAt = sale.sellAt; changed = true; }
+    else if(sale.expiresAt <= now){ sale.expired = true; changed = true; }
   });
   return changed;
 }
 
+function fmtSaleLeft(ms){
+  const t = Math.max(0, Math.ceil(ms / 1000));
+  return String(Math.floor(t / 60)).padStart(2,'0') + ':' + String(t % 60).padStart(2,'0');
+}
+function updateSaleTimers(){
+  document.querySelectorAll('.sale-timer[data-end]').forEach(el=>{
+    el.textContent = fmtSaleLeft(Number(el.dataset.end) - Date.now());
+  });
+}
+
 function soldUnclaimedCount(){
-  return (state.transferSales || []).filter(x=>x.sold).length;
+  return (state.transferSales || []).filter(x=>x.sold || x.expired).length;
 }
 
 function updateTransferNavBadge(){
@@ -2919,7 +2932,7 @@ function updateTransferNavBadge(){
 let transferTickInterval = null;
 function ensureTransferTick(){
   if(transferTickInterval) return;
-  transferTickInterval = setInterval(transferTick, 2000);
+  transferTickInterval = setInterval(transferTick, 1000);
 }
 function transferTick(){
   if(!state || !state.players) return;
@@ -2928,6 +2941,7 @@ function transferTick(){
   const c2 = transferMarketStep();
   if(c1 || c2) save();
   updateTransferNavBadge();
+  updateSaleTimers();
   const view = document.getElementById('view-transfer');
   const modal = document.getElementById('player-modal');
   if((c1 || c2) && view && view.classList.contains('active') && modal && modal.classList.contains('hidden')){
@@ -2964,16 +2978,18 @@ function transferFilterHtml(){
 
 function saleRowHtml(sale){
   const p = sale.player;
-  const pos = posByCode(p.pos) || { code: p.pos || '?', css: '' };
-  const right = sale.sold
-    ? `<button class="transfer-row-buy sale-claim-btn" data-claim="${sale.id}">ЗАБРАТЬ</button>`
-    : `<button class="transfer-row-buy" data-open-sale="${sale.id}"><img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${fmt(sale.price)}</button>`;
+  const st = saleState(sale);
+  const right = st === 'sold'
+    ? `<div class="sale-status sale-status-sold">Продан</div>`
+    : st === 'expired'
+      ? `<div class="sale-status sale-status-expired">Не продан</div>`
+      : `<div class="sale-status sale-status-listed"><img src="${IMG.time}" class="img-icon" alt=""> <span class="sale-timer" data-end="${sale.expiresAt}">${fmtSaleLeft(sale.expiresAt - Date.now())}</span></div>`;
   return `
-  <div class="tournament-card transfer-row sale-row ${sale.sold ? 'sold' : ''}" data-sale="${sale.id}">
+  <div class="tournament-card transfer-row sale-row ${st}" data-sale="${sale.id}">
     ${playerAvatarHtml(p)}
     <div class="tournament-info">
       <div class="tournament-name">${p.name}</div>
-      <div class="tournament-status">${sale.sold ? 'Продан · +' + fmt(sale.price) : posLabel(p.pos) + ' · Сила ' + fmt(p.power)}</div>
+      <div class="tournament-status">${posLabel(p.pos)} · Сила ${fmt(p.power)}</div>
     </div>
     ${right}
   </div>`;
@@ -2994,12 +3010,31 @@ function claimTransferSale(saleId){
   renderTransferMarket();
 }
 
+function returnExpiredSale(saleId){
+  const i = state.transferSales.findIndex(x=>x.id === saleId);
+  if(i === -1) return;
+  const sale = state.transferSales[i];
+  if(!sale.expired) return;
+  if(state.players.length >= MAX_SQUAD_PLAYERS){
+    showToast(`❌ В команде максимум ${MAX_SQUAD_PLAYERS} игроков — вернуть нельзя`);
+    return;
+  }
+  state.transferSales.splice(i, 1);
+  state.players.push(Object.assign({}, sale.player, { status:'bench', training:false, trainingEndTime:null }));
+  save();
+  refreshTopbar();
+  updateTransferNavBadge();
+  closePlayerModal();
+  showToast(`${sale.player.name} не продался и вернулся в запас`);
+  renderTransferMarket();
+}
+
 function cancelTransferSale(saleId){
   const i = state.transferSales.findIndex(x=>x.id === saleId);
   if(i === -1) return;
   const sale = state.transferSales[i];
-  if(sale.sold){
-    showToast('Игрок уже продан — заберите деньги');
+  if(sale.sold || sale.expired){
+    showToast(sale.sold ? 'Игрок уже продан — заберите деньги' : 'Время продажи истекло — верните игрока в команду');
     closePlayerModal();
     renderTransferMarket();
     return;
@@ -3055,16 +3090,19 @@ function openSaleModal(saleId){
   const sale = (state.transferSales || []).find(x=>x.id === saleId);
   if(!sale) return;
   const p = sale.player;
-  const btn = sale.sold
+  const st = saleState(sale);
+  const btn = st === 'expired'
+    ? `<button id="btn-sale-action" class="btn-primary btn-big" style="margin-top:14px;">Вернуть в команду</button>`
+    : sale.sold
     ? `<button id="btn-sale-action" class="btn-primary btn-big" style="margin-top:14px;">Забрать <img src="${IMG.coin}" class="img-icon" alt="Монеты"> ${fmt(sale.price)}</button>`
     : `<button id="btn-sale-action" class="btn-secondary btn-big" style="margin-top:14px;">Снять с трансфера</button>`;
   document.getElementById('player-modal-body').innerHTML =
-    transferCardHtml(p, sale.sold ? 'Продан' : 'Трансфер', sale.price) + btn;
+    transferCardHtml(p, st === 'sold' ? 'Продан' : st === 'expired' ? 'Не продан' : 'Трансфер', sale.price) + btn;
   healthModalPlayerId = null;
   document.getElementById('player-modal').classList.remove('hidden');
   document.getElementById('btn-sale-action').addEventListener('click', (e)=>{
     e.stopPropagation();
-    if(sale.sold) claimTransferSale(sale.id); else cancelTransferSale(sale.id);
+    if(sale.sold) claimTransferSale(sale.id); else if(sale.expired) returnExpiredSale(sale.id); else cancelTransferSale(sale.id);
   });
 }
 
@@ -3110,7 +3148,7 @@ function renderTransferMarket(){
   if(isSell){
     all = (state.transferSales || [])
       .filter(x => transferActiveFilter === 'all' || x.player.pos === transferActiveFilter)
-      .sort((a,b)=> (b.sold?1:0) - (a.sold?1:0) || a.listedAt - b.listedAt);
+      .sort((a,b)=> ((b.sold||b.expired)?1:0) - ((a.sold||a.expired)?1:0) || a.listedAt - b.listedAt);
   } else {
     all = state.transferMarket.players.filter(p =>
       transferActiveFilter === 'all' || p.pos === transferActiveFilter
@@ -3154,9 +3192,6 @@ function renderTransferMarket(){
       if(row.dataset.sale) openSaleModal(row.dataset.sale);
       else openTransferPlayerModal(row.dataset.id);
     });
-  });
-  list.querySelectorAll('[data-claim]').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{ e.stopPropagation(); claimTransferSale(btn.dataset.claim); });
   });
 }
 
@@ -3409,7 +3444,7 @@ function onSellPlayer(playerId){
     return;
   }
   const price = sellPlayerPrice(p.power);
-  showConfirm(`Выставить <b>${p.name}</b> на трансфер за ${fmt(price)} монет? Игрок будет продан в течение 15 минут. До продажи его можно снять с трансфера.`, ()=>{
+  showConfirm(`Выставить <b>${p.name}</b> на трансфер за ${fmt(price)} монет? На продажу даётся 30 минут (шанс продажи 85%). До продажи его можно снять с трансфера.`, ()=>{
     if(state.players.length <= MIN_SQUAD_PLAYERS) return;
     if(state.lineups){
       Object.keys(state.lineups).forEach(fid=>{
@@ -3426,8 +3461,10 @@ function onSellPlayer(playerId){
       player: snapshot,
       price,
       listedAt: now,
-      sellAt: now + rnd(30 * 1000, TRANSFER_SELL_WINDOW_MS),
-      sold: false
+      sellAt: Math.random() < TRANSFER_SELL_CHANCE ? now + rnd(30 * 1000, TRANSFER_SELL_WINDOW_MS - 30 * 1000) : null,
+      expiresAt: now + TRANSFER_SELL_WINDOW_MS,
+      sold: false,
+      expired: false
     });
 
     save();
