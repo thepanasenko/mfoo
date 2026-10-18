@@ -3758,3 +3758,16 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 
 .cup-intro-powerrow span { color:#7fd3ff; }
 .cup-intro-time span { color:var(--gold); }
+
+/* длинные названия кубков — сокращаем многоточием */
+.cup-intro-name,
+.play-card .tournament-name,
+.cup-header .view-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  max-width: 100%;
+}
+.play-card .tournament-name { width: 100%; text-align: center; }
+.cup-header .view-title { flex: 1; }
