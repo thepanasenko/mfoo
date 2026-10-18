@@ -386,12 +386,12 @@ input {
 }
 
 .btn-reset {
-  margin-top: 22px;
+  margin-top: 14px;
   margin-bottom: 6px;
   background: rgba(239, 68, 68, .15);
   border: 1px solid var(--red);
   color: #fff;
-  padding: 12px 14px;
+  padding: 14px 14px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 800;
@@ -3752,7 +3752,7 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .cup-trophy-box { width:100px; height:100px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgb(0 0 0 / 50%); box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5); border:2px solid #082b1a; border-radius:18px; }
 .cup-intro .cup-trophy-img { width:80px; height:80px; margin:0; }
 .cup-intro .cup-trophy { font-size:52px; width:auto; margin:0; text-align:center; line-height:1; }
-.cup-intro > .btn-big { margin-top:14px; padding:14px 10px; font-size:14px; }
+.cup-intro > .btn-big { margin-top:14px; padding:16px 10px; font-size:14px; }
 .cup-intro .cup-eligibility { margin:14px 0 0; display:flex; align-items:center; justify-content:center; gap:8px; font-family:var(--ff-display); font-size:20px; color:var(--gold); }
 .cup-intro .cup-eligibility:empty { display:none; }
 
