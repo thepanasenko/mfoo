@@ -352,9 +352,10 @@ input {
 }
 
 .btn-primary.btn-disabled-soft {
-  background: var(--surface-3);
-  color: var(--text-dim);
-  box-shadow: 0 6px 0 #0a1a13, 0 8px 16px rgba(0, 0, 0, .4);
+  background: rgb(0 0 0 / 50%);
+    border: 1px solid #082b1a;
+    box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5);
+    color: var(--text-dim);
   cursor: default;
 }
 
@@ -3731,3 +3732,29 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .sale-status-listed{ color:var(--gold); border-color:var(--gold); }
 .sale-status-sold{ color:var(--green); border-color:var(--green); }
 .sale-status-expired{ color:var(--red); border-color:var(--red); }
+
+/* ============================================================
+   ЭКРАН КУБКА / ЧЕМПИОНАТА / ЛИГИ — шапка: кубок слева, инфо справа
+   ============================================================ */
+.cup-intro { text-align: left; padding: 18px 16px; }
+.cup-intro-top { display: flex; align-items: center; gap: 16px;     align-items: flex-start;}
+.cup-intro .cup-trophy-img { width: 120px; height: 120px; margin: 0; flex-shrink: 0; }
+.cup-intro .cup-trophy { font-size: 80px; margin: 0; flex-shrink: 0; width: 120px; text-align: center; }
+.cup-intro-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.cup-intro-name { font-family: var(--ff-display); font-size: 18px; line-height: 1.2; color: var(--text); }
+.cup-intro-meta { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 14px; color: var(--text); }
+.cup-intro-info .btn-big { padding: 12px 8px; font-size: 13px; margin-top: 4px; }
+.cup-intro .cup-eligibility { margin: 14px 0 0; text-align: center; }
+.cup-intro .cup-eligibility:empty { display: none; }
+.btn-primary.cup-start-bad, .btn-primary.cup-start-bad:disabled { color: var(--red); }
+
+/* v2: кубок 80px в блоке 100x100, кнопка под шапкой на всю ширину */
+.cup-trophy-box { width:100px; height:100px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgb(0 0 0 / 50%); box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5); border:2px solid #082b1a; border-radius:18px; }
+.cup-intro .cup-trophy-img { width:80px; height:80px; margin:0; }
+.cup-intro .cup-trophy { font-size:52px; width:auto; margin:0; text-align:center; line-height:1; }
+.cup-intro > .btn-big { margin-top:14px; padding:14px 10px; font-size:14px; }
+.cup-intro .cup-eligibility { margin:14px 0 0; display:flex; align-items:center; justify-content:center; gap:8px; font-family:var(--ff-display); font-size:20px; color:var(--gold); }
+.cup-intro .cup-eligibility:empty { display:none; }
+
+.cup-intro-powerrow span { color:#7fd3ff; }
+.cup-intro-time span { color:var(--gold); }

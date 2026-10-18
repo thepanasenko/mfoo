@@ -3985,6 +3985,21 @@ function renderTournaments(){
 /* ============================================================
    CUP SCREEN — SETUP
    ============================================================ */
+/* кнопка старта в «неактивном» виде с красной причиной (как «Турнир в процессе») */
+function setCupStartBad(text){
+  const b = document.getElementById('btn-cup-start');
+  b.classList.remove('hidden');
+  b.classList.add('btn-disabled-soft', 'cup-start-bad');
+  b.disabled = true;
+  b.textContent = text;
+  const e = document.getElementById('cup-eligibility');
+  e.classList.remove('bad'); e.textContent = '';
+}
+function clearCupStartBad(){
+  const b = document.getElementById('btn-cup-start');
+  b.classList.remove('cup-start-bad');
+}
+
 function renderCupScreen(){
   const t = tournamentById(currentCupId);
   if(!t) return;
@@ -4014,6 +4029,12 @@ function renderCupScreen(){
   const mainCount = state.players.filter(p=>p.status==='main').length;
   const squadFull = mainCount >= MAIN_SQUAD_SIZE;
   const range = tournamentRange(t, power);
+
+  document.getElementById('cup-intro-name').textContent = t.title;
+  document.getElementById('cup-intro-power').textContent = t.friendly ? 'Любая' : rangeLabel(range);
+  document.getElementById('cup-intro-teams').textContent =
+    t.scheduled ? 'от 20' : (t.type === 'group' ? fmt(t.teamsPerGroup) : fmt(t.teamCount));
+  if(!t.scheduled) document.getElementById('cup-intro-timer-row').classList.add('hidden');
   const eligible = power >= range.min && power <= range.max;
   const introEl = document.getElementById('cup-intro');
   const bracketWrap = document.getElementById('cup-bracket-wrap');
@@ -4044,26 +4065,21 @@ function renderCupScreen(){
   }
   stopLeagueCountdown();
   hideLeagueCancelBtn();
+  clearCupStartBad();
   startBtn.textContent = 'ИГРАТЬ';
   startBtn.disabled = false;
   startBtn.classList.remove('btn-disabled-soft');
+  eligEl.classList.remove('bad');
+  eligEl.textContent = '';
 
   if(!squadFull){
-    eligEl.classList.add('bad');
-    eligEl.textContent = `Соберите полный основной состав (${mainCount}/${MAIN_SQUAD_SIZE}), чтобы играть в турнирах.`;
-    startBtn.classList.add('hidden');
+    setCupStartBad(`Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`);
   } else if(eligible){
-    eligEl.classList.remove('bad');
-    eligEl.textContent = `Сила клуба: ${fmt(power)}. Ваша команда подходит для участия.`;
     startBtn.classList.remove('hidden');
   } else if(power < range.min){
-    eligEl.classList.add('bad');
-    eligEl.textContent = `Ваша команда слишком слабая для этого турнира. Нужна сила от ${fmt(range.min)}.`;
-    startBtn.classList.add('hidden');
+    setCupStartBad('Команда слишком слабая');
   } else {
-    eligEl.classList.add('bad');
-    eligEl.textContent = 'Ваша команда слишком сильная для этого турнира.';
-    startBtn.classList.add('hidden');
+    setCupStartBad('Команда слишком сильная');
   }
 }
 
@@ -4076,26 +4092,42 @@ function stopLeagueCountdown(){
   if(leagueCountdownInterval){ clearInterval(leagueCountdownInterval); leagueCountdownInterval = null; }
 }
 
+function updateLeagueTimerRow(t){
+  const { next } = getLeagueSessions(t);
+  const totalSec = Math.floor(Math.max(0, next.getTime() - Date.now()) / 1000);
+  const hh = String(Math.floor(totalSec / 3600)).padStart(2,'0');
+  const mm = String(Math.floor((totalSec % 3600) / 60)).padStart(2,'0');
+  const ss = String(totalSec % 60).padStart(2,'0');
+  document.getElementById('cup-intro-timer-row').classList.remove('hidden');
+  document.getElementById('cup-intro-timer').textContent = `${hh}:${mm}:${ss}`;
+}
+
 function renderLeagueIntro(t, ctx){
+  updateLeagueTimerRow(t);
   const eligEl = document.getElementById('cup-eligibility');
   const startBtn = document.getElementById('btn-cup-start');
+  clearCupStartBad();
 
   if(!ctx.squadFull){
-    eligEl.classList.add('bad');
-    eligEl.textContent = `Соберите полный основной состав (${ctx.mainCount}/${MAIN_SQUAD_SIZE}), чтобы играть в турнирах.`;
-    startBtn.classList.add('hidden');
+    setCupStartBad(`Соберите состав (${ctx.mainCount}/${MAIN_SQUAD_SIZE})`);
     hideLeagueCancelBtn();
     stopLeagueCountdown();
+    leagueCountdownInterval = setInterval(()=>{
+      const view = document.getElementById('view-cup');
+      if(!view || !view.classList.contains('active') || currentCupId !== t.id){ stopLeagueCountdown(); return; }
+      updateLeagueTimerRow(t);
+    }, 1000);
     return;
   }
   if(!ctx.eligible){
-    eligEl.classList.add('bad');
-    eligEl.textContent = ctx.power < ctx.range.min
-      ? `Ваша команда слишком слабая для турнира «${t.title}». Нужна сила от ${fmt(ctx.range.min)}.`
-      : `Ваша команда слишком сильная для своего диапазона в «${t.title}» (${rangeLabel(ctx.range)}).`;
-    startBtn.classList.add('hidden');
+    setCupStartBad(ctx.power < ctx.range.min ? 'Команда слишком слабая' : 'Команда слишком сильная');
     hideLeagueCancelBtn();
     stopLeagueCountdown();
+    leagueCountdownInterval = setInterval(()=>{
+      const view = document.getElementById('view-cup');
+      if(!view || !view.classList.contains('active') || currentCupId !== t.id){ stopLeagueCountdown(); return; }
+      updateLeagueTimerRow(t);
+    }, 1000);
     return;
   }
 
@@ -4183,14 +4215,9 @@ function updateLeagueCountdown(t){
   const ss = String(totalSec % 60).padStart(2,'0');
   const registered = reg.sessionId === leagueSessionId(next);
 
-  const power = calcClubPower(state.players);
-  const range = registered && reg.range ? reg.range : bigLeagueRangeForPower(power);
-  const rangeLine = `<br><span style="font-size:12px;color:var(--text-dim)">Диапазон силы клуба ${registered ? '(закреплён при регистрации)' : 'для вашей текущей силы'}: ${rangeLabel(range)}. Ваша сила: ${fmt(power)}.</span>`;
-
-  eligEl.innerHTML = (registered
-    ? `<img src="${IMG.check}" class="img-icon" alt=""> Вы зарегистрированы! До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b>`
-    : `До старта «${t.title}»: <b>${hh}:${mm}:${ss}</b><br><span style="font-size:12px;color:var(--text-dim)">Старты ${scheduleCadenceLabel(t)} по Киеву. Зарегистрируйтесь заранее — кубки и другие турниры при этом остаются доступны.</span>`
-  ) + rangeLine;
+  eligEl.classList.remove('bad');
+  eligEl.textContent = '';
+  updateLeagueTimerRow(t);
 
   startBtn.innerHTML = registered ? `ВЫ ЗАРЕГИСТРИРОВАНЫ <img src="${IMG.check}" class="img-icon" alt="">` : 'ЗАРЕГИСТРИРОВАТЬСЯ';
   startBtn.disabled = registered;
