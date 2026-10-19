@@ -1199,12 +1199,12 @@ input {
 /* кнопка «Инвентарь» — та же форма, что и «Задания», но в сине-голубом оттенке */
 .btn-inventory {
   margin-top: 0;
-  background: rgb(37 99 235 / 18%);
-  border-color: #2563eb;
+  background: rgb(63 169 255 / 15%);
+  border-color: #3fa9ff;
 }
 
 .btn-inventory .btn-tasks-arrow {
-  color: #2563eb;
+  color: #3fa9ff;
 }
 
 /* строки предметов инвентаря (переиспользуют каркас .task-row) */
@@ -3780,8 +3780,3 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .btn-federation.locked .btn-tasks-arrow { font-size: 16px; }
 
 .federation-lock-img { width: 32px; height: 32px; object-fit: contain; display: block; }
-
-/* v3: «Федерация» — голубая (бывший цвет «Инвентаря»), «Инвентарь» — синий */
-.btn-federation { background: rgb(63 169 255 / 15%); border-color: #3fa9ff; }
-.btn-federation .btn-tasks-arrow { color: #3fa9ff; }
-.btn-federation.locked { background: rgb(0 0 0 / 50%); border-color: #082b1a; }
