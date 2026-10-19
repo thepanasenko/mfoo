@@ -391,7 +391,7 @@ input {
   background: rgba(239, 68, 68, .15);
   border: 1px solid var(--red);
   color: #fff;
-  padding: 14px 14px;
+  padding: 16px 14px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 800;
