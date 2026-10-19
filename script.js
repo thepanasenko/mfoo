@@ -582,7 +582,7 @@ const TOURNAMENTS = [
   },
   {
     id:'greenland',
-    title:'ЧЕМП ГРЕНЛАНДИИ',
+    title:'ЧЕМПИОНАТ ГРЕНЛАНДИИ',
     icon:'❄️',
     type:'group',
     tableOnly:true, // только таблица: победа = 1-е место, без плей-офф
