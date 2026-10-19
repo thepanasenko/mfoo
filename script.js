@@ -3752,7 +3752,9 @@ function renderManager(){
         <span class="btn-tasks-title">Федерация</span>
         <span class="btn-tasks-sub">${state.level < FEDERATION_MIN_LEVEL ? 'Доступна с ' + FEDERATION_MIN_LEVEL + ' уровня' : 'Скоро'}</span>
       </span>
-      <span class="btn-tasks-arrow">${state.level < FEDERATION_MIN_LEVEL ? '🔒' : '›'}</span>
+      ${state.level < FEDERATION_MIN_LEVEL
+        ? '<span class="btn-tasks-arrow"><img src="images/locked.png" class="federation-lock-img" alt="Закрыто"></span>'
+        : '<span class="btn-tasks-arrow">›</span>'}
     </button>
     <div class="mgr-action-row">
       <button id="btn-open-hall" class="mgr-action-btn mgr-hall-btn">
@@ -3776,7 +3778,7 @@ function renderManager(){
   document.getElementById('btn-open-inventory').addEventListener('click', openInventoryModal);
   document.getElementById('btn-open-federation').addEventListener('click', ()=>{
     if(state.level < FEDERATION_MIN_LEVEL){
-      showToast(`🔒 Достигните ${FEDERATION_MIN_LEVEL} уровня, чтобы открыть Федерацию`);
+      showToast(`Достигните ${FEDERATION_MIN_LEVEL} уровня, чтобы открыть Федерацию`);
     }
     /* заглушка: раздел пока никуда не ведёт */
   });
