@@ -6,6 +6,7 @@
 const SAVE_KEY = 'mfoot_save_v1';
 
 /* ---------- asset paths ---------- */
+const FEDERATION_MIN_LEVEL = 15;       // уровень менеджера для кнопки «Федерация»
 const BIG_TIER_LIMIT = 11000;        // с этой силы начинается диапазон «11 000+»
 const RANGE_UNLIMITED = 999999999;   // «без верхнего предела» (конечное число, чтобы сохранялось в JSON)
 const BOT_POWER_CAP = 15000;         // боты никогда не сильнее этого значения
@@ -3745,6 +3746,14 @@ function renderManager(){
       </span>
       <span class="btn-tasks-arrow">›</span>
     </button>
+    <button id="btn-open-federation" class="btn-tasks btn-federation ${state.level < FEDERATION_MIN_LEVEL ? 'locked' : ''}">
+      <span class="btn-tasks-icon"><img src="images/federation.png" class="btn-tasks-icon-img" alt="Федерация"></span>
+      <span class="btn-tasks-text">
+        <span class="btn-tasks-title">Федерация</span>
+        <span class="btn-tasks-sub">${state.level < FEDERATION_MIN_LEVEL ? 'Доступна с ' + FEDERATION_MIN_LEVEL + ' уровня' : 'Скоро'}</span>
+      </span>
+      <span class="btn-tasks-arrow">${state.level < FEDERATION_MIN_LEVEL ? '🔒' : '›'}</span>
+    </button>
     <div class="mgr-action-row">
       <button id="btn-open-hall" class="mgr-action-btn mgr-hall-btn">
         <img src="${IMG.zalslava}" class="mgr-action-img" alt="Зал славы">
@@ -3765,6 +3774,12 @@ function renderManager(){
 
   document.getElementById('btn-open-tasks').addEventListener('click', openTasksModal);
   document.getElementById('btn-open-inventory').addEventListener('click', openInventoryModal);
+  document.getElementById('btn-open-federation').addEventListener('click', ()=>{
+    if(state.level < FEDERATION_MIN_LEVEL){
+      showToast(`🔒 Достигните ${FEDERATION_MIN_LEVEL} уровня, чтобы открыть Федерацию`);
+    }
+    /* заглушка: раздел пока никуда не ведёт */
+  });
   document.getElementById('btn-open-hall').addEventListener('click', openHallView);
   document.getElementById('btn-open-settings').addEventListener('click', openSettingsModal);
   updateTasksBadge();
