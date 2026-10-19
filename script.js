@@ -3898,7 +3898,7 @@ function openManagerAvatarPicker(){
 function leagueListStatusText(t, opts){
   const { inProgress, squadFull, mainCount, eligible, range } = opts;
   if(inProgress) return 'Идёт групповой этап / плей-офф';
-  if(!squadFull) return `Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`;
+  if(!squadFull) return `СОБЕРИТЕ состав (${mainCount}/${MAIN_SQUAD_SIZE})`;
   if(!eligible) return `Нужна сила клуба ${rangeLabel(range)}`;
   const { next } = getLeagueSessions(t);
   const remaining = Math.max(0, next.getTime() - Date.now());
@@ -4090,13 +4090,13 @@ function renderCupScreen(){
   eligEl.textContent = '';
 
   if(!squadFull){
-    setCupStartBad(`Соберите состав (${mainCount}/${MAIN_SQUAD_SIZE})`);
+    setCupStartBad(`СОБЕРИТЕ СОСТАВ (${mainCount}/${MAIN_SQUAD_SIZE})`);
   } else if(eligible){
     startBtn.classList.remove('hidden');
   } else if(power < range.min){
-    setCupStartBad('Команда слишком слабая');
+    setCupStartBad('КОМАНДА СЛИШКОМ СЛАБАЯ');
   } else {
-    setCupStartBad('Команда слишком сильная');
+    setCupStartBad('КОМАНДА СЛИШКОМ СИЛЬНАЯ');
   }
 }
 
@@ -4126,7 +4126,7 @@ function renderLeagueIntro(t, ctx){
   clearCupStartBad();
 
   if(!ctx.squadFull){
-    setCupStartBad(`Соберите состав (${ctx.mainCount}/${MAIN_SQUAD_SIZE})`);
+    setCupStartBad(`СОБЕРИТЕ состав (${ctx.mainCount}/${MAIN_SQUAD_SIZE})`);
     hideLeagueCancelBtn();
     stopLeagueCountdown();
     leagueCountdownInterval = setInterval(()=>{

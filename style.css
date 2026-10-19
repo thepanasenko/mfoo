@@ -3779,4 +3779,4 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .btn-federation.locked .btn-tasks-icon-img { filter: grayscale(.8); }
 .btn-federation.locked .btn-tasks-arrow { font-size: 16px; }
 
-.federation-lock-img { width: 28px; height: 28px; object-fit: contain; display: block; }
+.federation-lock-img { width: 32px; height: 32px; object-fit: contain; display: block; }
