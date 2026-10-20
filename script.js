@@ -1382,17 +1382,28 @@ function renderHallView(){
   const box = document.getElementById('hall-list');
   if(!box || !state) return;
   const counts = {};
-  state.trophies.forEach(t=>{
-    if(!counts[t.name]) counts[t.name] = { count:0, tournament: TOURNAMENTS.find(x=>x.title===t.name) || null };
-    counts[t.name].count++;
-  });
-  const names = Object.keys(counts);
-  box.innerHTML = names.length
-    ? `<div class="mgr-trophy-list">` + names.map(name=>{
-        const d = counts[name];
-        return `<div class="mgr-trophy-item">${trophyIconHtml(d.tournament)}<span class="mgr-trophy-name">${name}</span><span class="mgr-trophy-count">×${d.count}</span></div>`;
-      }).join('') + `</div>`
-    : `<div class="mgr-empty">Пока нет завоёванных кубков</div>`;
+  state.trophies.forEach(t=>{ counts[t.name] = (counts[t.name] || 0) + 1; });
+
+  /* все турниры (кроме товарищеского), в порядке списка; не завоёванные — серые с нулём */
+  const won = TOURNAMENTS.filter(t=> !t.friendly);
+  const card = (t, size)=>{
+    const src = TROPHY_IMG[t.id];
+    const img = src ? `<img src="${src}" class="hall-img" alt="${t.title}">` : `<span class="hall-emoji">${t.icon}</span>`;
+    const n = counts[t.title] || 0;
+    return `<div class="hall-item hall-${size} ${n ? '' : 'empty'}">
+      <div class="hall-box">${img}<span class="hall-count">×${n}</span></div>
+      <div class="hall-name">${t.title}</div>
+    </div>`;
+  };
+  const world = won.filter(t=> t.id === 'worldcup');
+  const leagues = won.filter(t=> t.id === 'bigleague' || t.id === 'championsleague');
+  const rest = won.filter(t=> !['worldcup','bigleague','championsleague'].includes(t.id));
+
+  let html = '';
+  if(world.length)   html += `<div class="hall-row hall-row-world">${world.map(t=>card(t,'world')).join('')}</div>`;
+  if(leagues.length) html += `<div class="hall-row hall-row-leagues">${leagues.map(t=>card(t,'league')).join('')}</div>`;
+  if(rest.length)    html += `<div class="hall-row hall-row-rest">${rest.map(t=>card(t,'cup')).join('')}</div>`;
+  box.innerHTML = html;
 }
 
 function closeInventoryView(){
@@ -3422,7 +3433,7 @@ function onTerminateContract(playerId){
     closePlayerModal();
     renderTeam();
     showToast(`${p.name} покинул команду`);
-  }, { icon:'📄', title:'Разорвать контракт?', yesText:'Разорвать' });
+  }, { icon:'<img src="images/contractnull.png" class="confirm-icon-img" alt="">', title:'Разорвать контракт?', yesText:'Разорвать' });
 }
 
 function onSellPlayer(playerId){
@@ -3445,7 +3456,7 @@ function onSellPlayer(playerId){
     return;
   }
   const price = sellPlayerPrice(p.power);
-  showConfirm(`Выставить <b>${p.name}</b> на трансфер за ${fmt(price)} монет? На продажу даётся 30 минут (шанс продажи 85%). До продажи его можно снять с трансфера.`, ()=>{
+  showConfirm(`Выставить <b>${p.name}</b> на трансфер за ${fmt(price)} монет? До продажи его можно снять с трансфера.`, ()=>{
     if(state.players.length <= MIN_SQUAD_PLAYERS) return;
     if(state.lineups){
       Object.keys(state.lineups).forEach(fid=>{
@@ -3473,7 +3484,7 @@ function onSellPlayer(playerId){
     closePlayerModal();
     renderTeam();
     showToast(`${p.name} выставлен на трансфер за ${fmt(price)} монет`);
-  }, { icon:'🔁', title:'Выставить на трансфер?', yesText:'Выставить' });
+  }, { icon:'<img src="images/transfericon.png" class="confirm-icon-img" alt="">', title:'Выставить на трансфер?', yesText:'Выставить' });
 }
 
 const MAIN_SQUAD_SIZE = 11;

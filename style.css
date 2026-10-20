@@ -3780,3 +3780,26 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .btn-federation.locked .btn-tasks-arrow { font-size: 16px; }
 
 .federation-lock-img { width: 32px; height: 32px; object-fit: contain; display: block; }
+
+.confirm-icon-img { width: 64px; height: 64px; object-fit: contain; display: block; margin: 0 auto; }
+
+/* Зал славы: блок с картинкой, название под блоком, число трофеев в углу */
+.hall-row { display: grid; gap: 10px; margin-bottom: 16px; justify-items: center; align-items: start; }
+.hall-row-world { grid-template-columns: 1fr; }
+.hall-row-leagues { grid-template-columns: repeat(2, 1fr); }
+.hall-row-rest { grid-template-columns: repeat(3, 1fr); }
+.hall-item { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; width: 100%; }
+.hall-box { position: relative; display: flex; align-items: center; justify-content: center; background: rgb(0 0 0 / 50%); box-shadow: inset 10px 10px 20px rgba(0, 0, 0, 0.5), inset -10px -10px 20px rgba(0, 0, 0, 0.5); border: 2px solid #082b1a; border-radius: 18px; }
+.hall-world .hall-box { width: 120px; height: 120px; }
+.hall-world .hall-img { width: 100px; height: 100px; }
+.hall-league .hall-box { width: 110px; height: 110px; }
+.hall-league .hall-img { width: 90px; height: 90px; }
+.hall-cup .hall-box { width: 100px; height: 100px; }
+.hall-cup .hall-img { width: 80px; height: 80px; }
+.hall-img { object-fit: contain; display: block; }
+.hall-emoji { font-size: 44px; line-height: 1; }
+.hall-count { position: absolute; top: 6px; right: 8px; font-size: 11px; font-weight: 800; color: var(--text-dim); }
+.hall-name { font-size: 11px; line-height: 1.2; text-align: center; color: var(--text); max-width: 100%; overflow-wrap: anywhere; }
+.hall-world .hall-name { font-size: 13px; }
+.hall-item.empty .hall-img, .hall-item.empty .hall-emoji { filter: grayscale(1) brightness(.8); opacity: .55; }
+.hall-item.empty .hall-name { color: var(--text-dim); }
