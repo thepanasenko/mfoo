@@ -1395,14 +1395,17 @@ function renderHallView(){
       <div class="hall-name">${t.title}</div>
     </div>`;
   };
-  const world = won.filter(t=> t.id === 'worldcup');
-  const leagues = won.filter(t=> t.id === 'bigleague' || t.id === 'championsleague');
-  const rest = won.filter(t=> !['worldcup','bigleague','championsleague'].includes(t.id));
+  /* порядок: Чемпионат мира → Лига чемпионов → Большая лига; затем чемпионаты (сильные сверху);
+     в конце кубки — от Кубка Беларуси до Кубка Новичков */
+  const TOP_IDS = ['worldcup','championsleague','bigleague'];
+  const CUP_IDS = ['novice','jamaica','france','usa','belarus'];
+  const byStrength = (a,b)=> b.min - a.min;
+  const top = TOP_IDS.map(id=> won.find(t=> t.id === id)).filter(Boolean);
+  const champs = won.filter(t=> !TOP_IDS.includes(t.id) && !CUP_IDS.includes(t.id)).sort(byStrength);
+  const cups = won.filter(t=> CUP_IDS.includes(t.id)).sort(byStrength);
 
-  let html = '';
-  if(world.length)   html += `<div class="hall-row hall-row-world">${world.map(t=>card(t,'world')).join('')}</div>`;
-  if(leagues.length) html += `<div class="hall-row hall-row-leagues">${leagues.map(t=>card(t,'league')).join('')}</div>`;
-  if(rest.length)    html += `<div class="hall-row hall-row-rest">${rest.map(t=>card(t,'cup')).join('')}</div>`;
+  const all = [...top, ...champs, ...cups];
+  const html = `<div class="hall-row">${all.map(t=>card(t,'cup')).join('')}</div>`;
   box.innerHTML = html;
 }
 

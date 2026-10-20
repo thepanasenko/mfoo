@@ -3804,3 +3804,4 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .hall-item.empty .hall-img, .hall-item.empty .hall-emoji { filter: grayscale(1) brightness(.8); }
 .hall-item.empty .hall-name { color: var(--text-dim); }
 .hall-item:not(.empty) .hall-count { color: var(--gold); }
+.hall-row { grid-template-columns: repeat(3, 1fr); }
