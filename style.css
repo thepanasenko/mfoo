@@ -3803,3 +3803,4 @@ body.bank-bg::before{ background-image:url('images/fonbank.png'); }
 .hall-world .hall-name { font-size: 13px; }
 .hall-item.empty .hall-img, .hall-item.empty .hall-emoji { filter: grayscale(1) brightness(.8); opacity: .55; }
 .hall-item.empty .hall-name { color: var(--text-dim); }
+.hall-item:not(.empty) .hall-count { color: var(--gold); }
